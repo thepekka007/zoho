@@ -12392,8 +12392,50 @@ def sales_summery(request):
     data = AddItem.objects.all()
     
     return render(request, 'sales_summery.html', {'data':data, 'company': company})
+
+
+def godown_details(request):
+    company = company_details.objects.get(user = request.user)
+    data = Addgodown.objects.all()
     
-    
+    return render(request, 'godown_details.html', {'data':data, 'company': company})
+
+def shareGodownDetailsToEmail(request):
+    if request.user:
+        try:
+            if request.method == 'POST':
+                emails_string = request.POST['email_ids']
+
+                # Split the string by commas and remove any leading or trailing whitespace
+                emails_list = [email.strip() for email in emails_string.split(',')]
+                email_message = request.POST['email_message']
+                # print(emails_list)
+
+                cmp = company_details.objects.get( user = request.user.id)
+                data = Addgodown.objects.all()
+                        
+                context = {'cmp': cmp,'data': data}
+                template_path = 'godown_detail_pdf.html'
+                template = get_template(template_path)
+
+                html  = template.render(context)
+                result = BytesIO()
+                pdf = pisa.pisaDocument(BytesIO(html.encode("ISO-8859-1")), result)#, link_callback=fetch_resources)
+                pdf = result.getvalue()
+                filename = f'Godown Report - {cmp.company_name}.pdf'
+                subject = f"Godown Report - {cmp.company_name}"
+                email = EmailMessage(subject, f"Hi,\nPlease find the attached Godown Report -of -{cmp.company_name}. \n{email_message}\n\n--\nRegards,\n{cmp.company_name}\n{cmp.address}\n{cmp.state} - {cmp.country}\n{cmp.contact_number}", from_email=settings.EMAIL_HOST_USER,to=emails_list)
+                email.attach(filename, pdf, "application/pdf")
+                email.send(fail_silently=False)
+
+                msg = messages.success(request, 'Report has been shared via email successfully..!')
+                return redirect(godown_details)
+        except Exception as e:
+            print(e)
+            messages.error(request, f'{e}')
+            return redirect(godown_details)
+
+
 def transaction(request, pk):
     product = AddItem.objects.get(id = pk)
     company = company_details.objects.get(user = request.user)
@@ -18106,6 +18148,12 @@ def project_summary(request):
         t.rateperhour=p.rateperhour
         
     return render(request,'project_summary.html',{'company':company,'taskz':taskz})
+
+def project_details(request):
+    company = company_details.objects.get(user=request.user)
+    
+        
+    return render(request,'project_details.html',{'company':company})
     
 
 def get_item_details(request):

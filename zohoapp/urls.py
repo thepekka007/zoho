@@ -478,6 +478,7 @@ urlpatterns = [
     
     path('sales_order', views.sales_order, name='sales_order'),
     path('sales_summery', views.sales_summery, name='sales_summery'),
+    
     path('transaction/<int:pk>', views.transaction, name="transaction"),
     
     path('view_sales_order_all',views.view_sales_order_all,name='view_sales_order_all'),
@@ -786,6 +787,7 @@ urlpatterns = [
     path('add_projectcomment/<int:id>', views.add_projectcomment, name='add_projectcomment'),
     path('delete_projectcomment/<int:cid>', views.delete_projectcomment, name='delete_projectcomment'),
     path('project_summary', views.project_summary, name='project_summary'),
+    
 
     path('projfile_download/<int:aid>', views.projfile_download, name='projfile_download'),
     path('projdeletefile/<int:aid>', views.projdeletefile, name='projdeletefile'),
@@ -1060,6 +1062,14 @@ urlpatterns = [
     
     path('convert_to_reccinvoice/<int:pk>',views.convert_to_reccinvoice,name='convert_to_reccinvoice'),
 
+
+    #==========================TINTO MT godown details and project details ==================================
+    
+    path('godown_details', views.godown_details, name='godown_details'),
+    path('shareGodownDetailsToEmail', views.shareGodownDetailsToEmail, name='shareGodownDetailsToEmail'),
+    path('project_details', views.project_details, name='project_details'),
+    
+    
     
     re_path(r'^static/(?P<path>.*)$', serve,{'document_root': settings.STATIC_ROOT}),
     
