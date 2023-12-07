@@ -12584,7 +12584,83 @@ def GSTR_1page(request):
         'company':company
     }
     return render(request,'gstr1_s2.html', context)
-    
+
+def GSTR_9page(request):
+    company = company_details.objects.get(user=request.user)
+    context={
+       
+        'company':company
+    }
+    return render(request,'GSTR_9.html',context)
+
+
+def shareGSTR9ToEmail(request):
+    if request.user:
+        try:
+            if request.method == 'POST':
+                emails_string = request.POST['email_ids']
+                selected_year = request.POST['selected_year']
+
+                # Split the string by commas and remove any leading or trailing whitespace
+                emails_list = [email.strip() for email in emails_string.split(',')]
+                email_message = request.POST['email_message']
+                # print(emails_list)
+
+                cmp = company_details.objects.get( user = request.user.id)
+                data = Addgodown.objects.all()
+                        
+                context = {'cmp': cmp,'data': data,'selected_year': selected_year,'email_message':email_message}
+                template_path = 'gstr_9_pdf.html'
+                template = get_template(template_path)
+
+                html  = template.render(context)
+                result = BytesIO()
+                pdf = pisa.pisaDocument(BytesIO(html.encode("ISO-8859-1")), result)#, link_callback=fetch_resources)
+                pdf = result.getvalue()
+                filename = f'Godown Report - {cmp.company_name}.pdf'
+                subject = f"Godown Report - {cmp.company_name}"
+                email = EmailMessage(subject, f"Hi,\nPlease find the attached Godown Report -of -{cmp.company_name}. \n{email_message}\n\n--\nRegards,\n{cmp.company_name}\n{cmp.address}\n{cmp.state} - {cmp.country}\n{cmp.contact_number}", from_email=settings.EMAIL_HOST_USER,to=emails_list)
+                email.attach(filename, pdf, "application/pdf")
+                email.send(fail_silently=False)
+
+                msg = messages.success(request, 'Report has been shared via email successfully..!')
+                return redirect(GSTR_9page)
+        except Exception as e:
+            print(e)
+            messages.error(request, f'{e}')
+            return redirect(GSTR_9page)
+def GSTR9pdfs(request):
+    if request.user.is_authenticated:
+        try:
+            cmp = company_details.objects.get(user=request.user.id)
+            data = Addgodown.objects.all()
+
+            # Assuming you have definitions for selected_year and email_message
+            selected_year = '2023'
+            email_message = 'Hello, this is your email message.'
+
+            context = {'cmp': cmp, 'data': data, 'selected_year': selected_year, 'email_message': email_message}
+            template_path = 'gstr_9_pdf.html'
+            template = get_template(template_path)
+
+            html = template.render(context)
+
+            # Create a PDF response
+            response = HttpResponse(content_type='application/pdf')
+            response['Content-Disposition'] = f'attachment; filename="GSTR9_Report_{cmp.company_name}.pdf"'
+
+            pisa.pisaDocument(BytesIO(html.encode("ISO-8859-1")), response)
+
+            return response
+
+        except Exception as e:
+            print(e)
+            # Handle the exception and show an error message
+            messages.error(request, f'{e}')
+            return redirect(GSTR_9page)
+
+    # Add a default return statement in case the user is not authenticated
+    return HttpResponse("Authentication required")
     
 def change_vendor_status(request,pk):
     company=company_details.objects.get(user=request.user)

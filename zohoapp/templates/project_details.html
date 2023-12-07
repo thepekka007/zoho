@@ -47,16 +47,7 @@
 
 <div class="d-flex justify-content-between align-items-center" style="margin-top: 40px;">
   <div class="d-flex">
-      <!-- <div class="col">
-          <form action="" method="post" id="date-form">
-              {% csrf_token %}
-              From <input type="date" id="d1" name="d1" required>
-              To <input type="date" id="d2" name="d2" required>
-              <span id="date-error" style="color: red;"></span>
-              
-          </form>
-      </div> -->
-      <!-- <a href="{% url 'customize_report' %}" style="margin-left: 30px;">Customize report <i class="fa fa-cog"></i></a> -->
+
   </div>
   
   <div class="d-flex">
@@ -116,7 +107,7 @@
       </datalist>
   </div>
   
-<!-- <input type="text" onclick="getValue()" id="search"  placeholder="Search.." autocomplete="off"  list="customers"> -->
+
 
 
 <div class="container-fluid" id="container-to-print"> 
@@ -152,22 +143,9 @@
             <td style="color: white;"></td>
             <td style="color: white;"></td>
             <td style="color: white;"></td>
-       
 
-            
-
-           
-            <!--<td style="color: white;">0</td>-->
-           
-           
-
-          
         </tr>
-        
-        
-       
 
-       
       </tbody>
                                    
                                  
@@ -255,12 +233,12 @@
     });
   
     const pdfOptions = {
-      margin: 0,
-      filename: '{{company.company_name}} Bill Details.pdf',
-      image: { type: 'jpeg', quality: 0.98 },
-      html2canvas: { scale: 2 },
-      jsPDF: { unit: 'mm', format: 'a4', orientation: 'landscape' },
-    };
+  margin: 0,
+  filename: '{{company.company_name}} Bill Details.pdf',
+  image: { type: 'jpeg', quality: 0.98 },
+  html2canvas: { scale: 2 },
+  jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }, // Adjust format and orientation
+};
   
     // Generate PDF from the container
     html2pdf().from(container).set(pdfOptions).save().then(() => {

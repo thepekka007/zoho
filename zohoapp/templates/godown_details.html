@@ -61,16 +61,6 @@
 
 <div class="d-flex justify-content-between align-items-center" style="margin-top: 40px;">
   <div class="d-flex">
-      <!-- <div class="col">
-          <form action="" method="post" id="date-form">
-              {% csrf_token %}
-              From <input type="date" id="d1" name="d1" required>
-              To <input type="date" id="d2" name="d2" required>
-              <span id="date-error" style="color: red;"></span>
-              
-          </form>
-      </div> -->
-      <!-- <a href="{% url 'customize_report' %}" style="margin-left: 30px;">Customize report <i class="fa fa-cog"></i></a> -->
   </div>
   
   <div class="d-flex">
@@ -81,10 +71,8 @@
         </button>
         <div class="dropdown-menu" aria-labelledby="exportDropdown">
             <!-- WhatsApp sharing link -->
-            <a class="dropdown-item" href="whatsapp://send?text=Check out this content: {{  object_or_url }}">
-                <i class="fa fa-whatsapp"></i> Share via WhatsApp
-            </a>
-            
+          
+            <a class="dropdown-item" href="javascript:void(0);" onclick="shareOnWhatsApp()">  <i class="fa fa-whatsapp"></i> WhatsApp</a>
             
               <!-- Email sharing link -->
             <a class="dropdown-item" data-target="#shareBillEmail" data-toggle="modal"> <i class="fa fa-envelope"></i> &nbsp; GMAIL</a>
@@ -96,6 +84,7 @@
     <div style="width: 3px;"></div>
       <!-- <button class="btn btn-light mr-2" id="print" onclick="printPageContent()">   <i class="fa fa-print"></i> Print</button>&nbsp; -->  
       <button class="btn btn-light mr-2" id="print" onclick="printPageContent()">   <i class="fa fa-print"></i> Print</button>&nbsp;
+
       <button class="btn btn-light mr-2" id="pdf" onclick="exportAsPDF()"><i class="fa fa-file-pdf-o"></i>PDF</button>
 
     
@@ -136,12 +125,12 @@
 
 
 <div class="container-fluid" id="container-to-print"> 
+    <section id="selected-area">
   <div class="row pt-5">
       <center>
         <h2 class="text" style="color: white;">{{ company.company_name }}</h2>
         <h4 id="selected_customer_heading" class="text" style="color: white;">GODOWN DETAILS</h4>
-          <!-- <p class="text" style="color: white;" id="date-range-display">From <span id="start_date"></span> To <span id="end_date"></span></p> -->
-          
+
       </center>
       <div class="table-responsive"> 
       <table class="table table-bordered table-striped mt-4" id="data-table">
@@ -173,7 +162,11 @@
       </div>
   </div>
 </div>
+</section>
+
+
 </div>
+
 <div class="printable-content mt-3">
   
 </div>
@@ -287,12 +280,13 @@
     });
   
     const pdfOptions = {
-      margin: 0,
-      filename: '{{company.company_name}} Bill Details.pdf',
-      image: { type: 'jpeg', quality: 0.98 },
-      html2canvas: { scale: 2 },
-      jsPDF: { unit: 'mm', format: 'a4', orientation: 'landscape' },
-    };
+  margin: 0,
+  filename: '{{company.company_name}} Bill Details.pdf',
+  image: { type: 'jpeg', quality: 0.98 },
+  html2canvas: { scale: 2 },
+  jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }, // Adjust format and orientation
+};
+
   
     // Generate PDF from the container
     html2pdf().from(container).set(pdfOptions).save().then(() => {
@@ -461,8 +455,16 @@ function calculateTotalBillAmount() {
       });
   });
   
+  
+  function shareOnWhatsApp() {
+    var url = window.location.href;
+    var text = url;
+    text = encodeURIComponent(text);
+    var whatsappUrl = "whatsapp://send?text=" + text;
+    window.location.href = whatsappUrl;
+  }
 
-//   goddwon email amd wp
+
 
 </script>
 

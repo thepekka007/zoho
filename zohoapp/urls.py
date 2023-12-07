@@ -1068,7 +1068,9 @@ urlpatterns = [
     path('godown_details', views.godown_details, name='godown_details'),
     path('shareGodownDetailsToEmail', views.shareGodownDetailsToEmail, name='shareGodownDetailsToEmail'),
     path('project_details', views.project_details, name='project_details'),
-    
+    path('GSTR_9page', views.GSTR_9page, name='GSTR_9page'),
+    path('shareGSTR9ToEmail', views.shareGSTR9ToEmail, name='shareGSTR9ToEmail'),
+    path('GSTR9pdfs', views.GSTR9pdfs, name='GSTR9pdfs'),
     
     
     re_path(r'^static/(?P<path>.*)$', serve,{'document_root': settings.STATIC_ROOT}),
