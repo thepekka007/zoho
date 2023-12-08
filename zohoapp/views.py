@@ -12396,7 +12396,7 @@ def sales_summery(request):
 
 def godown_details(request):
     company = company_details.objects.get(user = request.user)
-    data = Addgodown.objects.all()
+    data = Addgodown.objects.filter(user = request.user.id)
     
     return render(request, 'godown_details.html', {'data':data, 'company': company})
 
@@ -12412,7 +12412,7 @@ def shareGodownDetailsToEmail(request):
                 # print(emails_list)
 
                 cmp = company_details.objects.get( user = request.user.id)
-                data = Addgodown.objects.all()
+                data = Addgodown.objects.filter(user = request.user.id)
                         
                 context = {'cmp': cmp,'data': data}
                 template_path = 'godown_detail_pdf.html'
