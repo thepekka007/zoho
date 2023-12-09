@@ -4,7 +4,19 @@
 {% load static %}
 <style>
 
-  
+.modal {
+    z-index: 9999;
+    overflow: scroll;
+  }
+
+  .modal-content {
+    background-color: #fefefe;
+    margin: 15% auto;
+    padding: 20px;
+    border: 1px solid #888;
+    width: 80%;
+  }
+
   .col {
       width: 100%;
       padding: 10px;
@@ -59,13 +71,11 @@
         <div class="dropdown-menu" aria-labelledby="exportDropdown">
             <!-- WhatsApp sharing link -->
             <a class="dropdown-item" href="whatsapp://send?text=Check out this content: {{ object_or_url }}">
-                <i class="fa fa-whatsapp"></i> Share via WhatsApp
+                <i class="fa fa-whatsapp"></i> WhatsApp
             </a>
     
             <!-- Email sharing link -->
-            <a class="dropdown-item" href="mailto:?subject=New: {{ object.title }}&body=Check it out: {{ object_or_url }}">
-                <i class="fa fa-envelope"></i> Share via Email
-            </a>
+            <a class="dropdown-item" data-target="#shareBillEmail" data-toggle="modal"> <i class="fa fa-envelope"></i> &nbsp; GMAIL</a>
         </div>
     </div>
     
@@ -159,9 +169,46 @@
   </div>
 </div>
 </div>
+<div class="modal fade" id="shareBillEmail">
+  <div class="modal-dialog modal-xl">
+    <div class="modal-content" style="background: rgb(32, 35, 37);border-radius: 20px;">
+      <div class="modal-header" style="background: rgb(32, 35, 37);">
+        <h5 class="m-3 text-uppercase" id="shareBillEmailLabel">Share Project Details Via Email</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
+            aria-hidden="true">&times;</span></button>
+      </div>
+      <div class="modal-body" style="background: rgb(32, 35, 37);">
+        <div class="card p-3 m-3">
+          <form action="" method="post" class="needs-validation"
+            id="share_to_email_form" autocomplete="off">
+            {% csrf_token %}
+            <div class="form-group">
+              <label for="emailIds">Email IDs</label>
+              <textarea class="form-control text-dark" name="email_ids" id="emailIds" rows="5"
+                placeholder="Multiple emails can be added by separating with a comma(,)." required></textarea>
+            </div>
+            <input type="hidden" id="selectedYearInput" name="selected_year" value="">
+            <div class="form-group mt-2">
+              <label for="item_unitname">Message(optional)</label>
+              <textarea name="email_message" id="email_message" class="text-dark form-control" cols=""
+                rows="4" placeholder="This message will be sent along with Bill details."></textarea>
+            </div>
+            <input type="hidden" id="externalDataInput" name="selected_year" >
+        <div class="modal-footer d-flex justify-content-center" style="border-top: 1px solid #ffff;">
+          <input type="submit" id="share_with_email"
+            class="submitShareEmailBtn rounded-pill text-grey w-50 my-4 mx-3" value="SEND MAIL">
+        </div>
+      </div>
+  </form>
+    </div>
+  </div>
+</div>
+
+</div>
 <div class="printable-content mt-3">
   
 </div>
+
 <script>
   const searchInput = document.getElementById("search");
   const partyNameDisplay = document.getElementById("party_name");

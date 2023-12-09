@@ -12617,9 +12617,9 @@ def shareGSTR9ToEmail(request):
                 result = BytesIO()
                 pdf = pisa.pisaDocument(BytesIO(html.encode("ISO-8859-1")), result)#, link_callback=fetch_resources)
                 pdf = result.getvalue()
-                filename = f'Godown Report - {cmp.company_name}.pdf'
-                subject = f"Godown Report - {cmp.company_name}"
-                email = EmailMessage(subject, f"Hi,\nPlease find the attached Godown Report -of -{cmp.company_name}. \n{email_message}\n\n--\nRegards,\n{cmp.company_name}\n{cmp.address}\n{cmp.state} - {cmp.country}\n{cmp.contact_number}", from_email=settings.EMAIL_HOST_USER,to=emails_list)
+                filename = f'GSTR9 Report - {cmp.company_name}.pdf'
+                subject = f"GSTR9 Report - {cmp.company_name}"
+                email = EmailMessage(subject, f"Hi,\nPlease find the attached GSTR9 Report -of  -{cmp.company_name}. \n{email_message}\n\n--\nRegards,\n{cmp.company_name}\n{cmp.address}\n{cmp.state} - {cmp.country}\n{cmp.contact_number}", from_email=settings.EMAIL_HOST_USER,to=emails_list)
                 email.attach(filename, pdf, "application/pdf")
                 email.send(fail_silently=False)
 

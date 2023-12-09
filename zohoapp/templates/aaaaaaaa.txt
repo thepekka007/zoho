@@ -1,3 +1,54 @@
+{% extends 'base.html' %}
+{% block content %}
+{% load social_share %}
+{% load static %}
+<!-- Include jQuery -->
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.4/xlsx.full.min.js"></script>
+
+
+<style>
+    
+    .modal {
+    z-index: 9999;
+    overflow: scroll;
+  }
+
+  .modal-content {
+    background-color: #fefefe;
+    margin: 15% auto;
+    padding: 20px;
+    border: 1px solid #888;
+    width: 80%;
+  }
+
+    .ui-datepicker-calendar {
+        display: none;
+    }
+
+
+    .datepicker {
+        width: 13rem;
+        /* height: 3.2vh; */
+        /* display: grid; */
+        justify-items: center;
+        border: 1px solid black;
+    }
+
+
+
+    .datepicker label {
+        font-size: 1rem;
+        color: rgb(0, 0, 0);
+    }
+
+
+    .bar {
+        align-items: center;
+        display: flex;
+        justify-content: space-between;
+    }
+</style>
 
 <div class="page-content">
     <div class="card radius-15">
@@ -78,7 +129,7 @@
        
      
 
-        <div class="page-content">
+<div class="page-content">
 <div class="container-fluid" id="selected-area"> 
     <div class="container-fluid" id="container-to-print"> 
     <div class="card radius-15 " id="pdf-card">
@@ -293,9 +344,6 @@
                         </tr>
                     </tbody>
                 </table>
-
-
-                
                 <table class="table2excel  table table-responsive-md mt-4  table-bordered"
                     style="background-color: rgba(0, 0, 0, 0.2);color: aliceblue;" id="myTable5">
                     <thead>
@@ -337,7 +385,7 @@
                         <tr>
                             <td class="text-center">D</td>
                             <td class="text-left">Exempted</td>
-                            <td class="text-right">0ftrwyvbgeribguqerbgiebruibgqeruibgiuerbgiu</td>
+                            <td class="text-right">0</td>
                             <td class="text-right"></td>
                             <td class="text-right"></td>
                             <td class="text-right"></td>
@@ -1405,3 +1453,150 @@
 </div>
 </div>
 </div>
+
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.9.3/html2pdf.bundle.min.js"></script>
+
+<script type="text/javascript">
+    $(function () {
+        $('.date-picker').datepicker({
+            changeMonth: true,
+            changeYear: true,
+            showButtonPanel: true,
+            dateFormat: 'MM yy',
+            onClose: function (dateText, inst) {
+                $(this).datepicker('setDate', new Date(inst.selectedYear, inst.selectedMonth, 1));
+            }
+        });
+    });
+    $(document).ready(function ($) {
+
+
+        $(document).on('click', '.btn_pdf', function (event) {
+            console.log('print1');
+            event.preventDefault();
+            var element = document.getElementById('pdf-card');
+            element.style.color = 'black';
+            element.style.backgroundColor = '#243e54';
+            var opt =
+            {
+                margin: 1,
+                filename: 'gstr9' + '.pdf',
+                image: { type: 'png', quality: 1.0 },
+                html2canvas: { scale: 3, useCORS: true, backgroundColor: null },
+                jsPDF: { unit: 'in', format: 'a3', orientation: 'portrait' }
+            };
+            html2pdf().set(opt).from(element).save();
+
+        });
+
+    });
+</script>
+
+
+<script>
+    document.getElementById("FromDate").addEventListener("change", function () {
+        const selectedValue = this.value;
+        const dynamicCell = document.getElementById("year");
+
+
+        dynamicCell.innerHTML = selectedValue;
+        document.getElementById("id1").innerHTML = selectedValue;
+        document.getElementById("externalDataInput").value = selectedValue;
+    });
+
+
+
+    function printPageContent() {
+  const contentToPrint = document.getElementById('container-to-print');
+  const clonedContent = contentToPrint.cloneNode(true);
+
+  const textElements = clonedContent.querySelectorAll('.text');
+  const filterDropdowns = clonedContent.querySelectorAll('.filter-dropdown');
+
+  textElements.forEach(element => {
+    element.style.color = '#000000'; // Text color (black)
+  });
+
+  filterDropdowns.forEach(dropdown => {
+    dropdown.style.display = 'none';
+  });
+
+  const tableElements = clonedContent.querySelectorAll('table');
+  tableElements.forEach(table => {
+    const tableHeaders = table.querySelectorAll('th');
+    tableHeaders.forEach(th => {
+      th.style.color = '#000000';
+    });
+
+    table.style.width = '100%'; // Set table width to 100%
+    table.style.margin = '0 auto';
+
+    const tableCells = table.querySelectorAll('td, th, tr');
+    tableCells.forEach(cell => {
+      cell.style.border = '1px solid black';
+      cell.style.padding = '10px';
+      cell.style.color = '#000000';
+    });
+
+    // Set cell width explicitly to make sure they are printed with the same size
+    const firstRowCells = table.querySelectorAll('tr:first-child td, tr:first-child th');
+    firstRowCells.forEach(firstRowCell => {
+      firstRowCell.style.width = (100 / firstRowCells.length) + '%';
+    });
+  });
+
+  const printWindow = window.open('', '_blank');
+  printWindow.document.body.appendChild(clonedContent);
+  printWindow.print();
+  printWindow.close();
+}
+
+function exportToExcel() {
+     var table = document.getElementById('container-to-print');
+     var ws = XLSX.utils.table_to_sheet(table);
+     var wb = XLSX.utils.book_new();
+     XLSX.utils.book_append_sheet(wb, ws, 'Sheet1');
+     XLSX.writeFile(wb, 'report.xlsx');
+ }
+
+ // Function to handle export based on dropdown selection
+ document.getElementById('exportDropdown').addEventListener('change', function () {
+     var selectedValue = this.value;
+     if (selectedValue === 'pdf') {
+         exportToPDF();
+     } else if (selectedValue === 'xls') {
+         exportToExcel();
+     }
+ });
+ const pdfExportLink = document.getElementById('pdf'); 
+pdfExportLink.addEventListener('click', function (event) {
+ event.preventDefault(); 
+ exportToPDF();
+});
+
+function shareOnWhatsApp() {
+    var url = window.location.href;
+    var text = url;
+    text = encodeURIComponent(text);
+    var whatsappUrl = "whatsapp://send?text=" + text;
+    window.location.href = whatsappUrl;
+  }
+
+
+    function updateSelectedYear() {
+        var selectedYear = document.getElementById("FromDate").value;
+        document.getElementById("selectedYearInput").value = selectedYear;
+    }
+    function exportToPDF() {
+    var content = document.getElementById('selected-area');
+    html2pdf()
+      .from(content)
+      .save('{{company.company_name}} Godown Details.pdf')
+  }
+  
+
+</script>
+
+
+{% endblock %}
