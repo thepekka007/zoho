@@ -777,7 +777,7 @@ function calc_ship()
         <div class="col-sm-2"><label for="chellan_type">Challan type</label></div>
         <div class="col-sm-6 col-md-6 col-lg-6">
             <select class="form-control text-dark" id="customer_sel" name="chellan_type" >
-                <option value="{{estimate.chellan_type}}" selected>{{i.chellan_type}}</option>
+                <option value="{{i.chellan_type}}" >{{i.chellan_type}}</option>
               
                 <option value="Supplay Of Liquid Gas">Supplay Of Liquid Gas</option>
                 <option value="Job Work">Job Work</option>
@@ -791,93 +791,94 @@ function calc_ship()
   
   <!-- ..................................................... TABLE 1 .........................................   -->
 
-    <div class="row">
-      <div class="col-sm-12 col-md-12 col-lg-12">
-    <label for="" id="label_tab1">Price List</label><br>
-    <table class="table table-bordered text-white"  id="item_table" style="background-color: #b6b3b36b;table-layout: fixed;width: 100%;"
-        onchange="calc()">
-        <thead>
-            <tr>
-                <th style="font-weight: bold;color: rgb(245, 154, 36);" class="">Item Details <a href="" data-toggle="modal"  data-target="#newitem"
-                  style="text-decoration: none;"><i class="mdi mdi-plus p-2 rounded"
-                            style="color: white; background-color: rgb(210, 132, 30);"></i></a></th>
-                            <th style="font-weight: bold;color: rgb(245, 154, 36);" class="text-right">HSN</th>
-                <th style="font-weight: bold;color: rgb(245, 154, 36);" class="text-right">Quantity</th>
-                <th style="font-weight: bold;color: rgb(245, 154, 36);" class="text-right">Rate</th>
-                <th style="font-weight: bold;color: rgb(245, 154, 36);" class="text-right">Discount</th>
-                <th style="font-weight: bold;color: rgb(245, 154, 36);" class="text-right">Tax</th>
-                <th style="font-weight: bold;color: rgb(245, 154, 36);" class="text-right">Amount</th>
-            </tr>
-        </thead>
-        <tbody>
-          {% for est in est %}
-            <tr id='row1'>
-                <td>
-                    <div class='form-group'><select
-                            class='form-control bg-transparent text-light border-0 item_select itm'
-                            name='item[]' id='item1'>
-                            <option class='text-dark'  value="{{est.item_name}}">{{est.item_name}}</option>
-                            {% for i in items %}
-                            <option class="text-dark" value="{{i.Name}}">{{i.Name}}</option>
-                            {% endfor %}
-                            <option class='text-dark' id="items_nms"></option>
-                        </select></div>
-                </td>
-                <td class='text-right'><input type='text' id='hsn1'
-                  class='form-control bg-transparent border-0 text-light text-right hsn'  placeholder="6 Digit No" pattern="[0-9]{6}" name='hsn[]'
-                  value="{{est.hsn}}" readonly >
-                </td>
+  <div class="row">
+    <div class="col-sm-12 col-md-12 col-lg-12">
+  <label for="" id="label_tab1">Price List</label><br>
+  <table class="table table-bordered text-white"  id="item_table" style="background-color: #b6b3b36b;table-layout: fixed;width: 100%;"
+      onchange="calc()">
+      <thead>
+          <tr>
+              <th style="font-weight: bold;color: rgb(245, 154, 36);" class="">Item Details <a href="" data-toggle="modal"  data-target="#newitem"
+                style="text-decoration: none;"><i class="mdi mdi-plus p-2 rounded"
+                          style="color: white; background-color: rgb(210, 132, 30);"></i></a></th>
+                          <th style="font-weight: bold;color: rgb(245, 154, 36);" class="text-right">HSN</th>
+              <th style="font-weight: bold;color: rgb(245, 154, 36);" class="text-right">Quantity</th>
+              <th style="font-weight: bold;color: rgb(245, 154, 36);" class="text-right">Rate</th>
+              <th style="font-weight: bold;color: rgb(245, 154, 36);" class="text-right">Discount</th>
+              <th style="font-weight: bold;color: rgb(245, 154, 36);" class="text-right">Tax</th>
+              <th style="font-weight: bold;color: rgb(245, 154, 36);" class="text-right">Amount</th>
+          </tr>
+      </thead>
+      <tbody>
+        {% for est in est %}
+          <tr id='row1'>
+              <td>
+                  <div class='form-group'><select
+                          class='form-control bg-transparent text-light border-0 item_select itm'
+                          name='item[]' id='item1'>
+                          <option class='text-dark'  value="{{est.item_name}}">{{est.item_name}}</option>
+                          {% for i in items %}
+                          <option class="text-dark" value="{{i.Name}}">{{i.Name}}</option>
+                          {% endfor %}
+                          <option class='text-dark' id="items_nms"></option>
+                      </select></div>
+              </td>
+              <td class='text-right'><input type='text' id='hsn1'
+                class='form-control bg-transparent border-0 text-light text-right hsn'  placeholder="6 Digit No" pattern="[0-9]{6}" name='hsn[]'
+                value="{{est.hsn}}" readonly >
+              </td>
 
+
+            
 
               
+              <td class='text-right'><input type='number' id='qty1'
+                      class='bg-transparent form-control border-0 text-light text-right qty' name='quantity[]'
+                      value='{{est.quantity}}'>
+              </td>
+              <td class='text-right'><input type='number' id='rate1'
+                      class='bg-transparent form-control border-0 text-light text-right rate' name='rate[]'
+                      value='{{est.rate}}'>
+              </td>
+              <td class='text-right'><input type='number' id='discount1'
+                      class='bg-transparent form-control border-0 text-light text-right discount' name='discount[]'
+                      value='{{est.discount}}'>
+              </td>
+              <td class='text-right'> <select name='tax[]' id='tax1'
+                      class=' bg-transparent form-control text-light text-right border-0 tax'>
+                      <option value='{{est.tax_percentage}}'>{{est.tax_percentage}} %GST</option>
+                      <option class="form-control text-dark" value=0>0% GST</option>
+                      <option class="form-control text-dark" value=3>3% GST</option>
+                      <option class="form-control text-dark" value=5>5% GST</option>
+                      <option class="form-control text-dark" value=12>12% GST</option>
+                      <option class="form-control text-dark" value=18>18% GST</option>
+                      <option class="form-control text-dark" value=28>28% GST</option>
+                  </select>
+                </td>
+              <td style="display: none;">
+                  <input type="number" name='taxamount[]' id="taxamount1"
+                      class="form-control taxamount" />
+              </td>
+              <td class='text-right'><input type='number' id='amount1'
+                      class='bg-transparent form-control border-0 text-light text-right amount' name='amount[]'
+                      value="{{est.amount}}"></td>
+              <td class='text-center'><button type='button' id='del_btn1'
+                      class='btn btn-transparent text-danger btn-sm btn-outline-danger rounded-circle delete-row'
+                      style='width:30px'><i class='fa fa-times'></i></button>
+                      <button type='button' class='btn btn-transparent text-primary btn-sm btn-outline-primary rounded-circle clone-row' data-row=1 style='width:30px'><i class="fa fa-clone"></i>
+                      </button>
+                    </td>
+          </tr>
+          {% endfor %}
+      </tbody>
 
-                
-                <td class='text-right'><input type='number' id='qty1'
-                        class='bg-transparent form-control border-0 text-light text-right qty' name='quantity[]'
-                        value='{{est.quantity}}'>
-                </td>
-                <td class='text-right'><input type='number' id='rate1'
-                        class='bg-transparent form-control border-0 text-light text-right rate' name='rate[]'
-                        value='{{est.rate}}'>
-                </td>
-                <td class='text-right'><input type='number' id='discount1'
-                        class='bg-transparent form-control border-0 text-light text-right discount' name='discount[]'
-                        value='{{est.discount}}'>
-                </td>
-                <td class='text-right'> <select name='tax[]' id='tax1'
-                        class=' bg-transparent form-control text-light text-right border-0 tax'>
-                        <option value='{{est.tax_percentage}}'>{{est.tax_percentage}} %GST</option>
-                        <option class="form-control text-dark" value=0>0% GST</option>
-                        <option class="form-control text-dark" value=3>3% GST</option>
-                        <option class="form-control text-dark" value=5>5% GST</option>
-                        <option class="form-control text-dark" value=12>12% GST</option>
-                        <option class="form-control text-dark" value=18>18% GST</option>
-                        <option class="form-control text-dark" value=28>28% GST</option>
-                    </select>
-                  </td>
-                <td style="display: none;">
-                    <input type="number" name='taxamount[]' id="taxamount1"
-                        class="form-control taxamount" />
-                </td>
-                <td class='text-right'><input type='number' id='amount1'
-                        class='bg-transparent form-control border-0 text-light text-right amount' name='amount[]'
-                        value="{{est.amount}}"></td>
-                <td class='text-center'><button type='button' id='del_btn1'
-                        class='btn btn-transparent text-danger btn-sm btn-outline-danger rounded-circle delete-row'
-                        style='width:30px'><i class='fa fa-times'></i></button>
-                        <button type='button' class='btn btn-transparent text-primary btn-sm btn-outline-primary rounded-circle clone-row' data-row=1 style='width:30px'><i class="fa fa-clone"></i>
-                        </button>
-                      </td>
-            </tr>
-        </tbody>
+  </table>
+  <button type="button" class="btn btn-sm text-white" style="background-color: rgb(210, 132, 30) ;"
+      id="add-row"><i class="fa-solid  fa fa-plus rounded"
+      style="color: white; background-color: rgb(210, 132, 30);height: 20px;"></i></button>
 
-    </table>
-    <button type="button" class="btn btn-sm text-white" style="background-color: rgb(210, 132, 30) ;"
-        id="add-row"><i class="fa-solid  fa fa-plus rounded"
-        style="color: white; background-color: rgb(210, 132, 30);height: 20px;"></i></button>
-
-      </div>
     </div>
+  </div>
 
 <!-- ........................................................ END TABLE 1 .............................................. -->
 
@@ -885,97 +886,97 @@ function calc_ship()
 
 
 <div class="row">
-  <div class="col-sm-12 col-md-12 col-lg-12">
+<div class="col-sm-12 col-md-12 col-lg-12">
 <label for="" id="label_tab2" style="display: none;">Price List</label><br>
 <table class="table table-bordered text-white"  id="item_tablee" style="display: none; background-color: #b6b3b36b;table-layout: fixed;width: 100%;"
-    onchange="calc()">
-    <thead>
-        <tr>
-            <th style="font-weight: bold;color: rgb(245, 154, 36);" class="">Item Details <a href="" data-toggle="modal"  data-target="#newitem"
-              style="text-decoration: none;"><i class="mdi mdi-plus p-2 rounded"
-                        style="color: white; background-color: rgb(210, 132, 30);"></i></a></th>
+  onchange="calc()">
+  <thead>
+      <tr>
+          <th style="font-weight: bold;color: rgb(245, 154, 36);" class="">Item Details <a href="" data-toggle="modal"  data-target="#newitem"
+            style="text-decoration: none;"><i class="mdi mdi-plus p-2 rounded"
+                      style="color: white; background-color: rgb(210, 132, 30);"></i></a></th>
 
 
-                        <th style="font-weight: bold;color: rgb(245, 154, 36);" class="text-right">HSN</th>
-            <th style="font-weight: bold;color: rgb(245, 154, 36);" class="text-right">Quantity</th>
-            <th style="font-weight: bold;color: rgb(245, 154, 36);" class="text-right">Rate</th>
-            <th style="font-weight: bold;color: rgb(245, 154, 36);" class="text-right">Discount</th>
-            <th style="font-weight: bold;color: rgb(245, 154, 36);" class="text-right">Tax</th>
-            <th style="font-weight: bold;color: rgb(245, 154, 36);" class="text-right">Amount</th>
-        </tr>
-    </thead>
-    <tbody>
+                      <th style="font-weight: bold;color: rgb(245, 154, 36);" class="text-right">HSN</th>
+          <th style="font-weight: bold;color: rgb(245, 154, 36);" class="text-right">Quantity</th>
+          <th style="font-weight: bold;color: rgb(245, 154, 36);" class="text-right">Rate</th>
+          <th style="font-weight: bold;color: rgb(245, 154, 36);" class="text-right">Discount</th>
+          <th style="font-weight: bold;color: rgb(245, 154, 36);" class="text-right">Tax</th>
+          <th style="font-weight: bold;color: rgb(245, 154, 36);" class="text-right">Amount</th>
+      </tr>
+  </thead>
+  <tbody>
+    {% for est in est %}
 
-        <tr id='row1'>
-            <td>
-                <div class='form-group'><select
-                        class='form-control bg-transparent text-light border-0 item_selectt itmm'
-                        name='itemm[]' id='itemm1'>
-                        <option class='text-dark'  value="{{est.item_name}}">{{est.item_name}}</option>
-                        {% for i in items %}
-                        <option class="text-dark" value="{{i.Name}}">{{i.Name}}</option>
-                        {% endfor %}
-                        <option class='text-dark' id="items_nms"></option>
-                    </select></div>
-            </td>
+      <tr id='row1'>
+          <td>
+              <div class='form-group'><select
+                      class='form-control bg-transparent text-light border-0 item_selectt itmm'
+                      name='itemm[]' id='itemm1'>
+                      <option class='text-dark'  value="{{est.item_name}}">{{est.item_name}}</option>
+                      {% for i in items %}
+                      <option class="text-dark" value="{{i.Name}}">{{i.Name}}</option>
+                      {% endfor %}
+                      <option class='text-dark' id="items_nms"></option>
+                  </select></div>
+          </td>
 
-            <td class='text-right'><input type='text' id='hsnn1'
-              class='form-control bg-transparent border-0 text-light text-right hsn'  placeholder="6 Digit No" pattern="[0-9]{6}" name='hsnn[]'
-              value="{{est.hsn}}" readonly >
-            </td>
+          <td class='text-right'><input type='text' id='hsnn1'
+            class='form-control bg-transparent border-0 text-light text-right hsn'  placeholder="6 Digit No" pattern="[0-9]{6}" name='hsnn[]'
+            value="{{est.hsn}}" readonly >
+          </td>
 
 
-            <td class='text-right'><input type='number' id='qtyy1'
-                    class='bg-transparent form-control border-0 text-light text-right qtyy' name='quantityy[]'
-                    value="{{est.quantity}}">
+          <td class='text-right'><input type='number' id='qtyy1'
+                  class='bg-transparent form-control border-0 text-light text-right qtyy' name='quantityy[]'
+                  value='{{est.quantity}}'>
+          </td>
+          <td class='text-right'><input type='number' id='ratee1'
+                  class='bg-transparent form-control border-0 text-light text-right ratee' name='ratee[]'
+                  value='{{est.rate}}'>
+          </td>
+          <td class='text-right'><input type='number' id='discountt1'
+                  class='bg-transparent form-control border-0 text-light text-right discountt' name='discountt[]'
+                  value='{{est.discount}}'>
+          </td>
+          <td class='text-right'> <select name='taxx[]' id='taxx1'
+                  class=' bg-transparent form-control text-light text-right border-0 taxx'>
+                  <option  value='{{est.tax_percentage}}'>{{est.tax_percentage}} %IGST</option>
+                  <option class="form-control text-dark" value=0>0% IGST</option>
+                  <option class="form-control text-dark" value=3>3% IGST</option>
+                  <option class="form-control text-dark" value=5>5% IGST</option>
+                  <option class="form-control text-dark" value=12>12% IGST</option>
+                  <option class="form-control text-dark" value=18>18% IGST</option>
+                  <option class="form-control text-dark" value=28>28% IGST</option>
+              </select>
             </td>
-            <td class='text-right'><input type='number' id='ratee1'
-                    class='bg-transparent form-control border-0 text-light text-right ratee' name='ratee[]'
-                    value='0.00'>
-            </td>
-            <td class='text-right'><input type='number' id='discountt1'
-                    class='bg-transparent form-control border-0 text-light text-right discountt' name='discountt[]'
-                    value="{{est.discount}}">
-            </td>
-            <td class='text-right'> <select name='taxx[]' id='taxx1'
-                    class=' bg-transparent form-control text-light text-right border-0 taxx'>
-                    <option  value='{{est.tax_percentage}}'>{{est.tax_percentage}} %IGST</option>
-                    <option class="form-control text-dark" value=0>0% IGST</option>
-                    <option class="form-control text-dark" value=3>3% IGST</option>
-                    <option class="form-control text-dark" value=5>5% IGST</option>
-                    <option class="form-control text-dark" value=12>12% IGST</option>
-                    <option class="form-control text-dark" value=18>18% IGST</option>
-                    <option class="form-control text-dark" value=28>28% IGST</option>
-                </select>
-              </td>
-            <td style="display: none;">
-                <input type="number" name='taxamountt[]' id="taxamountt1"
-                    class="form-control taxamountt"/>
-            </td>
-            <td class='text-right'><input type='number' id='amountt1'
-                    class='bg-transparent form-control border-0 text-light text-right amountt' name='amountt[]'
-                    value="{{est.amount}}"></td>
-            <td class='text-center'><button type='button' id='del_btnn1'
-                    class='btn btn-transparent text-danger btn-sm btn-outline-danger rounded-circle delete-roww'
-                    style='width:30px'><i class='fa fa-times'></i></button>
-                    <button type='button' class='btn btn-transparent text-primary btn-sm btn-outline-primary rounded-circle clone-roww' data-row=1 style='width:30px'><i class="fa fa-clone"></i>
-                    </button>
-                  </td>
-        </tr>
-    </tbody>
-    {% endfor %}
+          <td style="display: none;">
+              <input type="number" name='taxamountt[]' id="taxamountt1"
+                  class="form-control taxamountt"/>
+          </td>
+          <td class='text-right'><input type='number' id='amountt1'
+                  class='bg-transparent form-control border-0 text-light text-right amountt' name='amountt[]'
+                  value="{{est.amount}}"></td>
+          <td class='text-center'><button type='button' id='del_btnn1'
+                  class='btn btn-transparent text-danger btn-sm btn-outline-danger rounded-circle delete-roww'
+                  style='width:30px'><i class='fa fa-times'></i></button>
+                  <button type='button' class='btn btn-transparent text-primary btn-sm btn-outline-primary rounded-circle clone-roww' data-row=1 style='width:30px'><i class="fa fa-clone"></i>
+                  </button>
+                </td>
+      </tr>
+      {% endfor %}
+  </tbody>
+
 </table>
 <button type="button" class="btn btn-sm text-white" style="background-color: rgb(210, 132, 30) ; display: none;"
-    id="add-roww"><i class="fa-solid  fa fa-plus rounded"
-    style="color: white; background-color: rgb(210, 132, 30);height: 20px;"></i></button>
+  id="add-roww"><i class="fa-solid  fa fa-plus rounded"
+  style="color: white; background-color: rgb(210, 132, 30);height: 20px;"></i></button>
 
-  </div>
+</div>
 </div>
 
 <!-- ..........................................................END TABLE 2 ..................................................... -->
 
-            
-<!-- .......................................... END OF TABLE 2................................................................ -->
 
 
     <div class="row border-bottom pb-5 border-top pt-5 ">
@@ -2680,8 +2681,16 @@ var rowCount = 1;
 $('#item_table').on('click', '.clone-row', function () {
   var row = $(this).closest('tr');
   var clonedRow = row.clone(); // Clone the current row
-  var newRowId = 'row' + rowCount; // Generate a new ID for the cloned row
+  var parentRowId = parseInt(row.attr('id').replace('row', '')); // Get the parent row number
+  var newRowId = 'row' + (parentRowId + rowCount); // Generate a new ID for the cloned row
   clonedRow.attr('id', newRowId); // Set the new ID for the cloned row
+
+  // Iterate over all elements with IDs in the cloned row and update them
+  clonedRow.find('[id]').each(function () {
+    var currentId = $(this).attr('id');
+    var newId = currentId.replace(parentRowId, parentRowId + rowCount);
+    $(this).attr('id', newId);
+  });
 
   // Clone the options for tax, account, and item
   var currentItem = row.find('.item_select').val();
@@ -2696,8 +2705,8 @@ $('#item_table').on('click', '.clone-row', function () {
   var row = $(this).closest('tr');
   calc();
   calc_total();
-     
 });
+
 
 
 // Event handler for clone button.....TABLE 2
@@ -2705,8 +2714,16 @@ var rowCount = 1;
 $('#item_tablee').on('click', '.clone-roww', function () {
   var row = $(this).closest('tr');
   var clonedRow = row.clone(); // Clone the current row
-  var newRowId = 'row' + rowCount; // Generate a new ID for the cloned row
+  var parentRowId = parseInt(row.attr('id').replace('row', '')); // Get the parent row number
+  var newRowId = 'row' + (parentRowId + rowCount); // Generate a new ID for the cloned row
   clonedRow.attr('id', newRowId); // Set the new ID for the cloned row
+
+  // Iterate over all elements with IDs in the cloned row and update them
+  clonedRow.find('[id]').each(function () {
+    var currentId = $(this).attr('id');
+    var newId = currentId.replace(parentRowId, parentRowId + rowCount);
+    $(this).attr('id', newId);
+  });
 
   // Clone the options for tax, account, and item
   var currentItem = row.find('.item_selectt').val();
@@ -2721,8 +2738,8 @@ $('#item_tablee').on('click', '.clone-roww', function () {
   var row = $(this).closest('tr');
   calc();
   calc_total();
-     
 });
+
 
 
 
@@ -3112,175 +3129,166 @@ function reloadPayment() {
 
 
 
-
-
-
-<!-- .............................................   TABLE 1    ........................................................ -->
+<!-- ................................................  TABLE 1 ......................................................... -->
 
 <script>
 
-    // set todays date on estimate date field
-    // var today = new Date().toISOString().substr(0, 10);
-    // document.getElementById("estimate_date").value = today;
-    // document.getElementById("expiry_date").value = today;
 
-    // Add new row
-   
- 
-    $(document).ready(function () {
-
-
-
-      $('#add-row').click(function () {
-          var table = document.getElementById("item_table");
-          var RowCount = table.rows.length;
-          console.log(RowCount);
-          var newRow = $(`
-          <tr id='row${RowCount}' >
-              <td>
-                  <div class='form-group'>
-                      <select
-                          class='form-control  bg-transparent  text-white border-0 item_select itm' name="item[]"
-                          id='item${RowCount}'>
-                          <option class="text-dark" value="">Select</option>
-                          {% for i in items %}
-                          <option class="text-dark" value="{{i.Name}}">{{i.Name}}</option>
-                         
-                          {% endfor %}
-                      </select></div>
-              </td>
-              <td class='text-right'>
-          <input type='text' id='hsn${RowCount}'  class='form-control bg-transparent  text-white border-0  text-right hsn' name="hsn[]" placeholder="6 Digit No" pattern="[0-9]{6}" value='' readonly required>
-          <span class='hsn-validation'></span>
-      </td>
-              <td class='text-right'><input type='number' id='qty${RowCount}'
-                      class='form-control border-0 bg-transparent  text-white text-right qty' name="quantity[]" value='0' onchange="calc()">
-              </td>
-              <td class='text-right'><input type='number' id='rate${RowCount}'
-                      class='form-control border-0 bg-transparent  text-white text-right rate' name="rate[]" value='0.00'
-                      ></td>
-                <td class='text-right'><input type='number' id='discount${RowCount}'
-                      class='form_control bg-transparent border-0 text-light text-right discount' name="discount[]" value='0.00' style="width:85%">
-              </td>
-              <td class='text-right'> <select name="tax[]" id='tax${RowCount}'
-                      class="form-control  bg-transparent  text-white text-right border-0 tax">
-                      <option>Select Tax</option>
-                  <option value="0" class="text-dark">GST 0%</option>
-                  <option value="3" class="text-dark">GST 3%</option>
-  
-                    <option value="5" class="text-dark">GST 5%</option>
-                    <option value="12" class="text-dark">GST 12%</option>
-                    <option value="18" class="text-dark">GST 18%</option>
-                    <option value="28" class="text-dark">GST 28%</option>
-                  
-                     
-                  </select></td>
-              <td style="display: none;">
-                  <input type="text" name="taxamount1[]" id="taxamount${RowCount}" class="form-control taxamount" />
-                          </td>
-              <td class='text-right'><input type='number' id='amount${RowCount}'
-                      class='form-control border-0 bg-transparent  text-white text-right amount' name="amount[]" value='0.00'></td>
-              <td class='text-center'><button type='button' id='del_btn${RowCount}'
-                      class='btn btn-transparent text-danger btn-sm btn-outline-danger rounded-circle delete-row'
-                      style='width:30px'><i class='fa fa-times'></i></button>
-                      <button type='button' class='btn btn-transparent text-primary btn-sm btn-outline-primary rounded-circle clone-row' data-row=1 style='width:30px'><i class="fa fa-clone"></i>
-                          </button>
-                      </td>
-          </tr>`);
-  
-  //             $(document).on("input", ".hsn", function() {
-  //     var hsn_value = $(this).val();
-  //     var hsn_length = hsn_value.length;
-  //     if (hsn_length > 6) {
-  //         $(this).val(hsn_value.substring(0, 6));
-  //         alert("HSN should not be more than 6 digits!");
-  //     }
-  // });
-          $('#item_table').append(newRow);
-      });
-  
-      $('#item_table').on('click', '.delete-row', function () {
-          $(this).closest('tr').remove();
-          calc();
-      });
-  
-  });
-  
-  
-  </script>
-  
-  <script>
   $(document).ready(function () {
-   $('#add-roww').click(function () {
-       var tablee = document.getElementById("item_tablee");
-       var RowCountt = tablee.rows.length;
-       console.log(RowCountt);
-       var newRoww= $(`
-       <tr id='row${RowCountt}' >
-           <td>
-               <div class='form-group'>
-                   <select
-                       class='form-control  bg-transparent  text-white border-0 item_selectt itmm' name='itemm[]'
-                       id='itemm${RowCountt}'>
-                       <option class="text-dark" value="">Select</option>
+
+
+
+    $('#add-row').click(function () {
+        var table = document.getElementById("item_table");
+        var RowCount = table.rows.length;
+        console.log(RowCount);
+        var newRow = $(`
+        <tr id='row${RowCount}' >
+            <td>
+                <div class='form-group'>
+                    <select
+                        class='form-control  bg-transparent  text-white border-0 item_select itm' name="item[]"
+                        id='item${RowCount}'>
+                        <option class="text-dark" value="">Select</option>
                        {% for i in items %}
+                        <option class="text-dark" value="{{i.Name}}">{{i.Name}}</option>
                        
-                       <option class="text-dark" value="{{i.Name}}">{{i.Name}}</option>
-                       {% endfor %}
-                   </select></div>
-           </td>
-           <td class='text-right'>
-       <input type='text' id='hsnn${RowCountt}'  class='form-control bg-transparent  text-white border-0  text-right hsnn' name='hsnn[]' value='' placeholder="6 Digit No" pattern="[0-9]{6}" readonly required>
-       <span class='hsn-validation'></span>
-   </td>
-           <td class='text-right'><input type='number' id='qtyy${RowCountt}'
-                   class='form-control border-0 bg-transparent  text-white text-right qtyy' name='quantityy[]' value='0' onchange="calc()">
-           </td>
-           <td class='text-right'><input type='number' id='ratee${RowCountt}'
-                   class='form-control border-0 bg-transparent  text-white text-right ratee' name='ratee[]' value='0.00'>
-              </td>
-              <td class='text-right'><input type='number' id='discountt${RowCountt}'
-                      class='form_control bg-transparent border-0 text-light text-right discountt' name='discountt[]' value='0.00' style="width:85%">
-              </td>
-           <td class='text-right'> <select name='taxx[]' id='taxx${RowCountt}'
-                   class="form-control  bg-transparent  text-white text-right border-0 taxx">
-                   <option>Select Tax</option>
-               
-               <option value="0" class="text-dark">IGST 0%</option>
-               <option value="3" class="text-dark">IGST 3%</option>
-                 <option value="5" class="text-dark">IGST 5%</option>
-                 <option value="12" class="text-dark">IGST 12%</option>
-                 <option value="18" class="text-dark">IGST 18%</option>
-                 <option value="28" class="text-dark">IGST 28%</option>
-                  
-               </select></td>
-           <td style="display: none;">
-               <input type="text" name='taxamountt1' id="taxamountt${RowCountt}" class="form-control taxamountt" />
-                       </td>
-           <td class='text-right'><input type='number' id='amountt${RowCountt}'
-                   class='form-control border-0 bg-transparent  text-white text-right amountt' name='amountt[]' value='0.00'></td>
-           <td class='text-center'><button type='button' id='del_btn${RowCountt}'
-                   class='btn btn-transparent text-danger btn-sm btn-outline-danger rounded-circle delete-roww'
-                   style='width:30px'><i class='fa fa-times'></i></button>
-                   <button type='button' class='btn btn-transparent text-primary btn-sm btn-outline-primary rounded-circle clone-roww' data-row=1 style='width:30px'><i class="fa fa-clone"></i>
-                       </button>
-                   </td>
-       </tr>`);
-  
-  
-       $('#item_tablee').append(newRoww);
-   });
-  
-   $('#item_tablee').on('click','.delete-roww', function () {
-       $(this).closest('tr').remove();
-       calc();
-   });
-  
-  });
+                        {% endfor %}
+                    </select></div>
+            </td>
+            <td class='text-right'>
+        <input type='text' id='hsn${RowCount}'  class='form-control bg-transparent  text-white border-0  text-right hsn' name="hsn[]" placeholder="6 Digit No" pattern="[0-9]{6}" value='' readonly required>
+        <span class='hsn-validation'></span>
+    </td>
+            <td class='text-right'><input type='number' id='qty${RowCount}'
+                    class='form-control border-0 bg-transparent  text-white text-right qty' name="quantity[]" value='0' onchange="calc()">
+            </td>
+            <td class='text-right'><input type='number' id='rate${RowCount}'
+                    class='form-control border-0 bg-transparent  text-white text-right rate' name="rate[]" value='0.00'
+                    ></td>
+              <td class='text-right'><input type='number' id='discount${RowCount}'
+                    class='form_control bg-transparent border-0 text-light text-right discount' name="discount[]" value='0.00' style="width:85%">
+            </td>
+            <td class='text-right'> <select name="tax[]" id='tax${RowCount}'
+                    class="form-control  bg-transparent  text-white text-right border-0 tax">
+                    <option>Select Tax</option>
+                <option value="0" class="text-dark">GST 0%</option>
+                <option value="3" class="text-dark">GST 3%</option>
+
+                  <option value="5" class="text-dark">GST 5%</option>
+                  <option value="12" class="text-dark">GST 12%</option>
+                  <option value="18" class="text-dark">GST 18%</option>
+                  <option value="28" class="text-dark">GST 28%</option>
+                
+                   
+                </select></td>
+            <td style="display: none;">
+                <input type="text" name="taxamount1[]" id="taxamount${RowCount}" class="form-control taxamount" />
+                        </td>
+            <td class='text-right'><input type='number' id='amount${RowCount}'
+                    class='form-control border-0 bg-transparent  text-white text-right amount' name="amount[]" value='0.00'></td>
+            <td class='text-center'><button type='button' id='del_btn${RowCount}'
+                    class='btn btn-transparent text-danger btn-sm btn-outline-danger rounded-circle delete-row'
+                    style='width:30px'><i class='fa fa-times'></i></button>
+                    <button type='button' class='btn btn-transparent text-primary btn-sm btn-outline-primary rounded-circle clone-row' data-row=1 style='width:30px'><i class="fa fa-clone"></i>
+                        </button>
+                    </td>
+        </tr>`);
+
+//             $(document).on("input", ".hsn", function() {
+//     var hsn_value = $(this).val();
+//     var hsn_length = hsn_value.length;
+//     if (hsn_length > 6) {
+//         $(this).val(hsn_value.substring(0, 6));
+//         alert("HSN should not be more than 6 digits!");
+//     }
+// });
+        $('#item_table').append(newRow);
+    });
+
+    $('#item_table').on('click', '.delete-row', function () {
+        $(this).closest('tr').remove();
+        calc();
+    });
+
+});
+
+
 </script>
 
-<!-- .....................................................  END OF TABLE 2 ................................................ -->
+<script>
+$(document).ready(function () {
+ $('#add-roww').click(function () {
+     var tablee = document.getElementById("item_tablee");
+     var RowCountt = tablee.rows.length;
+     console.log(RowCountt);
+     var newRoww= $(`
+     <tr id='row${RowCountt}' >
+         <td>
+             <div class='form-group'>
+                 <select
+                     class='form-control  bg-transparent  text-white border-0 item_selectt itmm' name='itemm[]'
+                     id='itemm${RowCountt}'>
+                     <option class="text-dark" value="">Select</option>
+                     {% for i in items %}
+                     
+                     <option class="text-dark" value="{{i.Name}}">{{i.Name}}</option>
+                     {% endfor %}
+                 </select></div>
+         </td>
+         <td class='text-right'>
+     <input type='text' id='hsnn${RowCountt}'  class='form-control bg-transparent  text-white border-0  text-right hsnn' name='hsnn[]' value='' placeholder="6 Digit No" pattern="[0-9]{6}" readonly required>
+     <span class='hsn-validation'></span>
+ </td>
+ 
+         <td class='text-right'><input type='number' id='qtyy${RowCountt}'
+                 class='form-control border-0 bg-transparent  text-white text-right qtyy' name='quantityy[]' value='0' onchange="calc()">
+         </td>
+         <td class='text-right'><input type='number' id='ratee${RowCountt}'
+                 class='form-control border-0 bg-transparent  text-white text-right ratee' name='ratee[]' value='0.00'>
+            </td>
+            <td class='text-right'><input type='number' id='discountt${RowCountt}'
+                    class='form_control bg-transparent border-0 text-light text-right discountt' name='discountt[]' value='0.00' style="width:85%">
+            </td>
+         <td class='text-right'> <select name='taxx[]' id='taxx${RowCountt}'
+                 class="form-control  bg-transparent  text-white text-right border-0 taxx">
+                 <option>Select Tax</option>
+             
+             <option value="0" class="text-dark">IGST 0%</option>
+             <option value="3" class="text-dark">IGST 3%</option>
+               <option value="5" class="text-dark">IGST 5%</option>
+               <option value="12" class="text-dark">IGST 12%</option>
+               <option value="18" class="text-dark">IGST 18%</option>
+               <option value="28" class="text-dark">IGST 28%</option>
+                
+             </select></td>
+         <td style="display: none;">
+             <input type="text" name='taxamountt1' id="taxamountt${RowCountt}" class="form-control taxamountt" />
+                     </td>
+         <td class='text-right'><input type='number' id='amountt${RowCountt}'
+                 class='form-control border-0 bg-transparent  text-white text-right amountt' name='amountt[]' value='0.00'></td>
+         <td class='text-center'><button type='button' id='del_btn${RowCountt}'
+                 class='btn btn-transparent text-danger btn-sm btn-outline-danger rounded-circle delete-roww'
+                 style='width:30px'><i class='fa fa-times'></i></button>
+                 <button type='button' class='btn btn-transparent text-primary btn-sm btn-outline-primary rounded-circle clone-roww' data-row=1 style='width:30px'><i class="fa fa-clone"></i>
+                     </button>
+                 </td>
+     </tr>`);
 
+
+     $('#item_tablee').append(newRoww);
+ });
+
+ $('#item_tablee').on('click','.delete-roww', function () {
+     $(this).closest('tr').remove();
+     calc();
+ });
+
+});
+
+</script>
+
+<!-- ...............................................................END TABLE 2 ........................................ -->
 
 
 

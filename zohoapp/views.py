@@ -44,6 +44,7 @@ from django.template import loader
 from .models import customer  # Import your Customer model
 from django.db.models import Max
 from django.views.decorators.csrf import csrf_exempt
+import csv
 
 
 def index(request):
@@ -209,7 +210,7 @@ def login(request):
             
             if not setting_list.objects.filter(user=request.user.id).exists():
                 user_id=User.objects.get(id=request.user.id)
-                settings_row=setting_list(user=user_id,items='yes',pricelist='yes',offline_banking='yes',banking='yes',customers='yes',
+                settings_row=setting_list(user=user_id,items='yes',pricelist='yes',offline_banking='yes',banking='yes',bank_holders='yes',loan_account='yes',customers='yes',
                 estimates='yes',retainer_invoices='yes',sales_orders='yes',delivery_challans='yes',invoices='yes',
                 credit_notes='yes',recurring_invoices='yes',vendors='yes',vendor_credits='yes',expenses='yes',recurring_expenses='yes',
                 purchase_orders='yes',payment_made='yes',bills='yes',recurring_bills='yes',projects='yes',chart_of_accounts='yes',
@@ -1219,19 +1220,18 @@ def add_invoice(request):
     company=company_details.objects.get(user_id=request.user)
     unit=Unit.objects.all()
     payments=payment_terms.objects.filter(user=request.user.id)
-    bank=Bankcreation.objects.all()
+    bank=Bankcreation.objects.filter(user=request.user.id)
     customer1=customer.objects.filter(user=request.user.id)   
     last_record = RetainerInvoice.objects.filter(user=request.user.id).last()
     sales=Sales.objects.all()
     itm=AddItem.objects.filter(user=request.user.id)
-
     purchase=Purchase.objects.all()
+    last_reference = retInvoiceReference.objects.filter(user=request.user.id).last()
+
     if last_record ==None:
-        reford = '01'
-        reference = 'RET-01'
-        remaining_characters='RET-'
+        reference = '01'
+        remaining_characters=''
     else:
-        reference = 'RET-01'
         lastSalesNo = last_record.retainer_invoice_number
         last_two_numbers = int(lastSalesNo[-2:])+1
         remaining_characters = lastSalesNo[:-2]  
@@ -1245,10 +1245,13 @@ def add_invoice(request):
                 reference = remaining_characters+'0'+str(last_two_numbers)
             else:
                 reference = remaining_characters+str(last_two_numbers)
-        if int(last_record.refrences)+1 < 10:
-            reford = '0'+ str(int(last_record.refrences)+1)
+    if last_reference == None:
+        reford = '01'
+    else:
+        if last_reference.reference+1 < 10:
+            reford = '0'+ str(last_reference.reference+1)
         else:
-            reford = str(int(last_record.refrences)+1)
+            reford = str(last_reference.reference+1)
 
     context={'customer1':customer1,'pay':payments,'company':company,'bank':bank,'unit':unit,'reford':reford,'reference':reference,'remaining_characters':remaining_characters,'itm':itm,'sales':sales,'purchase':purchase}    
     return render(request,'add_invoice.html',context)
@@ -1266,6 +1269,13 @@ def create_invoice_draft(request):
         customer_placesupply=request.POST['cus_place1']
         retainer_invoice_number=request.POST['retainer-invoice-number']
         references=request.POST['references']
+        last_reference = retInvoiceReference.objects.filter(user = request.user.id).last()
+        if last_reference == None:
+            ref = retInvoiceReference(reference = int(references),user = user)
+            ref.save()
+        else:
+            last_reference.reference = int(references)
+            last_reference.save()
         retainer_invoice_date=request.POST['invoicedate']
         total_amount=request.POST.get('total')
         bal_amount=request.POST['balance']
@@ -1309,17 +1319,25 @@ def create_invoice_draft(request):
             else:
                 ret_payment=retainer_payment_details(user=user,retainer=retainer_invoice,payment_opt=bankname,acc_no=acc_no,bank=bank,cheque_no=cheque_no,upi_id=upi_id)
                 ret_payment.save()
-
+        itemname =[]
+        itemid =[]
         description = request.POST.getlist('description[]')
         amount =request.POST.getlist('amount[]')
         itm=request.POST.getlist('item[]')
+        for i in itm:
+            w = AddItem.objects.get(id = i)
+            x = w.Name
+            y = w
+            itemname.append(x)
+            itemid.append(y)
+            
         qty=request.POST.getlist('quantity[]')
         rate=request.POST.getlist('rate[]')
-        if len(description)==len(amount)==len(itm)==len(qty)==len(rate):
-            mapped = zip(description,amount,itm,qty,rate)
+        if len(description)==len(amount)==len(itemname)==len(qty)==len(rate)==len(itemid):
+            mapped = zip(description,amount,itemname,qty,rate,itemid)
             mapped=list(mapped)
             for ele in mapped:
-                created = Retaineritems.objects.create(description=ele[0],amount=ele[1],itemname=ele[2],quantity=ele[3],rate=ele[4] ,retainer=retainer_invoice)
+                created = Retaineritems.objects.create(description=ele[0],amount=ele[1],itemname=ele[2],quantity=ele[3],rate=ele[4] ,item=ele[5],retainer=retainer_invoice)
         else:
             pass
 
@@ -1338,6 +1356,13 @@ def create_invoice_send(request):
         customer_placesupply=request.POST['cus_place1']
         retainer_invoice_number=request.POST['retainer-invoice-number']
         references=request.POST['references']
+        last_reference = retInvoiceReference.objects.filter(user = request.user.id).last()
+        if last_reference == None:
+            ref = retInvoiceReference(reference = int(references),user = user)
+            ref.save()
+        else:
+            last_reference.reference = int(references)
+            last_reference.save()
         retainer_invoice_date = request.POST.get('invoicedate')    
         total_amount=request.POST.get('total')
         bal_amount=request.POST['balance']
@@ -1387,16 +1412,24 @@ def create_invoice_send(request):
                 ret_payment=retainer_payment_details(user=user,retainer=retainer_invoice,payment_opt=bankname,acc_no=acc_no,bank=bank,cheque_no=cheque_no,upi_id=upi_id)
                 ret_payment.save()
 
+        itemname =[]
+        itemid = []
         description = request.POST.getlist('description[]')
         amount =request.POST.getlist('amount[]')
         itm=request.POST.getlist('item[]')
+        for i in itm:
+            w = AddItem.objects.get(id = i)
+            x = w.Name
+            y = w
+            itemname.append(x)
+            itemid.append(y)
         qty=request.POST.getlist('quantity[]')
         rate=request.POST.getlist('rate[]')
-        if len(description)==len(amount)==len(itm)==len(qty)==len(rate):
-            mapped = zip(description,amount,itm,qty,rate)
+        if len(description)==len(amount)==len(itemname)==len(qty)==len(rate)==len(itemid):
+            mapped = zip(description,amount,itemname,qty,rate,itemid)
             mapped=list(mapped)
             for ele in mapped:
-                created = Retaineritems.objects.create(description=ele[0],amount=ele[1],itemname=ele[2],quantity=ele[3],rate=ele[4] ,retainer=retainer_invoice)
+                created = Retaineritems.objects.create(description=ele[0],amount=ele[1],itemname=ele[2],quantity=ele[3],rate=ele[4] ,item=ele[5],retainer=retainer_invoice)
         else:
             pass
         # return redirect('invoice_view',pk=retainer_invoice.id)
@@ -1408,7 +1441,6 @@ def create_invoice_send(request):
         recipient = cust_email
         send_mail(subject, message, settings.EMAIL_HOST_USER, [recipient])
         return redirect('retainer_invoice')
-
 
 
 @login_required(login_url='login')
@@ -1657,19 +1689,27 @@ def retainer_update(request,pk):
 
         objects_to_delete = Retaineritems.objects.filter(retainer=retainer_invoice.id)
         objects_to_delete.delete()
-
+        itemname = []
+        itemid = []
         description = request.POST.getlist('description[]')
         amount =request.POST.getlist('amount[]')
         itm=request.POST.getlist('item[]')
+        for i in itm:
+            w = AddItem.objects.get(id=i)
+            x =w.Name
+            y =w
+            itemname.append(x)
+            itemid.append(y)
         qty=request.POST.getlist('quantity[]')
         rate=request.POST.getlist('rate[]')
 
-        if len(description)==len(amount)==len(itm)==len(qty)==len(rate):
-            mapped = zip(description,amount,itm,qty,rate)
+        if len(description)==len(amount)==len(itemname)==len(qty)==len(rate)==len(itemid):
+            mapped = zip(description,amount,itemname,qty,rate,itemid)
             mapped=list(mapped)
             for ele in mapped:
-                created = Retaineritems.objects.create(description=ele[0],amount=ele[1],itemname=ele[2],quantity=ele[3],rate=ele[4] ,retainer=retainer_invoice)
+                created = Retaineritems.objects.create(description=ele[0],amount=ele[1],itemname=ele[2],quantity=ele[3],rate=ele[4],item=ele[5] ,retainer=retainer_invoice)
         return redirect('invoice_view',retainer_invoice.id)
+
 
 @login_required(login_url='login')
 def mail_send(request,pk):
@@ -1744,27 +1784,26 @@ def allestimates(request):
 
 
 def newestimate(request):
-    user = request.user
-    company = company_details.objects.get(user=user)
-    cmp1=company.id
-    items = AddItem.objects.filter(user_id=user.id,satus='active')
-    customers = customer.objects.filter(user_id=user.id,status='active')
-    unit=Unit.objects.all()
-    sales=Sales.objects.all()
-    purchase=Purchase.objects.all()
-    payments = payment_terms.objects.filter(user=user)
-    print("helloooooooooooooooooooooooooo")
-
-    try:
-        latest_bill = Estimates.objects.filter(company = cmp1).order_by('-reference').first()
-        # latest_bill = Estimates.objects.filter(company = cmp1).values_list('reference',flat=True).last()
-        print("haiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiii") 
-        if latest_bill:
-                print("ssssssssssssssssssssssssssssssssssssssss") 
-                last_number = int(latest_bill.reference)
-                print(last_number)
-                new_number = last_number + 1
-                print(new_number)
+        user = request.user
+        company = company_details.objects.get(user=user)
+        cmp1=company.id
+        items = AddItem.objects.filter(user_id=user.id,satus='active')
+        customers = customer.objects.filter(user_id=user.id,status='active')
+        unit=Unit.objects.all()
+        sales=Sales.objects.all()
+        purchase=Purchase.objects.all()
+        payments = payment_terms.objects.filter(user=user)
+        print("helloooooooooooooooooooooooooo")
+        if Estimates.objects.filter(company = cmp1).exists():
+            latest_bill = Estimates.objects.filter(company = cmp1).order_by('-reference').first()
+            # latest_bill = Estimates.objects.filter(company = cmp1).values_list('reference',flat=True).last()
+            print("haiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiii") 
+            if latest_bill:
+                    print("ssssssssssssssssssssssssssssssssssssssss") 
+                    last_number = int(latest_bill.reference)
+                    print(last_number)
+                    new_number = last_number + 1
+                    print(new_number)
         else:
                 new_number = 1
         print("xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx") 
@@ -1782,10 +1821,6 @@ def newestimate(request):
         else:
                 context = {'unit':unit,'company': company,'items': items,'customers': customers,'count':new_number,'sales':sales,'purchase':purchase,'payments':payments}
                 return render(request,'new_estimate.html',context)
-        
-    
-    except Exception as e:
-        return redirect("allestimates")
 
 
 def itemdata_est(request):
@@ -2502,10 +2537,12 @@ def addinvoice(request):
 
 
 @login_required(login_url='login')
-def add_prod(request):    
+def add_prod(request):     #updation
+    user = request.user
     c = customer.objects.all()
     company = company_details.objects.get(user=request.user.id)
     p = AddItem.objects.filter(user = request.user)
+    items = AddItem.objects.filter(user_id=user.id)
     i = invoice.objects.all()
     payments = payment_terms.objects.filter(user = request.user)
     sales = Sales.objects.all()
@@ -2525,204 +2562,216 @@ def add_prod(request):
         payment_terms(Terms='due end of month', Days=60).save()
     elif not payment_terms.objects.filter(Terms='net 30').exists():
         payment_terms(Terms='net 30', Days=30).save()
-
-    if request.user.is_authenticated:
-        if request.method == 'POST':
-            user = request.user
-            x = request.POST["hidden_state"]
-            y = request.POST["hidden_cus_place"]
-            print("Value of x:", x)
-            print("Value of y:", y)
-            c = request.POST['cx_name']
-            print(c)
-            cus = customer.objects.get(id=c)
-            print(cus.id)
-            custo = cus
-            invoice_no = request.POST['inv_no']
-            terms = request.POST['term']
-            # term=payment_terms.objects.get(id=terms)
-            order_no = request.POST['ord_no']
-            cheque_number = ''
-            upi_id = ''
-            payment_method = request.POST['payment_method']
-            if payment_method == 'cash':
-                pass
-                # Handle cash related operations here
-            elif payment_method == 'cheque':
-                cheque_number = request.POST.get('cheque_number', '')
-                # Handle cheque related operations here
-            elif payment_method == 'upi':
-                upi_id = request.POST.get('upi_id', '')
-                # Handle UPI related operations here
-            elif payment_method == 'bank':
-                bank_id = request.POST.get('bank_name')
-                cheque_number = request.POST.get('cheque_number', '')
-                upi_id = request.POST.get('upi_id', '')
-                
-            else:
-                
-                pass
-
-            
-            inv_date_str = request.POST['inv_date']  
-            due_date_str = request.POST['due_date']  
-            
-            inv_date_str = request.POST.get('inv_date', "")
-            due_date_str = request.POST.get('due_date', "")
-
-            inv_date = None
-            due_date = None
-
-            if inv_date_str and due_date_str:
-                try:
-                    inv_date = datetime.strptime(inv_date_str, '%Y-%m-%d')
-                    due_date = datetime.strptime(due_date_str, '%Y-%m-%d')
-
-                    cxnote = request.POST.get('customer_note', "")
-                    subtotal = request.POST.get('subtotal', "")
-                    igst = request.POST.get('igst', "")
-                    cgst = request.POST.get('cgst', "")
-                    sgst = request.POST.get('sgst', "")
-                    totaltax = request.POST.get('totaltax', "")
-                    t_total = request.POST.get('t_total', "")
-                    file = request.FILES.get('file', None)
-                    tc = request.POST.get('ter_cond', "")
-                    status = request.POST.get('sd', "")
-                    shipping_charge = request.POST.get('shipping_charge', "")
-                    adjustment_charge = request.POST.get('adjustment_charge', "")
-                    paid_amount = request.POST.get('paid_amount', "")
-                    balance = request.POST.get('balance', "")
-
-                    # Code for different scenarios based on x and y values
-                    
-    # Save the invoice_payment instance to persist the changes in the database
+        
+        
+        
+    cur_user = request.user
+    user = User.objects.get(id=cur_user.id)
+    unit = Unit.objects.all()
     
+    if request.method == 'POST':
+        x = request.POST["hidden_state"]
+        y = request.POST["hidden_cus_place"]
+        c = request.POST['cx_name']
+        print(x)
+        print(y)
+        print(c)
+        cus = customer.objects.get(id=c)
+        print(cus.id)
+        custo = cus
+        invoice_no = request.POST['inv_no']
+        terms = request.POST['term']
+        # term=payment_terms.objects.get(id=terms)
+        order_no = request.POST['ord_no']
+        cheque_number = ''
+        upi_id = ''
+        payment_method = request.POST['payment_method']
+        if payment_method == 'cash':
+            pass
+            # Handle cash related operations here
+        elif payment_method == 'cheque':
+            cheque_number = request.POST.get('cheque_number', '')
+            # Handle cheque related operations here
+        elif payment_method == 'upi':
+            upi_id = request.POST.get('upi_id', '')
+            # Handle UPI related operations here
+        elif payment_method == 'bank':
+            bank_id = request.POST.get('bank_name')
+            cheque_number = request.POST.get('cheque_number', '')
+            upi_id = request.POST.get('upi_id', '')
+            
+        else:
+            
+            pass
 
-                        
+        
+        inv_date_str = request.POST['inv_date']  
+        due_date_str = request.POST['due_date']  
+        
+        inv_date_str = request.POST.get('inv_date', "")
+        due_date_str = request.POST.get('due_date', "")
+
+        inv_date = None
+        due_date = None
+
+        if inv_date_str and due_date_str:
+            try:
+                inv_date = datetime.strptime(inv_date_str, '%Y-%m-%d')
+                due_date = datetime.strptime(due_date_str, '%Y-%m-%d')
+
+                cxnote = request.POST.get('customer_note', "")
+                subtotal = request.POST.get('subtotal', "")
+                igst = request.POST.get('igst', "")
+                cgst = request.POST.get('cgst', "")
+                sgst = request.POST.get('sgst', "")
+                totaltax = request.POST.get('totaltax', "")
+                t_total = request.POST.get('t_total', "")
+                file = request.FILES.get('file', None)
+                tc = request.POST.get('ter_cond', "")
+                status = request.POST.get('sd', "")
+                shipping_charge = request.POST.get('shipping_charge', "")
+                adjustment_charge = request.POST.get('adjustment_charge', "")
+                paid_amount = request.POST.get('paid_amount', "")
+                balance = request.POST.get('balance', "")
+
+                # Code for different scenarios based on x and y values
+                
+# Save the invoice_payment instance to persist the changes in the database
+
+
                     
+                
 
-                    inv = invoice(user=user, customer=custo, invoice_no=invoice_no, terms=terms, order_no=order_no, 
-                                  inv_date=inv_date, due_date=due_date, cxnote=cxnote, subtotal=subtotal, 
-                                  igst=igst, cgst=cgst, sgst=sgst, t_tax=totaltax, grandtotal=t_total, 
-                                  status=status, terms_condition=tc, file=file, adjustment=adjustment_charge, shipping_charge=shipping_charge, paid_amount=paid_amount, balance=balance)
-                    inv.save()
-                    
-                    invoice_payment = InvoicePayment(
-                                        invoice=inv,
-                                        payment_method=payment_method,
-                                        cheque_number=cheque_number,
-                                        upi_id=upi_id,
-                                    )
-                    if payment_method == 'bank' and bank_id:
-                        bank_instance = Bankcreation.objects.get(id=bank_id)
-                        invoice_payment.bank = bank_instance
-                    invoice_payment.save()
+                invn = invoice(user=user, customer=custo, invoice_no=invoice_no, terms=terms, order_no=order_no, 
+                                inv_date=inv_date, due_date=due_date, cxnote=cxnote, subtotal=subtotal, 
+                                igst=igst, cgst=cgst, sgst=sgst, t_tax=totaltax, grandtotal=t_total, 
+                                status=status, terms_condition=tc, file=file, adjustment=adjustment_charge, shipping_charge=shipping_charge, paid_amount=paid_amount, balance=balance)
+                invn.save()
+                
+                invoice_payment = InvoicePayment(
+                                    invoice=invn,
+                                    payment_method=payment_method,
+                                    cheque_number=cheque_number,
+                                    upi_id=upi_id,
+                                )
+                if payment_method == 'bank' and bank_id:
+                    bank_instance = Bankcreation.objects.get(id=bank_id)
+                    invoice_payment.bank = bank_instance
+                invoice_payment.save()
 
-                    # Additional code for creating invoice items
+                # Additional code for creating invoice items
 
-                except ValueError as e:
-                    print(f"Value Error: {e}")
+            except ValueError as e:
+                print(f"Value Error: {e}")
+        
+            if x == y:
+                items = request.POST.getlist('item[]')
+                
+                print(items)
+                hsns = request.POST.getlist('hsn[]')
+                quantity1 = request.POST.getlist('quantity[]')
+                quantities = [float(x) for x in quantity1]
+                rate1 = request.POST.getlist('rate[]')
+                rates = [float(x) for x in rate1]
+                discount1 = request.POST.getlist('discount[]')
+                discounts = [float(x) for x in discount1]
+                tax1 = request.POST.getlist('tax[]')
+                taxes = [float(x) for x in tax1]
+                amount1 = request.POST.getlist('amount[]')
+                amounts = [float(x) for x in amount1]
+            else:
+                items = request.POST.getlist('itemm[]')
+                print(items)
+                hsns = request.POST.getlist('hsnn[]')
+                quantity1 = request.POST.getlist('quantityy[]')
+                quantities = [float(x) for x in quantity1]
+                rate1 = request.POST.getlist('ratee[]')
+                rates = [float(x) for x in rate1]
+                discount1 = request.POST.getlist('discountt[]')
+                discounts = [float(x) for x in discount1]
+                tax1 = request.POST.getlist('taxx[]')
+                taxes = [float(x) for x in tax1]
+                amount1 = request.POST.getlist('amountt[]')
+                amounts = [float(x) for x in amount1]
 
            
+            print("Items:", items)
+            print("Hsns:", hsns)
+            print("Quantities:", quantities)
+            print("Rates:", rates)
+            print("Discounts:", discounts)
+            print("Taxes:", taxes)
+            print("Amounts:", amounts)
 
-            if x == y:
-                item = request.POST.getlist("item[]")
-                print("Item List:", item) 
-
-                hsn = request.POST.getlist("hsn[]")
-                quantity = request.POST.getlist("quantity[]")
-                rate = request.POST.getlist("rate[]")
-                discount = request.POST.getlist("discount[]")
-                tax = request.POST.getlist("tax[]")
-                amount = request.POST.getlist("amount[]")
-                print('amount:', amount)
-                for i in range(len(item)):
-                    print(f"Item: {item[i]}, HSN: {hsn[i]}, Quantity: {quantity[i]}, Rate: {rate[i]}, Discount: {discount[i]}, Tax: {tax[i]}, Amount: {amount[i]}")
-
-                    
-                # term=payment_terms.objects.get(id=term.id)
-            else:
-                itemm = request.POST.getlist('itemm[]')
-                hsnn = request.POST.getlist('hsnn[]')
-                quantityy = request.POST.getlist('quantityy[]')
-                ratee = request.POST.getlist('ratee[]')
-                discountt = request.POST.getlist('discountt[]')
-                taxx = request.POST.getlist('taxx[]')
-                amountt = request.POST.getlist('amountt[]')
-                for i in range(len(itemm)):
-                    print(f"Item: {itemm[i]}, HSN: {hsnn[i]}, Quantity: {quantityy[i]}, Rate: {ratee[i]}, Discount: {discountt[i]}, Tax: {taxx[i]}, Amount: {amountt[i]}")
-
-                # term=payment_terms.objects.get(id=term.id)
-
-            
-            
-               
-            if x == y:
-                print("Length of invoiceitem.item: ", len(item))
-                print("Length of invoiceitem.hsn: ", len(hsn))
-                print("Length of invoiceitem.quantity: ", len(quantity))
-                print("Length of invoiceitem.desc: ", len(discount))
-                print("Length of invoiceitem.tax: ", len(tax))
-                print("Length of invoiceitem.amount: ", len(amount))
-                print("Length of invoiceitem.rate: ", len(rate))
-                print("Value of x: ", x)
-                print("Value of y: ", y)
-                
-                inv_id = invoice.objects.get(id=inv.id)
-                if len(item) == len(hsn) == len(quantity) == len(discount) == len(tax) == len(amount) == len(rate):
-                    mapped = list(zip(item, hsn, quantity, discount, tax, amount, rate))
-                    print(mapped)
-                    created_objects = [
-                        invoice_item(
-                            inv=inv_id,
-                            product=element[0],
-                            hsn=element[1],
-                            quantity=element[2],
-                            discount=element[3],
-                            tax=element[4],
-                            total=element[5],
-                            rate=element[6],
-                        )
-                        for element in mapped
-                    ]
-                    invoice_item.objects.bulk_create(created_objects)
-                    return redirect('invoiceview')     
-
-            else:
-                inv_id = invoice.objects.get(id=inv.id)
-                if len(itemm) == len(hsnn) == len(quantityy) == len(discountt) == len(taxx) == len(amountt) == len(ratee):
-                    mapped = list(zip(itemm, hsnn, quantityy, discountt, taxx, amountt, ratee))
-                    created_objects = [
-                        invoice_item(
-                            inv=inv_id,
-                            product=element[0],
-                            hsn=element[1],
-                            quantity=element[2],
-                            discount=element[3],
-                            tax=element[4],
-                            total=element[5],
-                            rate=element[6],
-                        )
-                        for element in mapped
-                    ]
-                    invoice_item.objects.bulk_create(created_objects)
-                    return redirect('invoiceview')   
+            for i in range(len(items)):
+                item_data = invoice_item.objects.create(
+                    inv=invn,
+                    product=items[i],
+                    hsn=hsns[i],
+                    quantity=quantities[i],
+                    rate=rates[i],
+                    discount=discounts[i],
+                    tax=taxes[i],
+                    total=amounts[i]
+                )
 
 
-            
 
+
+        '''cust_note = request.POST['customer_note']
+        sub_total = float(request.POST['subtotal'])
+        igst = float(request.POST['igst'])
+        sgst = float(request.POST['sgst'])
+        cgst = float(request.POST['cgst'])
+        tax_amnt = float(request.POST['total_taxamount'])
+        shipping = float(request.POST['shipping_charge'])
+        adjustment = float(request.POST['adjustment_charge'])
+        total = float(request.POST['total'])
+        tearms_conditions = request.POST['tearms_conditions']
+        attachment = request.FILES.get('file')
+        status = 'Send'
+        tot_in_string = str(total)
+
+        challan = DeliveryChellan(
+            user=user,
+            cu=cus,
+            customer_name=cust_name,
+            chellan_no=chellan_no,
+            reference=reference,
+            chellan_date=chellan_date,
+            customer_mailid=customer_mailid,
+            sub_total=sub_total,
+            igst=igst,
+            sgst=sgst,
+            cgst=cgst,
+            tax_amount=tax_amnt,
+            chellan_type=chellan_type,
+            shipping_charge=shipping,
+            adjustment=adjustment,
+            total=total,
+            status=status,
+            customer_notes=cust_note,
+            terms_conditions=tearms_conditions,
+            attachment=attachment
+        )
+        challan.save()'''
+
+        
+
+        return redirect('invoiceview')
     context = {
-        'c': c,
-        'p': p,
-        'i': i,
-        'company': company,
-        'sales': sales,
-        'purchase': purchase,
-        'units': unit,
-        'count': count,
-        'payments': payments,
-        'banks' : banks
-    }
+            'c': c,
+            'p': p,
+            'items': items,
+            'i': i,
+            'company': company,
+            'sales': sales,
+            'purchase': purchase,
+            'units': unit,
+            'count': count,
+            'payments': payments,
+            'banks' : banks
+        }
     return render(request, 'createinvoice.html', context)
 
 
@@ -2750,12 +2799,11 @@ def add_cx(request):
                 customer(customerName=name,customerEmail=email,placeofsupply=pos,state=state,companyName=com_name,user_id=user.id).save()
         return redirect('add_prod')
 
-
-
-
 @login_required(login_url='login')
 def edited_prod(request, id):
     print(id)
+    print("Submitted Data - Tax:", request.POST.getlist('tax[]'))
+
     user = request.user
     c = customer.objects.all()
     p = AddItem.objects.filter(user = request.user)
@@ -2778,6 +2826,41 @@ def edited_prod(request, id):
     company = company_details.objects.get(user=request.user.id)
     comp = company.state
     
+    
+    
+    
+    user = request.user
+    company = company_details.objects.get(user=user)
+    customers = customer.objects.filter(user_id=user.id)
+    
+    c = customer.objects.all()
+
+    items = AddItem.objects.filter(user = request.user)
+    estimate = invoice.objects.get(id=id)
+    cust = estimate.customer.placeofsupply 
+    cust_id = estimate.customer.id
+    payments=payment_terms.objects.filter(user = request.user)
+    
+    pls= customer.objects.get(customerName=estimate.customer.customerName)
+    
+    est_items = invoice_item.objects.filter(inv=estimate)
+
+    unit=Unit.objects.all()
+    sale=Sales.objects.all()
+    purchase=Purchase.objects.all()
+    accounts = Purchase.objects.all()
+    account_types = set(Purchase.objects.values_list('Account_type', flat=True))
+
+    
+    account = Sales.objects.all()
+    account_type = set(Sales.objects.values_list('Account_type', flat=True))
+    
+    
+    
+    cur_user = request.user
+    user = User.objects.get(id=cur_user.id)
+    
+    c = customer.objects.all()
 
     if request.method == 'POST':
         x = request.POST["hidden_state"]
@@ -2808,6 +2891,7 @@ def edited_prod(request, id):
             est_obj.balance=invoic.balance
             est_obj.save()
 
+
         old = invoic.file
         new = request.FILES.get('file')
         if old and not new:
@@ -2834,109 +2918,84 @@ def edited_prod(request, id):
                 invp.bank_id = request.POST.get('bank_name', "")
 
             invp.save()
+        est_items = invoice_item.objects.filter(inv=estimate)
+        est_items.delete()
+        if x==y:
 
-        print("/////////////////////////////////////////////////////////")
+            est_items.item = request.POST.getlist('item[]')
+            est_items.hsn = request.POST.getlist('hsn[]')
+            est_items.quantity1 = request.POST.getlist('quantity[]')
+            est_items.quantity = [float(x) for x in est_items.quantity1]
+            est_items.rate1 = request.POST.getlist('rate[]')
+            est_items.rate = [float(x) for x in est_items.rate1]
+            est_items.discount1 = request.POST.getlist('discount[]')
+            est_items.discount = [float(x) for x in est_items.discount1]
+            est_items.tax1 = request.POST.getlist('tax[]')
+            est_items.tax = [float(x) for x in est_items.tax1]
+            est_items.amount1 = request.POST.getlist('amount[]')
+            est_items.amount = [float(x) for x in est_items.amount1]
         
-        if x == y:
-            invoiceitem.item = request.POST.getlist('item[]')
-            invoiceitem.hsn = request.POST.getlist('hsn[]')
-            invoiceitem.quantity = request.POST.getlist('quantity[]')
-            invoiceitem.rate = request.POST.getlist('rate[]')
-            invoiceitem.desc = request.POST.getlist('desc[]')
-            invoiceitem.tax = request.POST.getlist('tax[]')
-            invoiceitem.amount = request.POST.getlist('amount[]')
-            
-            print("hai")
-            
         else:
-            invoiceitem.itemm = request.POST.getlist('itemm[]')
-            invoiceitem.hsnn = request.POST.getlist('hsnn[]')
-            invoiceitem.quantityy = request.POST.getlist('quantityy[]')
-            invoiceitem.ratee = request.POST.getlist('ratee[]')
-            invoiceitem.descc = request.POST.getlist('descc[]')
-            invoiceitem.taxx = request.POST.getlist('taxx[]')
-            invoiceitem.amountt = request.POST.getlist('amountt[]')
-            
-            
-        if x == y:
-            print("manage")
-            print("Length of invoiceitem.item: ", len(invoiceitem.item))
-            print("Length of invoiceitem.hsn: ", len(invoiceitem.hsn))
-            print("Length of invoiceitem.quantity: ", len(invoiceitem.quantity))
-            print("Length of invoiceitem.desc: ", len(invoiceitem.desc))
-            print("Length of invoiceitem.tax: ", len(invoiceitem.tax))
-            print("Length of invoiceitem.amount: ", len(invoiceitem.amount))
-            print("Length of invoiceitem.rate: ", len(invoiceitem.rate))
-            print("Value of x: ", x)
-            print("Value of y: ", y)
-            if len(invoiceitem.item) == len(invoiceitem.hsn) == len(invoiceitem.quantity) == len(invoiceitem.desc) == len(invoiceitem.tax) == len(invoiceitem.amount) == len(invoiceitem.rate):
-                print("11")
-                mapped = zip(invoiceitem.item, invoiceitem.hsn, invoiceitem.quantity, invoiceitem.desc, invoiceitem.tax, invoiceitem.amount, invoiceitem.rate)
+
+            est_items.itemm = request.POST.getlist('itemm[]')
+            est_items.hsnn = request.POST.getlist('hsnn[]')
+            est_items.quantityy1 = request.POST.getlist('quantityy[]')
+            est_items.quantityy = [float(x) for x in est_items.quantityy1]
+            est_items.ratee1 = request.POST.getlist('ratee[]')
+            est_items.ratee = [float(x) for x in est_items.ratee1]
+            est_items.discountt1 = request.POST.getlist('discountt[]')
+            est_items.discountt = [float(x) for x in est_items.discountt1]
+            est_items.taxx1 = request.POST.getlist('taxx[]')
+            est_items.taxx = [float(x) for x in est_items.taxx1]
+            est_items.amountt1 = request.POST.getlist('amountt[]')
+            est_items.amountt = [float(x) for x in est_items.amountt1]
+       
+
+        
+
+        if x==y:
+            if len(est_items.item) == len(est_items.hsn) ==  len(est_items.quantity) == len(est_items.rate) == len(est_items.discount) == len(est_items.tax) == len(est_items.amount):
+                mapped = zip(est_items.item,est_items.hsn, est_items.quantity, est_items.rate, est_items.discount, est_items.tax, est_items.amount)
                 mapped = list(mapped)
                 for element in mapped:
-                    created = invoice_item.objects.get_or_create(inv=invoic, product=element[0], hsn=element[1],
-                                                                 quantity=element[2], discount=element[3], tax=element[4],
-                                                                 total=element[5], rate=element[6])
-                    print("moveon")
-
-                return redirect('invoice_overview', id)
+                    created = invoice_item.objects.create(
+                        inv=estimate, product=element[0], hsn=element[1], quantity=element[2], rate=element[3], discount=element[4], tax=element[5], total=element[6])
+            return redirect('invoice_overview', id)
 
         else:
-            if len(invoiceitem.itemm) == len(invoiceitem.hsnn) == len(invoiceitem.quantityy) == len(invoiceitem.descc) == len(invoiceitem.taxx) == len(invoiceitem.amountt) == len(invoiceitem.ratee):
-                mapped = zip(invoiceitem.itemm, invoiceitem.hsnn, invoiceitem.quantityy, invoiceitem.descc, invoiceitem.taxx, invoiceitem.amountt, invoiceitem.ratee)
+            if len(est_items.itemm) == len(est_items.hsnn) == len(est_items.quantityy) == len(est_items.ratee) == len(est_items.discountt) == len(est_items.taxx) == len(est_items.amountt):
+                mapped = zip(est_items.itemm, est_items.hsnn, est_items.quantityy, est_items.ratee, est_items.discountt, est_items.taxx, est_items.amountt)
                 mapped = list(mapped)
                 for element in mapped:
-                    print("Debug - Values before filter:", invoic, element[0], element[1])
-                    existing_items = invoice_item.objects.filter(
-                        inv=invoic,
-                        product=element[0],
-                        hsn=element[1],
-                        quantity=element[2],
-                            discount=element[3],
-                            tax=element[4],
-                            total=element[5],
-                            rate=element[6]
-                    )
-
-                    if not existing_items.exists():
-                        created = invoice_item.objects.create(
-                            inv=invoic,
-                            product=element[0],
-                            hsn=element[1],
-                            quantity=element[2],
-                            discount=element[3],
-                            tax=element[4],
-                            total=element[5],
-                            rate=element[6]
-                        )
-                        print("Debug - After create")
-
-
-
-
-                return redirect('invoice_overview', id)
-
+                    created = invoice_item.objects.create(
+                        inv=estimate, product=element[0],  hsn=element[1], quantity=element[2], rate=element[3], discount=element[4], tax=element[5], total=element[6])
+            return redirect('invoice_overview', id)
     context = {
-        'user': user,
         'c': c,
-        'p': p,
-        'inv': invoiceitem,
-        'i': invoic,
-        'pay': pay,
-        'sales': sales,
-        'purchase': purchase,
-        'units': unit,
         'company': company,
-        'cust': cust,
-        'comp': comp,
-        'custo_id': cust_id,
-        'invpay': invpay,
+        'i': estimate,
+        'customers': customers,
+        'items': items,
+        'est': est_items,
+        'unit':unit,
+        'sale':sale,
+        'purchase':purchase,
+        "account":account,
+        "account_type":account_type,
+        "accounts":accounts,
+        "account_types":account_types,
+        "pls":pls,
+        'payments':payments,
+        'cust':cust,
+        'custo_id':cust_id,
+        
+         'invpay': invpay,
         'banks': banks,
         'invp':invp,
          'ip':ip,
+         'p':p,
     
     }
-
     return render(request, 'invoiceedit.html', context)
 
 @login_required(login_url='login')
@@ -3185,7 +3244,7 @@ def termdata(request):
     
 def bankdata(request):
     bank_id = request.GET.get('id')
-    term = Bankcreation.objects.get(name=bank_id)
+    term = Bankcreation.objects.get(name=bank_id,user=request.user.id)
     data = {'bank': term.ac_no}
     return JsonResponse(data)
     
@@ -3988,13 +4047,12 @@ def create_sales_order(request):
     purchase=Purchase.objects.all()
     last_record = SalesOrder.objects.filter(user=request.user.id).last()
     bank = Bankcreation.objects.filter(user=user)
+    last_reference = salesOrderReference.objects.filter(user=request.user.id).last()
 
     if last_record ==None:
-        reford = '01'
-        reference = 'SO-01'
-        remaining_characters='SO-'
+        reference = '01'
+        remaining_characters=''
     else:
-        reference = 'SO-01'
         lastSalesNo = last_record.sales_no
         last_two_numbers = int(lastSalesNo[-2:])+1
         remaining_characters = lastSalesNo[:-2] 
@@ -4003,20 +4061,19 @@ def create_sales_order(request):
                 reference = '0'+str(last_two_numbers)
             else:
                 reference = str(last_two_numbers)
-            if int(last_record.reference)+1 < 10:
-                reford = '0'+ str(int(last_record.reference)+1)
-            else:
-                reford = str(int(last_record.reference)+1) 
         else: 
             if last_two_numbers < 10:
                 reference = remaining_characters+'0'+str(last_two_numbers)
             else:
                 reference = remaining_characters+str(last_two_numbers)
-            if int(last_record.reference)+1 < 10:
-                reford = '0'+ str(int(last_record.reference)+1)
-            else:
-                reford = str(int(last_record.reference)+1)
-    
+            
+    if last_reference==None:
+        reford = '01'
+    else:
+        if last_reference.reference+1 < 10:
+            reford = '0'+ str(last_reference.reference+1)
+        else:
+            reford = str(last_reference.reference+1)
     context={
         "c":cust,
         "pay":pay,
@@ -4120,9 +4177,6 @@ def add_sales_order(request):
             custo=cus.id
             sales_no=request.POST['sale_no']
 
-            if len(sales_no) == 4:
-                sales_no = sales_no[:3] + '0' +sales_no[-1]
-
             sale_list = list(SalesOrder.objects.filter(user=request.user.id).values_list('sales_no'))
             sale_list_update = [item[0] for item in sale_list]
             
@@ -4157,6 +4211,14 @@ def add_sales_order(request):
 
             tc=request.POST['ter_cond']
             product=tuple(request.POST.getlist('item[]'))
+            itemname = []
+            itemid = []
+            for i in product:
+                w =AddItem.objects.get(id =i)
+                x = w.Name
+                y = w
+                itemname.append(x)
+                itemid.append(y)
             hsn=tuple(request.POST.getlist('hsn[]'))
             quantity=tuple(request.POST.getlist('quantity[]'))
             rate=tuple(request.POST.getlist('rate[]'))
@@ -4173,22 +4235,31 @@ def add_sales_order(request):
             if "Save" in request.POST:
                 status = "approved"
             
+            last_reference = salesOrderReference.objects.filter(user=request.user.id).last()
+            if last_reference == None:
+                ref = salesOrderReference(reference = int(reference),user=user)
+                ref.save()
+            else:
+                last_reference.reference = int(reference)
+                last_reference.save()
+            
             sales=SalesOrder(customer_id=custo,sales_no=sales_no,terms=term,reference=reference, sales_date=sa_date,ship_date=sh_date,
                              balance=balance,cxnote=cxnote,subtotal=subtotal,igst=igst,cgst=cgst,sgst=sgst,t_tax=totaltax,
                              cheque_id=cheque_id,upi_id=upi_id,pay_method=pay_method,grandtotal=t_total,status=status,terms_condition=tc,
                              file=file,sos=sos,sh_charge=sh_charge,adjust=adjust,advance=advance,user=user)
             sales.save()
+
             sale_id=SalesOrder.objects.get(id=sales.id)
           
-            if len(product)==len(quantity)==len(tax)==len(total)==len(rate)==len(hsn):
-                mapped = zip(hsn,product,quantity,tax,total,rate,desc)
+            if len(itemname)==len(itemid)==len(quantity)==len(tax)==len(total)==len(rate)==len(hsn):
+                mapped = zip(hsn,itemname,quantity,tax,total,rate,desc,itemid)
                 mapped = list(mapped)
                 for element in mapped:
                     created =sales_item(sale=sale_id,hsn=element[0],product=element[1],quantity=element[2],tax=element[3],total=element[4],
-                                        rate=element[5],desc=element[6])
+                                        rate=element[5],desc=element[6],item=element[7])
                     created.save()
 
-            return redirect('view_sales_order')     
+            return redirect('view_sales_order')       
     
 @login_required(login_url='login')
 def sales_order_det(request,id):
@@ -4223,8 +4294,8 @@ def edit_sales_order(request,id):
     salesitem = sales_item.objects.filter(sale_id=id)
     sales = SalesOrder.objects.get(id=id)
     sales_id = SalesOrder.objects.get(id=id)
-    pay=payment_terms.objects.all(user=request.user.id)
-    bank = Bankcreation.objects.all(user=request.user.id)
+    pay=payment_terms.objects.filter(user=request.user.id)
+    bank = Bankcreation.objects.filter(user=request.user.id)
     unit=Unit.objects.all()
     last_record = SalesOrder.objects.last()
     sale=Sales.objects.all()
@@ -4286,6 +4357,14 @@ def edit_sales_order(request,id):
         sales.save()
         hsn=tuple(request.POST.getlist('hsn[]'))
         product=tuple(request.POST.getlist('item[]'))
+        itemname = []
+        itemid = []
+        for i in product:
+            w = AddItem.objects.get(id = i)
+            x = w.Name
+            y = w
+            itemname.append(x)
+            itemid.append(y)
         quantity=tuple(request.POST.getlist('quantity[]'))
         rate=tuple(request.POST.getlist('rate[]'))
         tax=tuple(request.POST.getlist('tax[]'))
@@ -4294,14 +4373,14 @@ def edit_sales_order(request,id):
         obj_dele=sales_item.objects.filter(sale_id=sales.id)
         obj_dele.delete()
        
-        if len(product)==len(quantity)==len(tax)==len(total)==len(rate):
+        if len(itemname)==len(itemid)==len(quantity)==len(tax)==len(total)==len(rate):
 
-            mapped = zip(hsn,product,quantity,tax,total,rate,desc)
+            mapped = zip(hsn,itemname,quantity,tax,total,rate,desc,itemid)
             mapped = list(mapped)
         
             for element in mapped:
                 created =sales_item(sale=sales,hsn=element[0],product=element[1],quantity=element[2],tax=element[3],total=element[4],
-                                        rate=element[5],desc=element[6])
+                                        rate=element[5],desc=element[6],item=element[7])
                 created.save()
                     
                
@@ -4352,7 +4431,7 @@ def create_delivery_chellan(request):
         account = Sales.objects.all()
         account_type = set(Sales.objects.values_list('Account_type', flat=True))
         payments = payment_terms.objects.filter(user = request.user)
-
+        
         context = {
             'company': company,
             'items': items,
@@ -4812,6 +4891,7 @@ def update_challan(request,id):
         cust_name =cus.customerName
         estimate = DeliveryChellan.objects.get(id=id)
         
+        
         # estimate.customer_name = request.POST['customer_name']
         estimate.customer_name = cust_name
         estimate.customer=custo
@@ -4839,57 +4919,58 @@ def update_challan(request,id):
             estimate.attachment = new
 
         estimate.save()
-
+        est_items = ChallanItems.objects.filter(chellan=estimate)
+        est_items.delete()
         if x==y:
 
-            item = request.POST.getlist('item[]')
-            hsn = request.POST.getlist('hsn[]')
-            quantity1 = request.POST.getlist('quantity[]')
-            quantity = [float(x) for x in quantity1]
-            rate1 = request.POST.getlist('rate[]')
-            rate = [float(x) for x in rate1]
-            discount1 = request.POST.getlist('discount[]')
-            discount = [float(x) for x in discount1]
-            tax1 = request.POST.getlist('tax[]')
-            tax = [float(x) for x in tax1]
-            amount1 = request.POST.getlist('amount[]')
-            amount = [float(x) for x in amount1]
+            est_items.item = request.POST.getlist('item[]')
+            est_items.hsn = request.POST.getlist('hsn[]')
+            est_items.quantity1 = request.POST.getlist('quantity[]')
+            est_items.quantity = [float(x) for x in est_items.quantity1]
+            est_items.rate1 = request.POST.getlist('rate[]')
+            est_items.rate = [float(x) for x in est_items.rate1]
+            est_items.discount1 = request.POST.getlist('discount[]')
+            est_items.discount = [float(x) for x in est_items.discount1]
+            est_items.tax1 = request.POST.getlist('tax[]')
+            est_items.tax = [float(x) for x in est_items.tax1]
+            est_items.amount1 = request.POST.getlist('amount[]')
+            est_items.amount = [float(x) for x in est_items.amount1]
         
         else:
 
-            itemm = request.POST.getlist('itemm[]')
-            hsnn = request.POST.getlist('hsnn[]')
-            quantityy1 = request.POST.getlist('quantityy[]')
-            quantityy = [float(x) for x in quantityy1]
-            ratee1 = request.POST.getlist('ratee[]')
-            ratee = [float(x) for x in ratee1]
-            discountt1 = request.POST.getlist('discountt[]')
-            discountt = [float(x) for x in discountt1]
-            taxx1 = request.POST.getlist('taxx[]')
-            taxx = [float(x) for x in taxx1]
-            amountt1 = request.POST.getlist('amountt[]')
-            amountt = [float(x) for x in amountt1]
+            est_items.itemm = request.POST.getlist('itemm[]')
+            est_items.hsnn = request.POST.getlist('hsnn[]')
+            est_items.quantityy1 = request.POST.getlist('quantityy[]')
+            est_items.quantityy = [float(x) for x in est_items.quantityy1]
+            est_items.ratee1 = request.POST.getlist('ratee[]')
+            est_items.ratee = [float(x) for x in est_items.ratee1]
+            est_items.discountt1 = request.POST.getlist('discountt[]')
+            est_items.discountt = [float(x) for x in est_items.discountt1]
+            est_items.taxx1 = request.POST.getlist('taxx[]')
+            est_items.taxx = [float(x) for x in est_items.taxx1]
+            est_items.amountt1 = request.POST.getlist('amountt[]')
+            est_items.amountt = [float(x) for x in est_items.amountt1]
        
 
         
 
         if x==y:
-            if len(item) == len(hsn) ==  len(quantity) == len(rate) == len(discount) == len(tax) == len(amount):
-                mapped = zip(item,hsn, quantity, rate, discount, tax, amount)
+            if len(est_items.item) == len(est_items.hsn) ==  len(est_items.quantity) == len(est_items.rate) == len(est_items.discount) == len(est_items.tax) == len(est_items.amount):
+                mapped = zip(est_items.item,est_items.hsn, est_items.quantity, est_items.rate, est_items.discount, est_items.tax, est_items.amount)
                 mapped = list(mapped)
                 for element in mapped:
-                    created = ChallanItems.objects.get_or_create(
+                    created = ChallanItems.objects.create(
                         chellan=estimate, item_name=element[0], hsn=element[1], quantity=element[2], rate=element[3], discount=element[4], tax_percentage=element[5], amount=element[6])
-            return redirect('delivery_chellan_home')
+            return redirect('delivery_challan_overview', id=id)
 
         else:
-            if len(itemm) == len(hsnn) == len(quantityy) == len(ratee) == len(discountt) == len(taxx) == len(amountt):
-                mapped = zip(itemm, hsnn, quantityy, ratee, discountt, taxx, amountt)
+            if len(est_items.itemm) == len(est_items.hsnn) == len(est_items.quantityy) == len(est_items.ratee) == len(est_items.discountt) == len(est_items.taxx) == len(est_items.amountt):
+                mapped = zip(est_items.itemm, est_items.hsnn, est_items.quantityy, est_items.ratee, est_items.discountt, est_items.taxx, est_items.amountt1)
                 mapped = list(mapped)
                 for element in mapped:
                     created = ChallanItems.objects.create(
                         chellan=estimate, item_name=element[0],  hsn=element[1], quantity=element[2], rate=element[3], discount=element[4], tax_percentage=element[5], amount=element[6])
-            return redirect('delivery_chellan_home')
+            return redirect('delivery_challan_overview', id=id)
     context = {
         'c': c,
         'i': estimate,
@@ -5274,7 +5355,7 @@ def itemdata_challan(request):
 def customer_dropdown_estimate(request):
     user = User.objects.get(id=request.user.id)
     options = {}
-    option_objects = customer.objects.all()
+    option_objects = customer.objects.filter(user=user.id,status='active')
     for option in option_objects:
         display_name = option.customerName
         options[option.id] = [display_name, f"{display_name}"]
@@ -5466,7 +5547,7 @@ def new_recur(request):
         return redirect('view_recurpage')
     else:
         return render(request,'samrecurpage.html')
-
+    
 
 def view_recurpage(request):
     user = request.user
@@ -6316,15 +6397,13 @@ def get_customerdet(request):
     cust = customer.objects.get(user=company.user_id,id=id)
     email = cust.customerEmail
     cust_id=id
+    cust_address=cust.Address1
     cust_place_supply=cust.placeofsupply
     gstin = cust.GSTIN
     gsttr = cust.GSTTreatment
     cstate = cust.placeofsupply.split("] ")[1:]
-    print(email)
-    print(gstin)
-    print(id)
     state = 'Not Specified' if cstate == "" else cstate
-    return JsonResponse({'customer_email' :email, 'gst_treatment':gsttr, 'gstin': gstin , 'state' : state,'cust_id':cust_id,'cust_place_supply':cust_place_supply},safe=False)
+    return JsonResponse({'customer_email' :email, 'gst_treatment':gsttr, 'gstin': gstin , 'state' : state,'cust_id':cust_id,'cust_place_supply':cust_place_supply,'cust_address':cust_address},safe=False)
 
 
 @login_required(login_url='login')
@@ -6500,7 +6579,7 @@ def item_dropdown(request):
     options = {}
     option_objects = AddItem.objects.filter(user = request.user)
     for option in option_objects:
-        options[option.id] = [option.Name,option.id]
+        options[option.id] = option.Name
 
     return JsonResponse(options)
 
@@ -7153,11 +7232,11 @@ def dashboard(request):
 
     userId=User.objects.get(id=request.user.id)
     if not payment_terms.objects.filter(Terms='NET 30',user=userId).exists():
-        payment_terms(Terms='NET 30',user=userId).save()
+        payment_terms(Terms='NET 30',user=userId ,Days = 30).save()
     if not payment_terms.objects.filter(Terms='NET 60',user=userId).exists():
-        payment_terms(Terms='NET 60',user=userId).save()
+        payment_terms(Terms='NET 60',user=userId,Days = 60).save()
     if not payment_terms.objects.filter(Terms='NET 45',user=userId).exists():
-        payment_terms(Terms='NET 45',user=userId).save()
+        payment_terms(Terms='NET 45',user=userId,Days = 45).save()
     if not payment_terms.objects.filter(Terms='Due on Receipt',user=userId).exists():
         payment_terms(Terms='Due on Receipt',user=userId).save()
 
@@ -7491,23 +7570,37 @@ def get_next_reference_number():
     
 def paymentadd_method(request):
     user = User.objects.get(id=request.user.id)
-    company=company_details.objects.get(user=request.user)
+    company = company_details.objects.get(user=request.user)
     vendors = vendor_table.objects.filter(user=request.user)
     bank =  Bankcreation.objects.filter(user=request.user)
     option = method.objects.all()
-    ref = payment_made.objects.filter(user=request.user).last()
+    last_record = payment_made.objects.filter(user=request.user).last()
 
-    if ref ==None:
-        ref_no = '01'
+    if last_record is None:
+        reford = '01'
+        reference = 'SO-01'
+        remaining_characters = 'SO-'
     else:
-        if ref.id+1 < 10:
-            ref_no = '0'+ str(ref.id+1)
+        reference = 'SO-01'
+        lastSalesNo = str(last_record.reference)  # Convert to string
+        last_two_numbers = int(lastSalesNo[-2:]) + 1
+        remaining_characters = lastSalesNo[:-2]
+        if last_two_numbers < 10:
+            reference = remaining_characters + '0' + str(last_two_numbers)
         else:
-            ref_no = ref.reference+1
+            reference = remaining_characters + str(last_two_numbers)
+
+        if int(last_record.id) + 1 < 10:
+            reford = '0' + str(int(last_record.id) + 1)
+        else:
+            reford = str(int(last_record.id) + 1)
+
     bill = PurchaseBills.objects.all()
     recurrbills = recurring_bills.objects.all()
-    context = {'vendors':vendors,'bank':bank,'option':option,'company':company, 'user':user,  'ref_no':ref_no,'bill':bill,'recurrbills':recurrbills}
-    return render(request,'payment_method_add.html',context)
+    context = {'vendors': vendors, 'bank': bank, 'option': option, 'company': company, 'user': user,
+               'reference': reference, 'reford': reford, 'remaining_characters': remaining_characters,
+               'bill': bill, 'recurrbills': recurrbills}
+    return render(request, 'payment_method_add.html', context)
 
 @require_POST
 def update_opening_balance(request):
@@ -7571,9 +7664,11 @@ def payment_add_details(request):
         user = request.user
         select = request.POST['select']
         vendor = vendor_table.objects.get(id=select)
-        payment_methods = request.POST['payment_method']
-        payment_received = method.objects.get(id=payment_methods)
+        payment_methods = request.POST['payment_no']
+        
 
+
+        
         # Calculate the next reference number
         reference = request.POST['reference']
 
@@ -7620,7 +7715,7 @@ def payment_add_details(request):
         data = payment_made(
             reference=reference,
             date=date,
-            payment=payment_received,
+            payment=payment_methods,
             cash=cash_value,
             cheque_number=cheque_number,
             vendor=vendor,
@@ -7651,9 +7746,10 @@ def payment_add_details_1(request):
         user = request.user
         select = request.POST['select']
         vendor = vendor_table.objects.get(id=select)
-        payment_methods = request.POST['payment_method']
-        payment_received = method.objects.get(id=payment_methods)
-        # Calculate the next reference number
+        payment_methods = request.POST['payment_no']
+
+
+
         reference = request.POST['reference']
 
         date = request.POST['date']
@@ -7695,7 +7791,7 @@ def payment_add_details_1(request):
         data = payment_made(
             reference=reference,
             date=date,
-            payment=payment_received,
+            payment=payment_methods,
             cash=cash_value,
             cheque_number=cheque_number,
             vendor=vendor,
@@ -9695,21 +9791,22 @@ def payroll_create(request):
     
 def editpayroll(request,id):
     p=Payroll.objects.get(id=id)
-    
     if request.method=='POST':
         p.title=request.POST['title']
         p.first_name=request.POST['fname']
         p.last_name=request.POST['lname']
         p.alias=request.POST['alias']
         p.joindate=request.POST['joindate']
+        p.salaryrange=request.POST['salarydate']   
         p.salary=request.POST['salary']   
-        # p.image=request.FILES.get('file')
         new=request.FILES.get('file')
         old= p.image
         if old!=None and new==None:
             p.image=old
         else:
             p.image=new
+        p.amountperhr=request.POST['amnthr']
+        p.workhr=request.POST['hours']
         p.emp_number = request.POST['empnum']
         p.designation = request.POST['designation']
         p.location=request.POST['location']
@@ -9738,14 +9835,27 @@ def editpayroll(request,id):
         p.UAN=request.POST['uan']
         p.PFN=request.POST['pfn']
         p.PRAN=request.POST['pran']
+        p.age=request.POST['age']
         istds=request.POST['istds']
         if istds == '1':
             p.isTDS=request.POST['pora']
-            p.TDS=request.POST['tds']
+            if request.POST['pora'] == 'Percentage':
+                p.TDS=float(request.POST['pcnt'])
+            else:
+                p.TDS=float(request.POST['amnt'])
         else:
             p.isTDS='No'
             p.TDS=0
         p.save()
+
+        if Payrollfiles.objects.filter(payroll=p).exists():
+            if(request.FILES.get('attach')):
+                pf=Payrollfiles.objects.get(payroll=p)
+                pf.attachment=request.request.FILES.get('attach')
+                pf.save()
+        else:
+            if(request.FILES.get('attach')):
+                Payrollfiles.objects.create(attachment=request.FILES.get('attach'),payroll=p)
         
         if Bankdetails.objects.filter(payroll=p).exists():
             b=Bankdetails.objects.get(payroll=p)
@@ -9778,6 +9888,7 @@ def createpayroll(request):
         lname=request.POST['lname']
         alias=request.POST['alias']
         joindate=request.POST['joindate']
+        salarydate=request.POST['salary']
         saltype=request.POST['saltype']
         if (saltype == 'Fixed'):
             salary=request.POST['fsalary']
@@ -9786,6 +9897,8 @@ def createpayroll(request):
         image=request.FILES.get('file')
         if image == None:
             image="image/img.png"
+        amountperhr=request.POST['amnthr']
+        workhr=request.POST['hours']
         empnum=request.POST['empnum']
         designation = request.POST['designation']
         location=request.POST['location']
@@ -9801,11 +9914,7 @@ def createpayroll(request):
         padd2=request.POST['paddress2'] 
         paddress= padd1+padd2
         phone=request.POST['phone']
-        ephn=request.POST['ephone']
-        if ephn=="":
-            ephone=None
-        else:
-            ephone=request.POST['ephone']
+        ephone=request.POST['ephone']
         email=request.POST['email']
         isdts=request.POST['tds']
         if isdts == '1':
@@ -9822,9 +9931,11 @@ def createpayroll(request):
         uan=request.POST['uan'] 
         pfn=request.POST['pfn']
         pran=request.POST['pran']
-        payroll= Payroll(user=usr, title=title,first_name=fname,last_name=lname,alias=alias,image=image,joindate=joindate,salary_type=saltype,salary=salary,emp_number=empnum,designation=designation,location=location,
-                         gender=gender,dob=dob,blood=blood,parent=fmname,spouse_name=sname,address=address,permanent_address=paddress ,Phone=phone,emergency_phone=ephone,
-                         email=email,ITN=itn,Aadhar=an,UAN=uan,PFN=pfn,PRAN=pran,isTDS=istdsval,TDS=tds)
+        age=request.POST['age']
+        payroll= Payroll(user=usr, title=title,first_name=fname,last_name=lname,alias=alias,image=image,joindate=joindate,salary_type=saltype,salary=salary,age=age,
+                         emp_number=empnum,designation=designation,location=location, gender=gender,dob=dob,blood=blood,parent=fmname,spouse_name=sname,workhr=workhr,
+                         amountperhr = amountperhr, address=address,permanent_address=paddress ,Phone=phone,emergency_phone=ephone, email=email,ITN=itn,Aadhar=an,
+                         UAN=uan,PFN=pfn,PRAN=pran,isTDS=istdsval,TDS=tds,salaryrange = salarydate)
         payroll.save()
 
         bank=request.POST['bank']
@@ -9838,9 +9949,8 @@ def createpayroll(request):
             b.save()
         attach=request.FILES.get('attach')       
         if(attach):
-            att=Payrollfiles(attachment=attach,payroll=payroll)
-        # messages.success(request,'Saved succefully !')
-        print(bank)
+            Payrollfiles.objects.create(attachment=attach,payroll=payroll)
+
         return redirect('payroll_list')
     else:
         return redirect('payroll_create')
@@ -9848,7 +9958,7 @@ def createpayroll(request):
         
 def payroll_list(request):
     company=company_details.objects.get(user=request.user)
-    p=Payroll.objects.all()
+    p=Payroll.objects.filter(user=request.user)
     return render(request,'payroll_list.html',{'pay':p,'company':company})
     
     
@@ -9859,14 +9969,12 @@ def payroll_delete(request,pid):
     
     
 def payroll_view(request,id):
-    payroll=Payroll.objects.all()
+    payroll=Payroll.objects.filter(user=request.user)
     p=Payroll.objects.get(id=id)
     com=Commentmodel.objects.filter(payroll=p)
     b=Bankdetails.objects.filter(payroll=p)
     attach=Payrollfiles.objects.filter(payroll=p)
     company=company_details.objects.get(user=request.user)
-    print(p)
-    print(attach)
     return render(request,'payroll_view.html',{'pay':payroll,'p':p,'b':b,'com':com,'attach':attach,'company':company})
 
 def payroll_active(request,id):
@@ -10080,7 +10188,6 @@ def save_expense(request):
     company = company_details.objects.get(user = request.user)
     if request.user.is_authenticated:
         if request.method == 'POST':
-           
             date = request.POST.get('date')
             stat=request.POST['sub']
             if stat == 'draft':
@@ -10088,7 +10195,6 @@ def save_expense(request):
             else:
                 status='save'
             
-           
             expense_account = request.POST.get('expense_account')
             amount = request.POST.get('amount')
             currency = request.POST.get('currency')
@@ -10097,9 +10203,11 @@ def save_expense(request):
             accno=request.POST.get('acc_no')
             upiid=request.POST.get('upi_id')
             chequeno=request.POST.get('cheque_no')
-            if accno:
+            if accno and accno != '0':
                 bank=Bankcreation.objects.get(ac_no=accno)
                 bankid=bank.id
+            else:
+                bankid=""
 
 
             notes = request.POST.get('notes')
@@ -10192,8 +10300,7 @@ def save_expense(request):
             cp= company_details.objects.get(user = request.user)
             paym = payment_terms.objects.filter(user=request.user.id)
             banks=Bankcreation.objects.all()
-
-            try:
+            if ExpenseE.objects.filter(company = cp).exists():
                 latest_bill = ExpenseE.objects.filter(company = cp).order_by('-reference_number').first()
                 if latest_bill:
                     print("ssssssssssssssssssssssssssssssssssssssss") 
@@ -10201,17 +10308,15 @@ def save_expense(request):
                     print(last_number)
                     new_number = last_number + 1
                     print(new_number)
-                else:
-                   new_number=1
+            else:
+                new_number=1
 
-                if deletedexpenses.objects.filter(cid=cp).exists():
+            if deletedexpenses.objects.filter(cid=cp).exists():
                    deleted=deletedexpenses.objects.get(cid = cp)
                    if deleted:
                        while int(deleted.reference_number) >= new_number:
                            new_number+=1
-                return render(request, 'addexpense.html', {'banks':banks,'pay':paym,'company':cp,'vendor':v,'customer': c,'payments':p,'accounts': accounts, 'account_types': account_types,'count':new_number})
-            except Exception as e:
-                return redirect("expensepage")
+            return render(request, 'addexpense.html', {'banks':banks,'pay':paym,'company':cp,'vendor':v,'customer': c,'payments':p,'accounts': accounts, 'account_types': account_types,'count':new_number})
    
 def upload_documents(request, expense_id):
     if request.method == 'POST':
@@ -12141,14 +12246,22 @@ def get_vendor_gst_treatment(request):
         try:
             vendor = vendor_table.objects.get(id=vendor_name, user=user)
             gst_treatment = vendor.gst_treatment
-            gstin = vendor.gst_number  
+            gstin = vendor.gst_number 
+            sourcesupply=vendor.source_supply 
+            address=vendor.baddress
+            city=vendor.bcity
+            state=vendor.bstate
+            country=vendor.bcountry
+            print(" source ........................ of ....................... supply")
+            
+
         except vendor_table.DoesNotExist:
             gst_treatment = None
             gstin = None
 
         print(f"Vendor Name: {vendor_name}, GST Treatment: {gst_treatment}, GSTIN: {gstin}")
 
-        return JsonResponse({'gst_treatment': gst_treatment, 'gstin': gstin})
+        return JsonResponse({'gst_treatment': gst_treatment, 'gstin': gstin,'sourcesupply':sourcesupply,'address':address,'city':city,'state':state,'country':country})
     else:
      
         return JsonResponse({'gst_treatment': None, 'gstin': None})
@@ -12392,50 +12505,8 @@ def sales_summery(request):
     data = AddItem.objects.all()
     
     return render(request, 'sales_summery.html', {'data':data, 'company': company})
-
-
-def godown_details(request):
-    company = company_details.objects.get(user = request.user)
-    data = Addgodown.objects.filter(user = request.user.id)
     
-    return render(request, 'godown_details.html', {'data':data, 'company': company})
-
-def shareGodownDetailsToEmail(request):
-    if request.user:
-        try:
-            if request.method == 'POST':
-                emails_string = request.POST['email_ids']
-
-                # Split the string by commas and remove any leading or trailing whitespace
-                emails_list = [email.strip() for email in emails_string.split(',')]
-                email_message = request.POST['email_message']
-                # print(emails_list)
-
-                cmp = company_details.objects.get( user = request.user.id)
-                data = Addgodown.objects.filter(user = request.user.id)
-                        
-                context = {'cmp': cmp,'data': data}
-                template_path = 'godown_detail_pdf.html'
-                template = get_template(template_path)
-
-                html  = template.render(context)
-                result = BytesIO()
-                pdf = pisa.pisaDocument(BytesIO(html.encode("ISO-8859-1")), result)#, link_callback=fetch_resources)
-                pdf = result.getvalue()
-                filename = f'Godown Report - {cmp.company_name}.pdf'
-                subject = f"Godown Report - {cmp.company_name}"
-                email = EmailMessage(subject, f"Hi,\nPlease find the attached Godown Report -of -{cmp.company_name}. \n{email_message}\n\n--\nRegards,\n{cmp.company_name}\n{cmp.address}\n{cmp.state} - {cmp.country}\n{cmp.contact_number}", from_email=settings.EMAIL_HOST_USER,to=emails_list)
-                email.attach(filename, pdf, "application/pdf")
-                email.send(fail_silently=False)
-
-                msg = messages.success(request, 'Report has been shared via email successfully..!')
-                return redirect(godown_details)
-        except Exception as e:
-            print(e)
-            messages.error(request, f'{e}')
-            return redirect(godown_details)
-
-
+    
 def transaction(request, pk):
     product = AddItem.objects.get(id = pk)
     company = company_details.objects.get(user = request.user)
@@ -12575,7 +12646,7 @@ def GSTR_3Bpage(request):
 def GSTR_1page(request):
     company = company_details.objects.get(user=request.user)
     data=invoice.objects.all()
-    invoices=recurring_invoice.objects.all()
+    invoices=Recurring_invoice.objects.all()
     reinv=RetainerInvoice.objects.all()
     context={
         'invoices':invoices,
@@ -12584,83 +12655,7 @@ def GSTR_1page(request):
         'company':company
     }
     return render(request,'gstr1_s2.html', context)
-
-def GSTR_9page(request):
-    company = company_details.objects.get(user=request.user)
-    context={
-       
-        'company':company
-    }
-    return render(request,'GSTR_9.html',context)
-
-
-def shareGSTR9ToEmail(request):
-    if request.user:
-        try:
-            if request.method == 'POST':
-                emails_string = request.POST['email_ids']
-                selected_year = request.POST['selected_year']
-
-                # Split the string by commas and remove any leading or trailing whitespace
-                emails_list = [email.strip() for email in emails_string.split(',')]
-                email_message = request.POST['email_message']
-                # print(emails_list)
-
-                cmp = company_details.objects.get( user = request.user.id)
-                data = Addgodown.objects.all()
-                        
-                context = {'cmp': cmp,'data': data,'selected_year': selected_year,'email_message':email_message}
-                template_path = 'gstr_9_pdf.html'
-                template = get_template(template_path)
-
-                html  = template.render(context)
-                result = BytesIO()
-                pdf = pisa.pisaDocument(BytesIO(html.encode("ISO-8859-1")), result)#, link_callback=fetch_resources)
-                pdf = result.getvalue()
-                filename = f'GSTR9 Report - {cmp.company_name}.pdf'
-                subject = f"GSTR9 Report - {cmp.company_name}"
-                email = EmailMessage(subject, f"Hi,\nPlease find the attached GSTR9 Report -of  -{cmp.company_name}. \n{email_message}\n\n--\nRegards,\n{cmp.company_name}\n{cmp.address}\n{cmp.state} - {cmp.country}\n{cmp.contact_number}", from_email=settings.EMAIL_HOST_USER,to=emails_list)
-                email.attach(filename, pdf, "application/pdf")
-                email.send(fail_silently=False)
-
-                msg = messages.success(request, 'Report has been shared via email successfully..!')
-                return redirect(GSTR_9page)
-        except Exception as e:
-            print(e)
-            messages.error(request, f'{e}')
-            return redirect(GSTR_9page)
-def GSTR9pdfs(request):
-    if request.user.is_authenticated:
-        try:
-            cmp = company_details.objects.get(user=request.user.id)
-            data = Addgodown.objects.all()
-
-            # Assuming you have definitions for selected_year and email_message
-            selected_year = '2023'
-            email_message = 'Hello, this is your email message.'
-
-            context = {'cmp': cmp, 'data': data, 'selected_year': selected_year, 'email_message': email_message}
-            template_path = 'gstr_9_pdf.html'
-            template = get_template(template_path)
-
-            html = template.render(context)
-
-            # Create a PDF response
-            response = HttpResponse(content_type='application/pdf')
-            response['Content-Disposition'] = f'attachment; filename="GSTR9_Report_{cmp.company_name}.pdf"'
-
-            pisa.pisaDocument(BytesIO(html.encode("ISO-8859-1")), response)
-
-            return response
-
-        except Exception as e:
-            print(e)
-            # Handle the exception and show an error message
-            messages.error(request, f'{e}')
-            return redirect(GSTR_9page)
-
-    # Add a default return statement in case the user is not authenticated
-    return HttpResponse("Authentication required")
+    
     
 def change_vendor_status(request,pk):
     company=company_details.objects.get(user=request.user)
@@ -14006,7 +14001,9 @@ def ewaycreate(request):
      purchase_type = set(Purchase.objects.values_list('Account_type', flat=True))
      item = AddItem.objects.filter(user = request.user)
      company=company_details.objects.get(user=request.user)
-     return render(request,'ewaycreate.html',{'data':data,'payments':payments,'trans':trans,'units':units,'sales':sales,'purchase':purchase,'sales_type':sales_type,'purchase_type':purchase_type,'item':item,'company':company})
+     eway_id = EwaybillIdModel.objects.filter(user=request.user.id).last()
+     return render(request,'ewaycreate.html',{'data':data,'payments':payments,'trans':trans,'units':units,'sales':sales,'purchase':purchase,'sales_type':sales_type,'purchase_type':purchase_type,'item':item,'company':company,
+                                            'eway_id':eway_id})
      
 def ewayb_customer(request):
     
@@ -14093,18 +14090,18 @@ def add_transportation(request):
     if request.method == 'POST':
         
         print('\n------------enterd-----------\n')
-        user = User.objects.get(id=request.user.id)
         transportation_method = request.POST.get('trans_method')
         type = request.POST.get('trans_type')
         print(transportation_method,type)
         if transportation_method:
-            transportation = Transportation(method=transportation_method,type=type,user=user)
+            transportation = Transportation(method=transportation_method,type=type,user=request.user.id)
+            
             transportation.save()
             return JsonResponse({'message': 'Transportation added successfully.'})
         else:
             return JsonResponse({'message': 'Transportation method is required.'}, status=400)
     else:
-        return JsonResponse({'message': 'Invalid request method.'}, status=405) 
+        return JsonResponse({'message': 'Invalid request method.'},status=405)
         
         
 def ewaybills_item(request):
@@ -14284,6 +14281,10 @@ def create_ewaybillz(request):
 def ewayoverview(request,id):
     eway=EWayBill.objects.filter(user=request.user)
     ewayi=EWayBill.objects.filter(id=id)
+
+    eway_single = EWayBill.objects.get(id=id)
+    comments = EwayComments.objects.filter(user=request.user.id,eway=eway_single.id)
+
     company=company_details.objects.get(user=request.user)
     ewayb = EWayBillItem.objects.filter(eway_bill_id=id)  # Fetch items related to the EWayBill id
     projc = get_object_or_404(EWayBill, id=id)
@@ -14292,7 +14293,8 @@ def ewayoverview(request,id):
         if comment_text:
             projc.comment = comment_text  # Set the comment field of the specific project object
             projc.save()  # Save the project object with the updated comment
-    return render(request, 'ewayoverview.html',{'eway':eway,"ewayi":ewayi,'ewayb':ewayb,'projc':projc,'company':company})
+    return render(request, 'ewayoverview.html',{'eway':eway,"ewayi":ewayi,'ewayb':ewayb,'projc':projc,'company':company,
+                                                "eway_single":eway_single,"comments":comments})
     
     
 def delete_ewaybills(request, id):
@@ -14422,9 +14424,9 @@ def ewaycommentdb(request, id):
     return redirect('ewayoverview', id=id)
     
 def get_transportation_options(request):
-    transportation_options = Transportation.objects.all().values_list('method', flat=True)
-    options_list = list(transportation_options)
-    return JsonResponse({'options': options_list})
+    transportation_options = Transportation.objects.all().values_list('id','method')
+    options_list = [{'id': item[0], 'method': item[1]} for item in transportation_options]
+    return JsonResponse({'options':options_list})
     
 def filter_invoice_draft(request):
     user = request.user
@@ -15158,31 +15160,29 @@ def challan_customize(request):
 
 def create_loan(request):
     error_message = None
-
     if request.method == 'POST':
-        print("Received a POST request")
-        # Process form submission
         employee_id = request.POST.get('employee')
         issue_date = request.POST.get('loan_issue_date')
         expiry_date = request.POST.get('loan_expiry_date')
         loan_amount = request.POST.get('loan_amount')
         cutting_type = request.POST.get('payment_method')
+        duration = request.POST.get('duration')
+        paymethod = request.POST.get('payment_type')
+        upi = request.POST.get('upi_id')
+        cheque = request.POST.get('cheque_id')
+        bnk = request.POST.get('bnk_id')
+        note = request.POST.get('note')
 
         try:
             if cutting_type == 'percentage_wise':
                 cutting_percentage = request.POST.get('percentage')
-                # Fetch the payroll object based on the selected employee
                 payroll = Payroll.objects.get(id=employee_id)
-                # Calculate monthly cutting amount as a percentage of salary
                 cutting_amount = (float(cutting_percentage) / 100) * float(payroll.salary)
             else:
                 cutting_amount = request.POST.get('monthly_cutting_amount')
-                cutting_percentage = 0  # Initialize as None
+                cutting_percentage = 0
 
-            # Fetch the payroll object based on the selected employee
             payroll = Payroll.objects.get(id=employee_id)
-            
-            # Check if monthly cutting amount is greater than salary
             if float(cutting_amount) > float(payroll.salary):
                 raise ValueError("Monthly cutting amount cannot exceed employee's salary")
 
@@ -15193,44 +15193,61 @@ def create_loan(request):
                 loan_amount=loan_amount,
                 monthly_cutting_type=cutting_type,
                 monthly_cutting_percentage=cutting_percentage,
-                monthly_cutting_amount=cutting_amount
+                monthly_cutting_amount=cutting_amount,
+                duration = duration,
+                pay_method = paymethod,
+                upi_id = upi,
+                cheque_id = cheque,
+                bank_id = bnk,
+                note = note,
+                user=request.user
             )
             
             loan.save()
 
-            # Debugging: Print information to the console
-            print(f"Employee ID: {employee_id}")
-            print(f"Issue Date: {issue_date}")
-            print(f"Expiry Date: {expiry_date}")
-            print(f"Loan Amount: {loan_amount}")
-            print(f"Cutting Type: {cutting_type}")
-            print(f"Cutting Percentage: {cutting_percentage}")
-            print(f"Cutting Amount: {cutting_amount}")
-            print(f"Payroll: {payroll}")
-            print(f"Loan: {loan}")
+            LoanRepayment.objects.create(
+                loan=loan,
+                payment_made = loan_amount,
+                interest = 0,
+                total_payment = 0,
+                payment_date = issue_date,
+                balance = loan_amount,
+                payment_method = paymethod,
+                upi_id = upi,
+                cheque_id = cheque,
+                bank_id = bnk,
+                particular = 'LOAN ISSUED'
+            )
 
-            return redirect('employee_list')  # Redirect to the employee list page
+            return redirect('employee_list') 
         except (ValueError, Payroll.DoesNotExist, ValidationError) as e:
-            # Handle validation errors (e.g., percentage > 100%, amount >= salary, employee not found)
             error_message = str(e)
 
-    # For GET requests or when the form is not submitted, retrieve a list of all payrolls
-    payrolls = Payroll.objects.all()
+    payrolls = Payroll.objects.filter(user=request.user, status='Active')
+    lemp = []
+    employees_with_loans = Payroll.objects.filter(loan__isnull=False,user=request.user)
+    for e in employees_with_loans:
+        lemp.append(e.id)
     company = company_details.objects.get(user=request.user)
+    dur = LoanDuration.objects.filter(user=request.user)
+    bank = Bankcreation.objects.filter(user=request.user)
     context = {
         'payrolls': payrolls,
         'error_message': error_message,
         'company': company,
+        'dur':dur,
+        'lemp':lemp,
+        'bank':bank
     }
     return render(request, 'create_loan.html', context)
     
     
 def employee_list(request):
-    employees_with_loans = Payroll.objects.filter(loan__isnull=False)
+    employees_with_loans = Payroll.objects.filter(loan__isnull=False,user=request.user)
     company=company_details.objects.get(user=request.user)
     for employee in employees_with_loans:
         employee.loan_info = Loan.objects.get(payroll=employee)
-    
+
     context = {
         'employees': employees_with_loans,
         'company': company,
@@ -15244,110 +15261,87 @@ def delete_loan(request, loan_id):
     return redirect('employee_list') 
     
 def edit_loan(request, loan_id): 
-    print("Entering edit_loan view")
-    
     loan = get_object_or_404(Loan, id=loan_id)
     payrolls = Payroll.objects.all()
-
     if request.method == 'POST':
-        print("Processing form submission")
-        
-        employee_id = request.POST.get('employee')
-        issue_date = request.POST.get('date_issue')
-        expiry_date = request.POST.get('date_expiry')
+        issue_date = request.POST.get('loan_issue_date')
+        expiry_date = request.POST.get('loan_expiry_date')
         loan_amount = request.POST.get('loan_amount')
-        
         cutting_type = request.POST.get('payment_method')
-
-        # Check if 'cutting_type' is "percentage_wise" and calculate cutting_amount
+        paymethod = request.POST.get('payment_type')
+        upi = request.POST.get('upi_id')
+        cheque = request.POST.get('cheque_id')
+        bnk = request.POST.get('bnk_id')
+        note = request.POST.get('note')
         if cutting_type == 'amount_wise':
             cutting_percentage = 0
             cutting_amount = request.POST.get('monthly_cutting_amount')
         else:
-            # 'cutting_type' is "amount_wise" or not provided, set cutting_percentage and cutting_amount to existing values
             cutting_percentage = request.POST.get('percentage')
             cutting_amount = (float(cutting_percentage) / 100) * float(loan.payroll.salary)
+        loan.date_issue = issue_date
+        loan.date_expiry = expiry_date
+        loan.loan_amount = loan_amount
+        loan.monthly_cutting_type = cutting_type
+        loan.monthly_cutting_percentage = cutting_percentage
+        loan.monthly_cutting_amount = cutting_amount
+        loan.pay_method = paymethod
+        loan.cheque_id = cheque
+        loan.upi_id = upi
+        loan.bank_id = bnk
+        loan.note = note
+        loan.save()
 
-        # Check if any values have changed before updating
-        if (issue_date != loan.date_issue or
-            expiry_date != loan.date_expiry or
-            loan_amount != loan.loan_amount or
-            cutting_percentage != loan.monthly_cutting_percentage or
-            cutting_amount != loan.monthly_cutting_amount):
-            
-            # Fetch the payroll object based on the selected employee
-            payroll = Payroll.objects.get(id=employee_id)
-            
-            # Check if monthly cutting amount is greater than salary
-            if float(cutting_amount) > float(payroll.salary):
-                error_message = "Monthly cutting amount cannot exceed salary"
-                context = {
-                    'loan': loan, 
-                    'payrolls': payrolls,
-                    'error_message': error_message,
-                }
-                return render(request, 'edit_loan.html', context)
-            
-            # Update loan details
-            loan.payroll = payroll
-            loan.date_issue = issue_date
-            loan.date_expiry = expiry_date
-            loan.loan_amount = loan_amount
-            loan.monthly_cutting_type = cutting_type
-            loan.monthly_cutting_percentage = cutting_percentage
-            loan.monthly_cutting_amount = cutting_amount
-            loan.save()
+        repay = LoanRepayment.objects.filter(loan=loan.id)
 
-            return redirect(reverse('employee_loan_details', args=[loan.payroll.id]))
+        bal = float(loan.loan_amount)
+        for r in repay:
+            if r.particular == 'LOAN ISSUED':
+                r.payment_made = bal
+                r.total_payment = bal
+                r.payment_date = issue_date
+                r.payment_method = paymethod
+                r.cheque_id = cheque
+                r.upi_id = upi
+                r.bank_id = bnk
+                r.balance = bal
+                r.save()
+            elif r.particular == 'ADDITIONAL LOAN ISSUED':
+                r.balance = bal + float(r.payment_made)
+                bal = float(r.balance)
+                r.save()
+            else :
+                r.balance = bal - float(r.payment_made)
+                bal = float(r.balance)
+                r.save()
+        return redirect('employee_loan_details',loan_id)
     
     company = company_details.objects.get(user=request.user)
-    
     context = {
         'loan': loan, 
         'company': company, 
         'payrolls': payrolls,
     }
-    print("Returning from edit_loan view")
     return render(request, 'edit_loan.html', context)
     
     
 def employee_loan_details(request, payroll_id):
-    status = request.GET.get('status', 'all')
-
-    if status == 'active':
-        loans = Loan.objects.filter(payroll_id=payroll_id, active=True)
-    elif status == 'inactive':
-        loans = Loan.objects.filter(payroll_id=payroll_id, active=False)
-    else:
-        loans = Loan.objects.filter(payroll_id=payroll_id)
-
-    payroll = get_object_or_404(Payroll, id=payroll_id)
-    loans = Loan.objects.filter(payroll=payroll)
-    l=Loan.objects.all()
-    comments = LoanComment.objects.filter(payroll=payroll)
-    attach = LoanAttach.objects.filter(payroll=payroll)
-    ''' if request.method == 'POST':
-        comment_text = request.POST.get('comment', '')  # Get the comment from the form
-        loan_id = request.POST.get('loan_id', '')  # Get the associated loan ID from the form
-        
-        if comment_text and loan_id:
-            loan = get_object_or_404(Loan, id=loan_id)
-            comment = LoanComment(comment=comment_text, loan=loan)
-            comment.save()
-            # Redirect to the same page after saving the comment
-            return redirect('employee_loan_details', payroll_id=payroll_id)'''
+    loan = Loan.objects.get(id=payroll_id)
+    all_loan = Loan.objects.filter(user=request.user)
     company=company_details.objects.get(user=request.user)
+    comments = LoanComment.objects.filter(loan=loan)
+    attach = LoanAttach.objects.filter(loan=loan)
+    repay = LoanRepayment.objects.filter(loan=payroll_id)
+    last_loan = LoanRepayment.objects.filter(loan=payroll_id).last().balance
     context = {
-        'p': payroll,
-        'loans': loans,
-        'l' : l,
-        'comments': comments,
-        'attach' : attach,
+        'loan': loan,
+        'all_loan': all_loan,
         'company': company,
+        'comments':comments,
+        'attach':attach,
+        'repay':repay,
+        'last_loan':last_loan
     }
-    for loan in loans:
-        print(f"Loan ID: {loan.id}")
-
     return render(request, 'employee_loan_details.html', context)
     
     
@@ -15410,12 +15404,10 @@ def employee_loan_template(request, payroll_id):
     return render(request, 'employee_loan_template.html', context)
     
 def add_loan_comment(request,payroll_id):
-    
-    payroll = get_object_or_404(Payroll, id=payroll_id)
-    
+    loan = get_object_or_404(Loan, id=payroll_id)
     if request.method== 'POST':
-        comments=request.POST['comment']
-        c= LoanComment(comment=comments,payroll=payroll)
+        comments=request.POST['comments']
+        c= LoanComment(comment=comments,loan=loan)
         c.save()
     return redirect('employee_loan_details',payroll_id=payroll_id)
     
@@ -15576,11 +15568,13 @@ def loan_deactive(request, loan_id):
     
 def createpayroll2(request):
     if request.method=='POST':
+        usr=request.user
         title=request.POST['title']
         fname=request.POST['fname']
         lname=request.POST['lname']
         alias=request.POST['alias']
         joindate=request.POST['joindate2']
+        salarydate=request.POST['salarydate']
         saltype=request.POST['saltype']
         if (saltype == 'Fixed'):
             salary=request.POST['fsalary']
@@ -15589,6 +15583,8 @@ def createpayroll2(request):
         image=request.FILES.get('file')
         if image == None:
             image="image/img.png"
+        amountperhr=request.POST['amnt']
+        workhr=request.POST['hours']
         empnum=request.POST['empnum']
         designation = request.POST['designation']
         location=request.POST['location']
@@ -15610,7 +15606,6 @@ def createpayroll2(request):
             ephone=None
         else:
             ephone=request.POST['ephone']
-        
         isdts=request.POST['tds']
         if isdts == '1':
             istdsval=request.POST['pora']
@@ -15626,9 +15621,11 @@ def createpayroll2(request):
         uan=request.POST['uan'] 
         pfn=request.POST['pfn']
         pran=request.POST['pran']
-        payroll= Payroll(title=title,first_name=fname,last_name=lname,alias=alias,image=image,joindate=joindate,salary_type=saltype,salary=salary,emp_number=empnum,designation=designation,location=location,
-                         gender=gender,dob=dob,blood=blood,parent=fmname,spouse_name=sname,address=address,permanent_address=paddress ,Phone=phone,emergency_phone=ephone,
-                         email=email,ITN=itn,Aadhar=an,UAN=uan,PFN=pfn,PRAN=pran,isTDS=istdsval,TDS=tds)
+        age=request.POST['age']
+        payroll= Payroll(user=usr,title=title,first_name=fname,last_name=lname,alias=alias,image=image,joindate=joindate,salary_type=saltype,salary=salary,
+                            salaryrange = salarydate, emp_number=empnum,designation=designation,location=location, gender=gender,dob=dob,blood=blood,parent=fmname,
+                            spouse_name=sname, address=address,permanent_address=paddress ,Phone=phone,emergency_phone=ephone,workhr=workhr,amountperhr = amountperhr,
+                            age=age, email=email,ITN=itn,Aadhar=an,UAN=uan,PFN=pfn,PRAN=pran,isTDS=istdsval,TDS=tds)
         payroll.save()
 
         bank=request.POST['bank']
@@ -15648,19 +15645,34 @@ def createpayroll2(request):
         return redirect('create_loan')
     else:
         return redirect('create_loan')
+        return redirect('create_loan')
         
         
 def loan_dropdown(request):
     options = {}
-    option_objects = Payroll.objects.all()  
+    option_objects = Payroll.objects.filter(status='Active',user=request.user)  
+    loan_objects = list(Loan.objects.values_list('payroll'))
+    loan_list = [item[0] for item in loan_objects]
+    
     for option in option_objects:
-        options[option.id] = {
-            'employee_name': option.first_name + ' ' + option.last_name,
-            'email': option.email,
-            'salary': option.salary,
-            'employee': option.emp_number,
-            'join_date': option.joindate.strftime('%Y-%m-%d'),  
-        }
+        if option.id in loan_list:
+            options[option.id] = {
+                'employee_name': option.first_name + ' ' + option.last_name,
+                'email': option.email,
+                'salary': option.salary,
+                'employee': option.emp_number,
+                'have-loan': '1',
+                'join_date': option.joindate.strftime('%Y-%m-%d'),  
+            }
+        else:
+            options[option.id] = {
+                'employee_name': option.first_name + ' ' + option.last_name,
+                'email': option.email,
+                'salary': option.salary,
+                'employee': option.emp_number,
+                'have-loan': '0',
+                'join_date': option.joindate.strftime('%Y-%m-%d'),  
+            }
     return JsonResponse(options)
     
     
@@ -16196,6 +16208,7 @@ def add_journal(request):
             credits = credits_list[i]
 
             journal_entry = JournalEntry(
+                user=user,
                 journal=journal,
                 account=account,
                 description=description,
@@ -18224,12 +18237,6 @@ def project_summary(request):
         t.rateperhour=p.rateperhour
         
     return render(request,'project_summary.html',{'company':company,'taskz':taskz})
-
-def project_details(request):
-    company = company_details.objects.get(user=request.user)
-    
-        
-    return render(request,'project_details.html',{'company':company})
     
 
 def get_item_details(request):
@@ -19450,9 +19457,6 @@ def new_estimate_item(request):
     return HttpResponse("Invalid request method.")
 
 
-
-
-
 def new_estimate_customer(request):
     company = company_details.objects.get(user = request.user)
 
@@ -19499,6 +19503,7 @@ def new_estimate_customer(request):
         szipcode=request.POST.get('spincode')
         sphone1=request.POST.get('sphone')
         sfax=request.POST.get('sfax')
+        status="active"
 
         # shipstreet1=request.POST.get('shipstreet1')
         # shipstreet2=request.POST.get('shipstreet2')
@@ -19510,6 +19515,7 @@ def new_estimate_customer(request):
         # shipphone=request.POST.get('shipphone')
 
         u = User.objects.get(id = request.user.id)
+        print("helloooooooooooooooooooo")
 
         cust = customer(customerName = name,customerType = cust_type, companyName= comp_name, GSTTreatment=gsttype,GSTIN=gstin, 
                         customerWorkPhone = w_mobile,customerMobile = p_mobile, customerEmail=email,skype = skype,Facebook = fb, 
@@ -19517,7 +19523,7 @@ def new_estimate_customer(request):
                         designation = desg, department = dpt,OpeningBalance=balance,Address1=street1,Address2=street2, city=city, 
                         state=state, PaymentTerms=payment,zipcode=pincode,country=country,  fax = fax,  phone1 = phone,
                         sAddress1=sAddress1,sAddress2=sAddress2,scity=scity,sstate=sstate,scountry=scountry,szipcode=szipcode,
-                        sphone1=sphone1,sfax=sfax,user=u)
+                        sphone1=sphone1,sfax=sfax,status=status,user=u)
         cust.save()
 
         return HttpResponse({"message": "success"})
@@ -19729,6 +19735,8 @@ def edit_setting(request,pk):
     pricelist1=request.POST.get('pricelist',False)
     offlinebanking1=request.POST.get('offlinebanking',False)
     banking1=request.POST.get('banking',False)
+    bank_holders1 = request.POST.get('bank_holders',False) #added - shemeem - New Module Development
+    loan_account1 = request.POST.get('loan_account',False) #added - shemeem - New Module Development
     customer1=request.POST.get('customer',False)
     estimate1=request.POST.get('estimate',False)
     retainerinvoice1=request.POST.get('retainerinvoice',False)
@@ -19779,6 +19787,22 @@ def edit_setting(request,pk):
     else:
         x="yes"
         setting_obj.banking=x
+# ................................  
+# #added - shemeem - New Module Development
+    if not bank_holders1:
+        x="no"
+        setting_obj.bank_holders=x
+    else:
+        x="yes"
+        setting_obj.bank_holders=x
+# ................................  
+# #added - shemeem - New Module Development
+    if not loan_account1:
+        x="no"
+        setting_obj.loan_account=x
+    else:
+        x="yes"
+        setting_obj.loan_account=x
 # ................................  
     if not customer1:
         x="no"
@@ -21745,17 +21769,18 @@ def convert_to_recinvoice(request,pk):
 @login_required(login_url='login')
 def journal_report(request):
     company = company_details.objects.get(user = request.user)
-    journal_entries=JournalEntry.objects.all()
+    journal_entries=JournalEntry.objects.filter(user=request.user)
     return render(request, 'journalreport.html',{'company': company,'journal_entries':journal_entries})
 
 @login_required(login_url='login')
 def purchase_order_details(request):
     company = company_details.objects.get(user = request.user)
-    data = Purchase_Order.objects.all()
+    data = Purchase_Order.objects.filter(user=request.user)
     for i in data:
         if i.vendor_name:
             i.vendor_name=i.vendor_name.split()
-            i.vendor_name=i.vendor_name[0]+' '+i.vendor_name[1]
+            i.vendor_name=i.vendor_name[:-1]
+            i.vendor_name=' '.join(i.vendor_name)
     return render(request, 'purchaseorderdetails.html',{'data':data, 'company': company})
     
     
@@ -21802,10 +21827,11 @@ def check_payment_num_valid(request):
         else:
             return HttpResponse("<span class='text-danger'>Payment Recieved Number is not Continues</span>")
     else:
-        if payments_recieved_number != 'PRN-01':
-            return HttpResponse("<span class='text-danger'>Payment Recieved Number is not Continues</span>")
-        else:
-            return HttpResponse("")
+        # if payments_recieved_number != 'PRN-01':
+        #     return HttpResponse("<span class='text-danger'>Payment Recieved Number is not Continues</span>")
+        # else:
+        #     return HttpResponse("")
+        return HttpResponse("")
 
 @login_required(login_url='login')
 def payment_reciedved_list_out(request):
@@ -21823,6 +21849,7 @@ def payment_recieved_create(request):
     cust = ''
     banks = Bankcreation.objects.filter(user = request.user.id)
     payments = PaymentRecievedIdModel.objects.filter(user=request.user.id)
+    pay=payment_terms.objects.filter(user=request.user.id)
     last=''
     if payments.exists():
         last = payments.last()
@@ -21844,7 +21871,8 @@ def payment_recieved_create(request):
                                                         'last':last,
                                                         'invoice_data':invoice_data,
                                                         'retainer_invoice_data':retainer_invoice_data,
-                                                        "all_invoice":all_invoice})
+                                                        "all_invoice":all_invoice,
+                                                        "pay":pay})
 
 @login_required(login_url='login')
 def get_customer_details_for_pay_rec(request):
@@ -21992,86 +22020,114 @@ def payment_recieved_create_new(request):
                                             pay_rec_balance = total_balance,)
             payment.save()
 
-        # creating all invoive
-        all_invoice_data = None
-        if invoice_data.exists():
-            for i in invoice_data:
-                all_invoice_data = PaymentRecievedAllInvoices(user=user,
-                                                            customer=cust,
-                                                            date= i.inv_date,
-                                                            due_date = i.due_date,
-                                                            invoice_type = 'INVOICE',
-                                                            invoice_number = i.invoice_no,
-                                                            invoice_amount = i.grandtotal,
-                                                            paid = i.paid_amount,
-                                                            balance = i.balance,
-                                                            payment_recieved=payment)
-                all_invoice_data.save()
-        if retainer_invoice_data.exists():
-            print('a\nasdasdasd\nasads')
-            for i in retainer_invoice_data:
-                all_invoice_data = PaymentRecievedAllInvoices(user=user,
-                                                            customer=cust,
-                                                            date= i.retainer_invoice_date,
-                                                            # due_date = i.due_date,
-                                                            invoice_type = 'RETAINER',
-                                                            invoice_number = i.retainer_invoice_number,
-                                                            invoice_amount = i.total_amount,
-                                                            paid = float(i.total_amount)-float(i.balance),
-                                                            balance = i.balance,
-                                                            payment_recieved=payment)
-                all_invoice_data.save()
-        if recurring_invoice_data.exists():
-            for i in recurring_invoice_data:
-                all_invoice_data = PaymentRecievedAllInvoices(user=user,
-                                                            customer=cust,
-                                                            date= i.start,
-                                                            due_date = i.end,
-                                                            invoice_type = 'RECURRING',
-                                                            invoice_number = i.reinvoiceno,
-                                                            invoice_amount = i.total,
-                                                            paid = i.paid,
-                                                            balance = i.balance,
-                                                            payment_recieved=payment)
-                all_invoice_data.save()
-        if credit_note_date.exists():
-            for i in credit_note_date:
-                all_invoice_data = PaymentRecievedAllInvoices(user=user,
-                                                            customer=cust,
-                                                            date= i.creditnote_date,
-                                                            # due_date = i.end,
-                                                            invoice_type = 'CREDIT NOTE',
-                                                            invoice_number = i.invoice_number,
-                                                            invoice_amount = i.total,
-                                                            paid = float(i.total)-float(i.balance),
-                                                            balance = i.balance,
-                                                            payment_recieved=payment)
-                all_invoice_data.save()
-            
 
+            
+        all_inv_date = request.POST.getlist('date[]')
+        all_inv_due_date = request.POST.getlist('due_date[]')
+        all_inv_inv_type = request.POST.getlist('inv_type[]')
+        all_inv_inv_no = request.POST.getlist('inv_no[]')
+        all_inv_inv_amount = request.POST.getlist('inv_amount[]')
+        all_inv_payment = request.POST.getlist('payment_amount[]')
+        all_inv_balance = request.POST.getlist('balance[]')
+        all_inv_inv_id = request.POST.getlist('invoice_id[]')
+        print(len(all_inv_inv_id))
+
+        all_invoice_data = None
+
+        if len(all_inv_date) == len(all_inv_due_date) == len(all_inv_inv_type) == len(all_inv_inv_no) == len(all_inv_inv_amount) == len(all_inv_payment) == len(all_inv_balance) == len(all_inv_inv_id):
+            print('\n\n')
+            for i in range(len(all_inv_date)):
+                # print(f'{all_inv_date[i]} {all_inv_due_date[i]} {all_inv_inv_type[i]} {all_inv_inv_no[i]} {all_inv_inv_amount[i]} {all_inv_payment[i]} {all_inv_balance[i]}')
+                
+                # check due date valid
+                if all_inv_due_date[i] == '---- NILL ----':
+                    due_date = None
+                else:
+                    due_date = all_inv_due_date[i]
+
+                
+                all_invoice_data = PaymentRecievedAllInvoices(user=user,
+                                                            customer=cust,
+                                                            date= all_inv_date[i],
+                                                            due_date = due_date,
+                                                            invoice_type = all_inv_inv_type[i],
+                                                            invoice_number = all_inv_inv_no[i],
+                                                            invoice_amount = all_inv_inv_amount[i],
+                                                            paid = all_inv_payment[i],
+                                                            balance = all_inv_balance[i],
+                                                            invoice_id=all_inv_inv_id[i],
+                                                            payment_recieved=payment)
+                all_invoice_data.save()
+
+                if all_inv_inv_type[i] == 'INVOICE':
+                    invoive_data = invoice.objects.get(id=all_inv_inv_id[i])
+                    invoive_data.paid_amount = all_inv_payment[i]
+
+                    invoive_data.balance = all_inv_balance[i]
+                    invoive_data.save()
+                if all_inv_inv_type[i] == 'RETAINER':
+                    retainer_data = RetainerInvoice.objects.get(id=all_inv_inv_id[i])
+
+                    retainer_data.balance = all_inv_balance[i]
+                    retainer_data.save()
+                if all_inv_inv_type[i] == 'RECCURING' :
+                    recur_data = Recurring_invoice.objects.get(id=all_inv_inv_id[i])
+                    recur_data.paid = all_inv_payment[i]
+
+                    recur_data.balance = all_inv_balance[i]
+                    recur_data.save()
+                if all_inv_inv_type[i] == 'CREDIT NOTE' :
+                    credit_data = Recurring_invoice.objects.get(id=all_inv_inv_id[i])
+                    # credit_data.paid = all_inv_payment[i]
+
+                    credit_data.balance = all_inv_balance[i]
+                    credit_data.save()
+
+            print('\n\n')
+        else:
+            messages.info(request,'cant create right now!')
+            return redirect('payment_recieved_create')
+            
         if PaymentRecievedIdModel.objects.filter(user=request.user.id).exists():
-            pay_id = PaymentRecievedIdModel.objects.filter(user=request.user.id).last()
-            if payments_recieved_number != pay_id.pay_rec_number:
-                ref_num = int(payment.id)+1
+            pay = PaymentRecievedIdModel.objects.filter(user=request.user.id)
+            pay_id = pay.last()
+            if pay.exclude(id=pay_id.id).last():
+                pay_id_second_last = pay.exclude(id=pay_id.id).last()
+                pattern = pay_id_second_last.pattern
+            else:
+                pay_id_second_last = pay.first()
+                pattern = pay_id_second_last.pattern
+            if payments_recieved_number != pay_id.pay_rec_number and payments_recieved_number != '' :
+                pay_id = PaymentRecievedIdModel(user=user)
+                count_for_ref_no = PaymentRecievedIdModel.objects.filter(user=user.id).count()
+                pay_id.pattern = pattern
+                pay_id.save()
+                ref_num = int(count_for_ref_no)+2
                 pay_id.ref_number = f'{ref_num:02}'
+
+                pay_id.pay_rec_number = pay_id_second_last.pay_rec_number
                 pay_id.save()
             else:
                 pay_id = PaymentRecievedIdModel(user=user)
+                count_for_ref_no = PaymentRecievedIdModel.objects.filter(user=user.id).count()
+                pay_id.pattern = pattern
                 pay_id.save()
-                ref_num = int(payment.id)+1
+                ref_num = int(count_for_ref_no)+2
                 pay_id.ref_number = f'{ref_num:02}'
 
-                pay_rec_num = int(pay_id.id)+1
-                pay_id.pay_rec_number = f'PRN-{pay_rec_num:02}'
+                pay_rec_num = ''.join(i for i in pay_id_second_last.pay_rec_number if i.isdigit())
+                pay_rec_num = int(pay_rec_num)+1
+
+                pay_id.pay_rec_number = f'{pattern}{pay_rec_num:02}'
                 pay_id.save()
-        else:
+        else:  
             pay_id = PaymentRecievedIdModel(user=user)
             pay_id.save()
-            ref_num = int(payment.id)+1
-            pay_id.ref_number = f'{ref_num:02}'
-
-            pay_rec_num = int(pay_id.id)+1
-            pay_id.pay_rec_number = f'PRN-{pay_rec_num:02}'
+            pay_id.ref_number = f'{2:02}'
+            
+            pattern = ''.join(i for i in payments_recieved_number if not i.isdigit())
+            pay_id.pattern = pattern
+            pay_id.pay_rec_number = f'{pattern}{2:02}'
             pay_id.save()
 
     return redirect('payment_reciedved_list_out')
@@ -22090,21 +22146,16 @@ from openpyxl import load_workbook
 
 @login_required(login_url='login')
 def import_payment_recieved(request):
-
-    # current_datetime = timezone.now()
-    # date =  current_datetime.date()
-    print(request.FILES['excel_file'])
     # try:
     if request.method == "POST" and 'excel_file' in request.FILES:
         excel_file = request.FILES['excel_file']
 
         wb = load_workbook(excel_file)
         ws = wb.active
-        # if 1 == 1 :
-        try:
+        if 1 == 1 :
+        # try:
             for row in ws.iter_rows(min_row=2, values_only=True):
                 name, mail, date,method,cheque_id,upi_id,bank,acc_no,amount,paid,balance = row
-                print(name)
 
                 user = User.objects.get(id=request.user.id)
                 if customer.objects.filter(customerEmail=mail).exists():
@@ -22133,9 +22184,9 @@ def import_payment_recieved(request):
                     # print(payments_recieved_method)
                     status = 'save'
                     if payments_recieved_method == 'cheque':
-                        print('cheque')
+                        # print('cheque')
                         cheque_id = request.POST.get('cheque_id')
-                        print(cheque_id)
+                        # print(cheque_id)
                         payment = PaymentRecievedModel(user=user,
                                                     customer=cust,
                                                     customer_name=customer_name,
@@ -22154,9 +22205,9 @@ def import_payment_recieved(request):
                                                     pay_rec_balance = total_balance)
                         payment.save()
                     elif payments_recieved_method == 'upi':
-                        print('upi')
+                        # print('upi')
                         upi_id = request.POST.get('upi_id')
-                        print(upi_id)
+                        # print(upi_id)
                         payment = PaymentRecievedModel(user=user,
                                                     customer=cust,
                                                     customer_name=customer_name,
@@ -22175,7 +22226,7 @@ def import_payment_recieved(request):
                                                     pay_rec_balance = total_balance)
                         payment.save()
                     elif payments_recieved_method == 'cash':
-                        print('cash')
+                        # print('cash')
                         payment = PaymentRecievedModel(user=user,
                                                         customer=cust,
                                                         customer_name=customer_name,
@@ -22193,7 +22244,7 @@ def import_payment_recieved(request):
                                                         pay_rec_balance = total_balance)
                         payment.save()
                     else:
-                        print('bank')
+                        # print('bank')
                         if not Bankcreation.objects.filter(name=bank,ac_no=acc_no).exists():
                             messages.warning(request,f"{bank} Bank with Account number {acc_no}doesn't exists")
                             return redirect('payment_reciedved_list_out')
@@ -22218,36 +22269,49 @@ def import_payment_recieved(request):
                                                             pay_rec_paid = float(total_amount)-float(total_balance),
                                                             pay_rec_balance = total_balance)
                             payment.save()
-                    if PaymentRecievedIdModel.objects.filter(user=request.user.id).exists():
-                        pay_id = PaymentRecievedIdModel.objects.filter(user=request.user.id).last()
-                        if payments_recieved_number != pay_id.pay_rec_number:
-                            ref_num = int(payment.id)+1
-                            pay_id.ref_number = f'{ref_num:02}'
-                            pay_id.save()
-                        else:
-                            pay_id = PaymentRecievedIdModel(user=user)
-                            pay_id.save()
-                            ref_num = int(payment.id)+1
-                            pay_id.ref_number = f'{ref_num:02}'
 
-                            pay_rec_num = int(pay_id.id)+1
-                            pay_id.pay_rec_number = f'PRN-{pay_rec_num:02}'
-                            pay_id.save()
-                    else:
+
+                    if PaymentRecievedIdModel.objects.filter(user=request.user.id).exists():
+                        pay = PaymentRecievedIdModel.objects.filter(user=request.user.id)
+                        pay_id_last = pay.last()
+                        if pay.exclude(id=pay_id_last.id).last():
+                            pay_id_second_last = pay.exclude(id=pay_id_last.id).last()
+                            pattern = pay_id_second_last.pattern
+                            print('1')
+                        else:
+                            pay_id_second_last = pay.first()
+                            pattern = pay_id_second_last.pattern
+                            print('2')
                         pay_id = PaymentRecievedIdModel(user=user)
+                        count_for_ref_no = PaymentRecievedIdModel.objects.filter(user=user.id).count()
+                        pay_id.pattern = pattern
                         pay_id.save()
-                        ref_num = int(payment.id)+1
+                        ref_num = int(count_for_ref_no)+2
                         pay_id.ref_number = f'{ref_num:02}'
 
-                        pay_rec_num = int(pay_id.id)+1
-                        pay_id.pay_rec_number = f'PRN-{pay_rec_num:02}'
+                        pay_rec_num = ''.join(i for i in pay_id_last.pay_rec_number if i.isdigit())
+                        print(f'---{pay_rec_num}---')
+                        pay_rec_num = int(pay_rec_num)+1
+                        print(f'---{pay_rec_num}---')
+                        pay_id.pay_rec_number = f'{pattern}{pay_rec_num:02}'
                         pay_id.save()
+                        print('4')
+                    else:  
+                        pay_id = PaymentRecievedIdModel(user=user)
+                        pay_id.save()
+                        pay_id.ref_number = f'{2:02}'
+                        
+                        pattern = ''.join(i for i in payments_recieved_number if not i.isdigit())
+                        pay_id.pattern = pattern
+                        pay_id.pay_rec_number = f'{pattern}{2:02}'
+                        pay_id.save()
+                        print('5')
                 else:
                     messages.info(request,f"Customer with mail id {mail} doen't exists")
                     return redirect('payment_reciedved_list_out')
             
-        except:
-            messages.warning(request,"Table field is missing / you are importing the wrong File.")
+        # except:
+        #     messages.warning(request,"Table field is missing / you are importing the wrong File.")
         return redirect('payment_reciedved_list_out')
     return redirect('payment_reciedved_list_out')
 
@@ -22316,20 +22380,23 @@ def payment_recieved_overview_sort_paynum(request,pk):
 @login_required(login_url='login')
 def payment_recieved_view_or_edit(request,pk):
     pay_data = PaymentRecievedModel.objects.get(id=pk)
+    cust = customer.objects.get(id=pay_data.customer.id)
     company = company_details.objects.get(id=request.user.id)    
     customers = customer.objects.filter(user=request.user.id,status='Active')
     banks = Bankcreation.objects.filter(user = request.user.id)
     # datas for the payment recieved table
     user = User.objects.get(id=request.user.id)
-    invoice_data = invoice.objects.filter(user=user.id,customer=pay_data.customer.id)
-    retainer_invoice_data = RetainerInvoice.objects.filter(user=user.id,customer_name=pay_data.customer.id)
-    recurring_invoice_data = Recurring_invoice.objects.filter(user=user.id,cust_name=pay_data.customer.id)
-    credit_note_date = Creditnote.objects.filter(user=user.id,customer=pay_data.customer.id)
-    all_invoice = list(chain(invoice_data,retainer_invoice_data,recurring_invoice_data,credit_note_date))
+    # invoice_data = invoice.objects.filter(user=user.id,customer=pay_data.customer.id)
+    # retainer_invoice_data = RetainerInvoice.objects.filter(user=user.id,customer_name=pay_data.customer.id)
+    # recurring_invoice_data = Recurring_invoice.objects.filter(user=user.id,cust_name=pay_data.customer.id)
+    # credit_note_date = Creditnote.objects.filter(user=user.id,customer=pay_data.customer.id)
+    # all_invoice = list(chain(invoice_data,retainer_invoice_data,recurring_invoice_data,credit_note_date))
+    all_invoice = PaymentRecievedAllInvoices.objects.filter(payment_recieved=pk)
     return render(request,'payment_recieved_view_or_edit.html',{'customers':customers,
                                                                 'pay_data':pay_data,
                                                                 'banks':banks,
-                                                                'all_invoice':all_invoice})
+                                                                'all_invoice':all_invoice,
+                                                                "cust":cust})
 
 @login_required(login_url='login')
 def payment_recieved_update(request,pk):
@@ -22465,94 +22532,137 @@ def payment_recieved_update(request,pk):
         
         
 
+        # if PaymentRecievedIdModel.objects.filter(user=request.user.id).exists():
+        #     pay_id = PaymentRecievedIdModel.objects.filter(user=request.user.id).last()
+        #     if payments_recieved_number != pay_id.pay_rec_number:
+        #         ref_num = int(payment.id)+1
+        #         pay_id.ref_number = f'{ref_num:02}'
+        #         pay_id.save()
+        #     else:
+        #         pay_id = PaymentRecievedIdModel(user=user)
+        #         pay_id.save()
+        #         ref_num = int(payment.id)+1
+        #         pay_id.ref_number = f'{ref_num:02}'
+
+        #         pay_rec_num = int(pay_id.id)+1
+        #         pay_id.pay_rec_number = f'PRN-{pay_rec_num:02}'
+        #         pay_id.save()
+        # else:
+        #     pay_id = PaymentRecievedIdModel(user=user)
+        #     pay_id.save()
+        #     ref_num = int(payment.id)+1
+        #     pay_id.ref_number = f'{ref_num:02}'
+
+        #     pay_rec_num = int(pay_id.id)+1
+        #     pay_id.pay_rec_number = f'PRN-{pay_rec_num:02}'
+        #     pay_id.save()
+
         if PaymentRecievedIdModel.objects.filter(user=request.user.id).exists():
-            pay_id = PaymentRecievedIdModel.objects.filter(user=request.user.id).last()
-            if payments_recieved_number != pay_id.pay_rec_number:
-                ref_num = int(payment.id)+1
+            pay = PaymentRecievedIdModel.objects.filter(user=request.user.id)
+            pay_id = pay.last()
+            if pay.exclude(id=pay_id.id).last():
+                pay_id_second_last = pay.exclude(id=pay_id.id).last()
+                pattern = pay_id_second_last.pattern
+            else:
+                pay_id_second_last = pay.first()
+                pattern = pay_id_second_last.pattern
+            if payments_recieved_number != pay_id.pay_rec_number and payments_recieved_number != '' :
+                pay_id = PaymentRecievedIdModel(user=user)
+                count_for_ref_no = PaymentRecievedIdModel.objects.filter(user=user.id).count()
+                pay_id.pattern = pattern
+                pay_id.save()
+                ref_num = int(count_for_ref_no)+2
                 pay_id.ref_number = f'{ref_num:02}'
+
+                pay_id.pay_rec_number = pay_id_second_last.pay_rec_number
                 pay_id.save()
             else:
                 pay_id = PaymentRecievedIdModel(user=user)
+                count_for_ref_no = PaymentRecievedIdModel.objects.filter(user=user.id).count()
+                pay_id.pattern = pattern
                 pay_id.save()
-                ref_num = int(payment.id)+1
+                ref_num = int(count_for_ref_no)+2
                 pay_id.ref_number = f'{ref_num:02}'
 
-                pay_rec_num = int(pay_id.id)+1
-                pay_id.pay_rec_number = f'PRN-{pay_rec_num:02}'
+                pay_rec_num = ''.join(i for i in pay_id_second_last.pay_rec_number if i.isdigit())
+                pay_rec_num = int(pay_rec_num)+1
+
+                pay_id.pay_rec_number = f'{pattern}{pay_rec_num:02}'
                 pay_id.save()
-        else:
+        else:  
             pay_id = PaymentRecievedIdModel(user=user)
             pay_id.save()
-            ref_num = int(payment.id)+1
-            pay_id.ref_number = f'{ref_num:02}'
-
-            pay_rec_num = int(pay_id.id)+1
-            pay_id.pay_rec_number = f'PRN-{pay_rec_num:02}'
+            pay_id.ref_number = f'{2:02}'
+            
+            pattern = ''.join(i for i in payments_recieved_number if not i.isdigit())
+            pay_id.pattern = pattern
+            pay_id.pay_rec_number = f'{pattern}{2:02}'
             pay_id.save()
-        
-        # if customer changed deete all the cyrrent invoices and insert new
-        invoice_data = invoice.objects.filter(user=user.id,customer=cust.id)
-        retainer_invoice_data = RetainerInvoice.objects.filter(user=user.id,customer_name=cust.id)
-        recurring_invoice_data = Recurring_invoice.objects.filter(user=user.id,cust_name=cust.id)
-        credit_note_date = Creditnote.objects.filter(user=user.id,customer=cust.id)
-        if customer_changed == True:
-            all_invoice_data = PaymentRecievedAllInvoices.objects.filter(payment_recieved=payment.id)
-            all_invoice_data.delete()
-            # creating all invoive
-            all_invoice_data = None
-            if invoice_data.exists():
-                for i in invoice_data:
-                    all_invoice_data = PaymentRecievedAllInvoices(user=user,
-                                                                customer=cust,
-                                                                date= i.inv_date,
-                                                                due_date = i.due_date,
-                                                                invoice_type = 'INVOICE',
-                                                                invoice_number = i.invoice_no,
-                                                                invoice_amount = i.grandtotal,
-                                                                paid = i.paid_amount,
-                                                                balance = i.balance,
-                                                                payment_recieved=payment)
-                    all_invoice_data.save()
-            if retainer_invoice_data.exists():
-                print('a\nasdasdasd\nasads')
-                for i in retainer_invoice_data:
-                    all_invoice_data = PaymentRecievedAllInvoices(user=user,
-                                                                customer=cust,
-                                                                date= i.retainer_invoice_date,
-                                                                # due_date = i.due_date,
-                                                                invoice_type = 'RETAINER',
-                                                                invoice_number = i.retainer_invoice_number,
-                                                                invoice_amount = i.total_amount,
-                                                                paid = float(i.total_amount)-float(i.balance),
-                                                                balance = i.balance,
-                                                                payment_recieved=payment)
-                    all_invoice_data.save()
-            if recurring_invoice_data.exists():
-                for i in recurring_invoice_data:
-                    all_invoice_data = PaymentRecievedAllInvoices(user=user,
-                                                                customer=cust,
-                                                                date= i.start,
-                                                                due_date = i.end,
-                                                                invoice_type = 'RECURRING',
-                                                                invoice_number = i.reinvoiceno,
-                                                                invoice_amount = i.total,
-                                                                paid = i.paid,
-                                                                balance = i.balance,
-                                                                payment_recieved=payment)
-                    all_invoice_data.save()
-            if credit_note_date.exists():
-                for i in credit_note_date:
-                    all_invoice_data = PaymentRecievedAllInvoices(user=user,
-                                                                customer=cust,
-                                                                date= i.creditnote_date,
-                                                                # due_date = i.end,
-                                                                invoice_type = 'CREDIT NOTE',
-                                                                invoice_number = i.invoice_number,
-                                                                invoice_amount = i.total,
-                                                                paid = float(i.total)-float(i.balance),
-                                                                balance = i.balance,
-                                                                payment_recieved=payment)
-                    all_invoice_data.save()
+    
+
+        all_inv_date = request.POST.getlist('date[]')
+        all_inv_due_date = request.POST.getlist('due_date[]')
+        all_inv_inv_type = request.POST.getlist('inv_type[]')
+        all_inv_inv_no = request.POST.getlist('inv_no[]')
+        all_inv_inv_amount = request.POST.getlist('inv_amount[]')
+        all_inv_payment = request.POST.getlist('payment_amount[]')
+        all_inv_balance = request.POST.getlist('balance[]')
+        all_inv_inv_id = request.POST.getlist('invoice_id[]')
+
+
+        all_invoice_data = PaymentRecievedAllInvoices.objects.filter(payment_recieved=payment.id)
+        all_invoice_data.delete()
+        # creating all invoive
+        if len(all_inv_date) == len(all_inv_due_date) == len(all_inv_inv_type) == len(all_inv_inv_no) == len(all_inv_inv_amount) == len(all_inv_payment) == len(all_inv_balance) == len(all_inv_inv_id):
+            print('\n\n')
+            for i in range(len(all_inv_date)):
+                print(f'{all_inv_date[i]} {all_inv_due_date[i]} {all_inv_inv_type[i]} {all_inv_inv_no[i]} {all_inv_inv_amount[i]} {all_inv_payment[i]} {all_inv_balance[i]}  {all_inv_inv_id[i]}')
+                
+                # check due date valid
+                if all_inv_due_date[i] == '---- NILL ----':
+                    due_date = None
+                else:
+                    due_date = all_inv_due_date[i]
+                
+                invoice_type = all_inv_inv_type[i]
+                all_invoice_data = PaymentRecievedAllInvoices(user=user,
+                                                            customer=cust,
+                                                            date= all_inv_date[i],
+                                                            due_date = due_date,
+                                                            invoice_type = invoice_type,
+                                                            invoice_number = all_inv_inv_no[i],
+                                                            invoice_amount = all_inv_inv_amount[i],
+                                                            paid = all_inv_payment[i],
+                                                            balance = all_inv_balance[i],
+                                                            invoice_id = all_inv_inv_id[i],
+                                                            payment_recieved=payment)
+                all_invoice_data.save()
+
+                if all_inv_inv_type[i] == 'INVOICE':
+                    invoive_data = invoice.objects.get(id=all_inv_inv_id[i])
+                    invoive_data.paid_amount = all_inv_payment[i]
+
+                    invoive_data.balance = all_inv_balance[i]
+                    invoive_data.save()
+                if all_inv_inv_type[i] == 'RETAINER':
+                    retainer_data = RetainerInvoice.objects.get(id=all_inv_inv_id[i])
+
+                    retainer_data.balance = all_inv_balance[i]
+                    retainer_data.save()
+                if all_inv_inv_type[i] == 'RECCURING' :
+                    recur_data = Recurring_invoice.objects.get(id=all_inv_inv_id[i])
+                    recur_data.paid = all_inv_payment[i]
+
+                    recur_data.balance = all_inv_balance[i]
+                    recur_data.save()
+                if all_inv_inv_type[i] == 'CREDIT NOTE' :
+                    credit_data = Recurring_invoice.objects.get(id=all_inv_inv_id[i])
+                    # credit_data.paid = all_inv_payment[i]
+
+                    credit_data.balance = all_inv_balance[i]
+                    credit_data.save()
+
+            print('\n\n')
 
     return redirect('payment_reciedved_list_out')
 
@@ -22672,10 +22782,11 @@ def check_eway_num_valid(request):
         else:
             return HttpResponse("<span class='text-danger'>Eway Number is not Continues</span>")
     else:
-        if eway_invoive_bill_no != 'EWB-01':
-            return HttpResponse("<span class='text-danger'>Eway Number is not Continues</span>")
-        else:
-            return HttpResponse("")
+        # if eway_invoive_bill_no != 'EWB-01':
+        #     return HttpResponse("<span class='text-danger'>Eway Number is not Continues</span>")
+        # else:
+        #     return HttpResponse("")
+        return HttpResponse("")
 
 @login_required(login_url='login')
 def access_vehicle_number(request):
@@ -22891,29 +23002,40 @@ def import_eway_bill(request):
             index_table.append({sl_no:eway_bill.id})
 
             if EwaybillIdModel.objects.filter(user=request.user.id).exists():
-                eway_id = EwaybillIdModel.objects.filter(user=request.user.id).last()
-                if invoiceno != eway_id.eway_bill_number:
-                    ref_num = int(eway_bill.id)+1
-                    eway_id.ref_number = f'{ref_num:02}'
-                    eway_id.save()
+                pay = EwaybillIdModel.objects.filter(user=request.user.id)
+                pay_id_last = pay.last()
+                if pay.exclude(id=pay_id_last.id).last():
+                    pay_id_second_last = pay.exclude(id=pay_id_last.id).last()
+                    pattern = pay_id_second_last.pattern
+                    print('1')
                 else:
-                    eway_id = EwaybillIdModel(user=user.id)
-                    eway_id.save()
-                    ref_num = int(eway_bill.id)+1
-                    eway_id.ref_number = f'{ref_num:02}'
+                    pay_id_second_last = pay.first()
+                    pattern = pay_id_second_last.pattern
+                    print('2')
+                pay_id = EwaybillIdModel(user=user)
+                count_for_ref_no = EwaybillIdModel.objects.filter(user=user.id).count()
+                pay_id.pattern = pattern
+                pay_id.save()
+                ref_num = int(count_for_ref_no)+2
+                pay_id.ref_number = f'{ref_num:02}'
 
-                    pay_rec_num = int(eway_id.id)+1
-                    eway_id.eway_bill_number = f'EWB-{pay_rec_num:02}'
-                    eway_id.save()
-            else:
-                eway_id = EwaybillIdModel(user=user.id)
-                eway_id.save()
-                ref_num = int(eway_bill.id)+1
-                eway_id.ref_number = f'{ref_num:02}'
-
-                pay_rec_num = int(eway_id.id)+1
-                eway_id.eway_bill_number = f'EWB-{pay_rec_num:02}'
-                eway_id.save()
+                pay_rec_num = ''.join(i for i in pay_id_last.eway_bill_number if i.isdigit())
+                print(f'---{pay_rec_num}---')
+                pay_rec_num = int(pay_rec_num)+1
+                print(f'---{pay_rec_num}---')
+                pay_id.eway_bill_number = f'{pattern}{pay_rec_num:02}'
+                pay_id.save()
+                print('4')
+            else:  
+                pay_id = EwaybillIdModel(user=user)
+                pay_id.save()
+                pay_id.ref_number = f'{2:02}'
+                
+                pattern = ''.join(i for i in invoiceno if not i.isdigit())
+                pay_id.pattern = pattern
+                pay_id.eway_bill_number = f'{pattern}{2:02}'
+                pay_id.save()
+                print('5')
 
         ws2 = wb['Items']
         for row in ws2.iter_rows(min_row=2, values_only=True):
@@ -22958,8 +23080,190 @@ def import_eway_bill(request):
     
     return redirect('ewaylistout')
 
-          
+from io import StringIO          
 
+@login_required(login_url='login')
+def generate_pdf_sendmail_payment_received(request,pk):
+
+    buffer = StringIO()
+    # p = canvas.Canvas(buffer,pagesize=A4)
+    pdf_filename = "sample.pdf"
+    doc = SimpleDocTemplate(pdf_filename, pagesize=letter)
+
+    company_data = company_details.objects.get(user=request.user.id)
+    # doc = SimpleDocTemplate(response, pagesize=letter)
+    elements = []
+
+    customers = customer.objects.filter(user=request.user.id)
+
+    data = [["                              ","                                          ","                            "]]
+
+    heading_style = ParagraphStyle(
+        'Heading1',
+        parent=getSampleStyleSheet()['Heading1'],
+        # alignment=1,  # Centered alignment
+        fontSize=16,
+        fontName='Helvetica-Bold',
+    )
+    big_font_stle = ParagraphStyle(
+        'Heading1',
+        parent=getSampleStyleSheet()['Heading1'],
+        # alignment=1,  # Centered alignment
+        fontSize=10,
+        fontName='Helvetica-Bold', 
+        spaceBefore=0,  # Adjust space before the paragraph
+        spaceAfter=0, 
+    )
+    heading_style1 = ParagraphStyle(
+        'Heading1',
+        parent=getSampleStyleSheet()['Heading1'],
+        # alignment=1,  # Centered alignment
+        fontSize=10,
+        fontName='Helvetica',
+        spaceBefore=0,  # Adjust space before the paragraph
+        spaceAfter=0,   
+    )
+    heading_style3 = ParagraphStyle(
+        'Heading1',
+        parent=getSampleStyleSheet()['Heading1'],
+        alignment=1,  # Centered alignment
+        fontSize=15,
+        fontName='Helvetica',
+    )
+    company = company_details.objects.get(id=request.user.id)
+    pay_id = PaymentRecievedModel.objects.get(id=pk)
+    cust = customer.objects.get(id=pay_id.customer.id)
+    empty = Paragraph("", heading_style)
+    heading1 = Paragraph(f"{company_data.company_name}", heading_style)
+    para1 = Paragraph(f"{company_data.city}, {company_data.state}, {company_data.pincode}",heading_style1)
+    para2 = Paragraph(f"Phone : {company_data.contact_number}",heading_style1)
+    para3 = Paragraph(f"Email : {company_data.company_email}",heading_style1)
+    heading2 = Paragraph(f"PAYMENT RECIEVED", heading_style)
+    # elements.append(heading3)
+    elements.append(heading1)
+    elements.append(empty)
+    elements.append(empty)
+    elements.append(para1)
+    elements.append(para2)
+
+    elements.append(empty)
+    elements.append(empty) 
+    elements.append(empty)
+    elements.append(empty)
+
+
+    elements.append(heading2)
+
+    
+    # for i in range(10):
+    data.append(["Payment Rec. No :",f"{pay_id.payment_recieved_number}",f"{cust.customerName}"])
+    data.append(["Reference No :",f"{pay_id.reference_number}",f"{cust.Address1}"])
+    data.append(["Pay Rec. Date :",f"{pay_id.payment_recieved_date.strftime('%Y-%m-%d')}",f"{cust.customerEmail}"])
+    data.append(["Payment Method:",f"{pay_id.payment_recieved_method}",f"{cust.GSTTreatment[0:50]}"])
+    data.append(["GST NO :",f"{cust.GSTIN}",f"{cust.GSTTreatment[50:]}"])
+
+    table = Table(data)
+
+
+    
+    data1 = [["                              ","                                          ","                            "]]
+    data1.append([Paragraph(f"PARTICULARS : {pay_id.pay_rec_paid}",big_font_stle),"",""])
+    data1.append([Paragraph(f"AMOUNT : {pay_id.pay_rec_balance}",big_font_stle),"",""])
+    table1 = Table(data1)
+
+    style = TableStyle([
+        ('BACKGROUND', (0, 0), (0, 0), colors.white),
+        ('TEXTCOLOR', (0, 0), (-1, 0), colors.black),
+        ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
+        ('ALIGN',(0,1),(-1,-1 ),'LEFT'),
+        ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+        ('BOTTOMPADDING', (0, 0), (-1, 0), 12),
+        ('BACKGROUND', (0, 1), (-1, -1), colors.white),
+        ('GRID', (0, 0), (-1, -1), 1, colors.black)
+    ])
+
+    # table.setStyle(style)
+    elements.append(table)
+
+    elements.append(empty)
+    elements.append(empty)
+    elements.append(empty)
+    elements.append(empty)
+    elements.append(empty)
+    elements.append(empty)
+
+    elements.append(table1)
+    doc.build(elements)
+    pdf = buffer.getvalue()
+    buffer.close()
+    response = HttpResponse(content_type='application/pdf')
+    response['Content-Disposition'] = 'attachment; filename="mypdf.pdf"'
+    # response.write(pdf)
+    with open(pdf_filename, 'rb') as pdf_file:
+        pdf_content = pdf_file.read()
+    return pdf_content
+    
+@login_required(login_url='login')
+def payment_recieved_to_mail(request,pk):
+    if request.user:
+        if request.method == 'POST':
+            pdf = generate_pdf_sendmail_payment_received(request,pk)
+            pay_data = PaymentRecievedModel.objects.get(id=pk)
+            subject = "Payment Recieved document"
+            message = request.POST['email_message']
+            email = request.POST['email_ids']
+            mail = EmailMessage(subject, message, settings.EMAIL_HOST_USER, [email])
+            mail.attach("mypdf.pdf", pdf , 'application/pdf')
+            mail.send()
+            messages.success(request,"Document sent successfully")
+
+
+
+    return redirect('payment_recieved_overview',pk=pk)
+
+@login_required(login_url='login')
+def ewaybill_to_mail(request,pk):
+    if request.user:
+        if request.method == 'POST':
+            if request.method == 'POST':
+                emails_string = request.POST['email_ids']
+
+                # Split the string by commas and remove any leading or trailing whitespace
+                emails_list = [email.strip() for email in emails_string.split(',')]
+                email_message = request.POST['email_message']
+                # print(emails_list)
+
+                eway=EWayBill.objects.filter(user=request.user.id)
+                ewayi=EWayBill.objects.filter(id=pk)
+
+                eway_single = EWayBill.objects.get(id=pk)
+                comments = EwayComments.objects.filter(user=request.user.id,eway=eway_single.id)
+
+                company=company_details.objects.get(user=request.user.id)
+                ewayb = EWayBillItem.objects.filter(eway_bill_id=pk)  # Fetch items related to the EWayBill id
+                projc = get_object_or_404(EWayBill, id=pk)
+                # bill = SalesOrder.objects.get(id = id)
+                # items = sales_item.objects.filter( sale = bill.id)
+                        
+                context = {'eway':eway,"ewayi":ewayi,'ewayb':ewayb,'projc':projc,'company':company,
+                                                "eway_single":eway_single,"comments":comments}
+                template_path = 'ewaybill_pdf.html'
+                template = get_template(template_path)
+
+                html  = template.render(context)
+                result = BytesIO()
+                pdf = pisa.pisaDocument(BytesIO(html.encode("ISO-8859-1")), result)#, link_callback=fetch_resources)
+                pdf = result.getvalue()
+                filename = "eway_bill.pdf"
+                subject = "eway_Bill"
+                email = EmailMessage(subject, f"Hi,\nPlease find the attached SALES BILL - Bill-", from_email=settings.EMAIL_HOST_USER,to=emails_list)
+                email.attach(filename, pdf, "application/pdf")
+                email.send(fail_silently=False)
+
+                msg = messages.success(request, 'Bill has been shared via email successfully..!')
+
+
+    return redirect('ewayoverview',id=pk)    
 #==============================================  ASHIKH VU (end) ================================================
 
 def import_estimate(request):
@@ -23513,13 +23817,1800 @@ def convert_to_reccinvoice(request,pk):
 
 
 
+# ---------Bank Holders & Loan account ------------shemeem------------------------------------------------------
+def bankHolders(request):
+    if request.user:
+        context = {
+            'bank_holders':BankHolders.objects.filter(user = request.user)
+        }
+        return render(request, 'bank_holders.html',context)
+    return redirect('/')
+
+def addBankHolder(request):
+    if request.user:
+        context = {
+            'banks' : Bankcreation.objects.filter(user=request.user),
+        }
+        return render(request, 'add_bank_holder.html',context)
+    else:
+        return redirect('/')
+
+def newBankHolder(request):
+    if request.user:
+        if request.method == "POST":
+            try:
+                if not BankHolders.objects.filter(user = request.user, holder_name = request.POST['holder_name']).exists():
+                    hName = request.POST['holder_name']
+                    hAliasName = request.POST['holder_alias_name']
+                    hContact = request.POST['contact']
+                    hEmail = request.POST['holder_email']
+                    accType = request.POST['acc_type']
+                    
+                    bank = Bankcreation.objects.get(id = request.POST['bank_id'])
+                    bName = request.POST['bank_name']
+                    bAccNum = request.POST['acc_num']
+                    bIFSC = request.POST['ifsc_code']
+                    bSwiftCode = request.POST['swift_code']
+                    bBranch = request.POST['branch_name']
+
+                    chqRange = request.POST['chq_range']
+                    chqPrint = request.POST['chq_print']
+                    chqPrintConfig = request.POST['chq_print_config']
+
+                    pan = request.POST['pan_number']
+                    regType = request.POST['registration_type']
+                    gstin = request.POST['gstin']
+                    alterGst = request.POST['gst_alter']
+
+                    mName = request.POST['mailing_name']
+                    mAddress = request.POST['mailing_address']
+                    mCountry = request.POST['mailing_country']
+                    mState = request.POST['mailing_state']
+                    mPin = request.POST['mailing_pin']
+
+                    obDate = request.POST['openbal_date']
+                    obType = request.POST['openbal_type']
+                    obAmount = float(request.POST['openbal_amount'])
+
+                    holder = BankHolders(
+                        user = User.objects.get(id = request.user.id), holder_name = hName, alias_name = hAliasName, phone_number = hContact, email_id = hEmail, acc_type = accType,
+                        bank = bank, bank_name = bName, acc_number = bAccNum, ifsc_code = bIFSC, swift_code = bSwiftCode, branch_name = bBranch,
+                        cheque_range = chqRange, cheque_printing = chqPrint, cheque_print_config = chqPrintConfig,
+                        pan_number = pan, registration_type = regType, gstin = gstin, gst_alter = alterGst,
+                        mail_name = mName, mail_address = mAddress, mail_country = mCountry, mail_state = mState, mail_pin = mPin,
+                        openbal_date = obDate, openbal_type = obType, openbal_amount = obAmount,
+                        status = 'Active',
+                    )
+                    holder.save()
+                    return redirect(bankHolders)
+                else:
+                    messages.error(request, f"{request.POST['holder_name']} already exists..try another..!")
+                    return redirect(addBankHolder)
+            except Exception as e:
+                print(e)
+                return redirect(addBankHolder)
+        return redirect(addBankHolder)
+    return redirect('/')
+
+
+def getBankDetails(request):
+    if request.user:
+        try:
+            bankId = request.POST.get('id')
+            bankDetails = Bankcreation.objects.get(id = int(bankId))
+            return JsonResponse({'status':True, 'id':bankDetails.id, 'acc_number':bankDetails.ac_no, 'ifsc_code':bankDetails.ifsc, 'branch_name':bankDetails.branch, 'swift_code':'Not Available'})
+
+        except Exception as e:
+            print(e)
+            return JsonResponse({'status':False})
+    return redirect('/')
+
+
+def bankHoldersActive(request):
+    if request.user:
+        try:
+            context = {
+                'bank_holders':BankHolders.objects.filter(user = request.user, status = "Active")
+            }
+            return render(request, 'bank_holders.html',context)
+        except Exception as e:
+            print(e)
+            return redirect(bankHolders)
+    return redirect('/')
+
+
+def bankHoldersInactive(request):
+    if request.user:
+        try:
+            context = {
+                'bank_holders':BankHolders.objects.filter(user = request.user, status = "Inactive")
+            }
+            return render(request, 'bank_holders.html',context)
+        except Exception as e:
+            print(e)
+            return redirect(bankHolders)
+    return redirect('/')
+
+
+def bankHoldersSortByName(request):
+    if request.user:
+        try:
+            context = {
+                'bank_holders':BankHolders.objects.filter(user = request.user).order_by('holder_name')
+            }
+            return render(request, 'bank_holders.html',context)
+        except Exception as e:
+            print(e)
+            return redirect(bankHolders)
+    return redirect('/')
+
+
+def bankHoldersSortByAccNum(request):
+    if request.user:
+        try:
+            context = {
+                'bank_holders':BankHolders.objects.filter(user = request.user).order_by('acc_number')
+            }
+            return render(request, 'bank_holders.html',context)
+        except Exception as e:
+            print(e)
+            return redirect(bankHolders)
+    return redirect('/')
+
+
+def getAllBanks(request):
+    if request.user:
+        try:
+            list = []
+            banks = Bankcreation.objects.filter(user = request.user)
+
+            for item in banks:
+                bankDetails = {
+                    "id": item.id,
+                    "name": item.name,
+                }
+                list.append(bankDetails)
+
+            # print(list)
+            return JsonResponse({"banks": list}, safe=False)
+        except Exception as e:
+            print(e)
+            return JsonResponse({"message": "failed"})
+    else:
+        return JsonResponse({"message": "failed"})
+
+
+def bankHolderStatusInactive(request,id):
+    if request.user:
+        bank_holder = BankHolders.objects.get(id = id)
+        bank_holder.status = 'Inactive'
+        bank_holder.save()
+        print('Invactive==')
+        return redirect(viewBankHolder,id)
+    return redirect('/')
+
+
+def bankHolderStatusActive(request,id):
+    if request.user:
+        bank_holder = BankHolders.objects.get(id = id)
+        bank_holder.status = 'Active'
+        bank_holder.save()
+        print('Active==')
+        return redirect(viewBankHolder,id)
+    return redirect('/')
+
+
+def deleteBankHolder(request, id):
+    if request.user:
+        bank_holder = BankHolders.objects.get(id = id)
+        bank_holder.delete()
+        return redirect(bankHolders)
+    return redirect('/')
+
+
+def editBankHolder(request,id):
+    if request.user:
+        context = {
+            'holder':BankHolders.objects.get(id = id),
+            'banks' : Bankcreation.objects.filter(user=request.user),
+        }
+        return render(request,'edit_bank_holder.html',context)
+    return redirect('/')
+
+
+def updateBankHolder(request,id):
+    if request.user:
+        if request.method == "POST":
+            try:
+                holder = BankHolders.objects.get(id = id)
+                if request.POST['holder_name'] != holder.holder_name and BankHolders.objects.filter(user = request.user, holder_name = request.POST['holder_name']).exists():
+                    messages.error(request, f"{request.POST['holder_name']} already exists..try another..!")
+                    return redirect(editBankHolder,id)
+                else:
+                    hName = request.POST['holder_name']
+                    hAliasName = request.POST['holder_alias_name']
+                    hContact = request.POST['contact']
+                    hEmail = request.POST['holder_email']
+                    accType = request.POST['acc_type']
+                    
+                    bank = Bankcreation.objects.get(id = request.POST['bank_id'])
+                    bName = request.POST['bank_name']
+                    bAccNum = request.POST['acc_num']
+                    bIFSC = request.POST['ifsc_code']
+                    bSwiftCode = request.POST['swift_code']
+                    bBranch = request.POST['branch_name']
+
+                    chqRange = request.POST['chq_range']
+                    chqPrint = request.POST['chq_print']
+                    chqPrintConfig = request.POST['chq_print_config']
+
+                    pan = request.POST['pan_number']
+                    regType = request.POST['registration_type']
+                    gstin = "" if request.POST['registration_type'] != 'Regular' and request.POST['registration_type'] != 'Composition' else request.POST['gstin']
+                    alterGst = request.POST['gst_alter']
+
+                    mName = request.POST['mailing_name']
+                    mAddress = request.POST['mailing_address']
+                    mCountry = request.POST['mailing_country']
+                    mState = request.POST['mailing_state']
+                    mPin = request.POST['mailing_pin']
+
+                    obDate = request.POST['openbal_date']
+                    obType = request.POST['openbal_type']
+                    obAmount = float(request.POST['openbal_amount'])
+
+                    holder.holder_name = hName 
+                    holder.alias_name = hAliasName
+                    holder.phone_number = hContact
+                    holder.email_id = hEmail
+                    holder.acc_type = accType
+                    holder.bank = bank
+                    holder.bank_name = bName
+                    holder.acc_number = bAccNum
+                    holder.ifsc_code = bIFSC
+                    holder.swift_code = bSwiftCode
+                    holder.branch_name = bBranch
+                    holder.cheque_range = chqRange
+                    holder.cheque_printing = chqPrint
+                    holder.cheque_print_config = chqPrintConfig
+                    holder.pan_number = pan
+                    holder.registration_type = regType
+                    holder.gstin = gstin
+                    holder.gst_alter = alterGst
+                    holder.mail_name = mName
+                    holder.mail_address = mAddress
+                    holder.mail_country = mCountry
+                    holder.mail_state = mState
+                    holder.mail_pin = mPin
+                    holder.openbal_date = obDate
+                    holder.openbal_type = obType
+                    holder.openbal_amount = obAmount
+                    
+                    holder.save()
+                    return redirect(viewBankHolder,id)
+
+            except Exception as e:
+                print(e)
+                return redirect(editBankHolder,id)
+        return redirect(editBankHolder,id)
+    return redirect('/')
+
+
+def viewBankHolder(request, id):
+    if request.user:
+        try:
+            context = {
+                'holder': BankHolders.objects.get(id = id),
+                'all_bank_holders': BankHolders.objects.filter(user = request.user),
+            }
+            return render(request, 'view_bank_holder.html',context)
+        except Exception as e:
+            print(e)
+            return redirect(bankHolders)
+    return redirect('/')
+
+
+def holderNameAsc(request, id):
+    if request.user:
+        try:
+            context = {
+                'holder': BankHolders.objects.get(id = id),
+                'all_bank_holders': BankHolders.objects.filter(user = request.user).order_by('holder_name'),
+            }
+            return render(request, 'view_bank_holder.html',context)
+        except Exception as e:
+            print(e)
+            return redirect(bankHolders)
+    return redirect('/')
+
+
+def holderNameDesc(request, id):
+    if request.user:
+        try:
+            context = {
+                'holder': BankHolders.objects.get(id = id),
+                'all_bank_holders': BankHolders.objects.filter(user = request.user).order_by('-holder_name'),
+            }
+            return render(request, 'view_bank_holder.html',context)
+        except Exception as e:
+            print(e)
+            return redirect(bankHolders)
+    return redirect('/')
+
+
+
+#---------Loan Account views--------
+
+def loanAccounts(request):
+    if request.user:
+        context = {
+            'loan_accounts':LoanAccounts.objects.filter(user = request.user)
+        }
+        return render(request, 'loan_accounts.html',context)
+    return redirect('/')
+
+
+def addLoanAccount(request):
+    if request.user:
+        context = {
+            'banks' : Bankcreation.objects.filter(user=request.user),
+            'bankHolders':BankHolders.objects.filter(user = request.user),
+        }
+        return render(request, 'add_loan_account.html',context)
+    else:
+        return redirect('/')
+
+
+def getHolderDetails(request):
+    if request.user:
+        try:
+            holderId = request.POST.get('id')
+            if not LoanAccounts.objects.filter(user = request.user, holder = BankHolders.objects.get(id = holderId)).exists():
+                holderDetails = BankHolders.objects.get(id = int(holderId))
+                return JsonResponse({'status':True, 'isTaken':"false", 'id':holderDetails.id, 'acc_number':holderDetails.acc_number})
+            else:
+                holderDetails = BankHolders.objects.get(id = request.POST.get('id'))
+                return JsonResponse({'status':False, 'isTaken':'true','message':f"Loan account already exists for {holderDetails.holder_name}, try additional loan..!"})
+        except Exception as e:
+            print(e)
+            return JsonResponse({'status':False})
+    return redirect('/')
+
+
+def getAllBankHolders(request):
+    if request.user:
+        try:
+            list = []
+            holders = BankHolders.objects.filter(user = request.user)
+
+            for item in holders:
+                holderDetails = {
+                    "id": item.id,
+                    "name": item.holder_name,
+                }
+                list.append(holderDetails)
+
+            # print(list)
+            return JsonResponse({"holders": list}, safe=False)
+        except Exception as e:
+            print(e)
+            return JsonResponse({"message": "failed"})
+    else:
+        return JsonResponse({"message": "failed"})
+
+
+def createLoanAccount(request):
+    if request.user:
+        try:
+            if request.method == 'POST':
+                holder = BankHolders.objects.get(id = request.POST['acc_name'])
+                if not LoanAccounts.objects.filter(user = request.user, holder = BankHolders.objects.get(id = request.POST['acc_name'])).exists():
+                    
+                    acc_name = holder.holder_name
+                    acc_number = request.POST['loan_acc_number']
+                    lender_bank = request.POST['lender_bank']
+                    loan_amount = float(request.POST['loan_amount'])
+                    desc = request.POST['description']
+                    amt_rcvd = request.POST['amount_received_in']
+                    amt_rcvd_acc_num = None if request.POST['amt_rcvd_acc_num'] == '' else request.POST['amt_rcvd_acc_num']
+                    amt_rcvd_upi_id = None if request.POST['amt_rcvd_upi_id'] == '' else request.POST['amt_rcvd_upi_id']
+                    amt_rcvd_cheque_id = None if request.POST['amt_rcvd_cheque_id'] == '' else request.POST['amt_rcvd_cheque_id']
+
+                    loan_date = request.POST['loan_date']
+                    interest = 0 if request.POST['interest_amount'] == '' else float(request.POST['interest_amount'])
+                    terms = 0 if request.POST['terms_duration'] == '' else  int(request.POST['terms_duration'])
+
+                    procs_fee = 0 if request.POST['procs_fee'] == '' else float(request.POST['procs_fee'])
+                    procs_fee_paid_from = request.POST['procs_fee_received_from']
+                    procs_fee_acc_num = None if request.POST['procs_fee_acc_num'] == '' else request.POST['procs_fee_acc_num']
+                    procs_fee_upi_id = None if request.POST['procs_fee_upi_id'] == '' else request.POST['procs_fee_upi_id']
+                    procs_fee_cheque_id = None if request.POST['procs_fee_cheque_id'] == '' else request.POST['procs_fee_cheque_id']
+
+                    # bal = loan_amount+interest
+                    status = 'Active'
+
+                    account = LoanAccounts(
+                        user = User.objects.get(id = request.user.id),holder = holder,acc_name = acc_name, acc_number = acc_number, lender_bank = lender_bank, description = desc,
+                        loan_amount = loan_amount,balance = loan_amount, loan_date = loan_date, amount_received = amt_rcvd ,amt_rcvd_cheque_id = amt_rcvd_cheque_id, amt_rcvd_upi_id = amt_rcvd_upi_id, amt_rcvd_bank_acc_number = amt_rcvd_acc_num,
+                        interest = interest,term_duration = terms, procs_fee = procs_fee,procs_fee_paid_from = procs_fee_paid_from,procs_fee_cheque_id = procs_fee_cheque_id,procs_fee_upi_id = procs_fee_upi_id,procs_fee_bank_acc_number = procs_fee_acc_num, status = status,
+                    )
+
+                    account.save()
+
+                    #Transaction
+                    trans = LoanAccountTransactions(
+                        user = User.objects.get(id = request.user.id), loan_account = account, type = 'Opening Loan', date = date.today(), principal = account.loan_amount, interest = account.interest,
+                        total = account.loan_amount + account.interest, balance = account.balance
+                    )
+                    trans.save()
+
+
+                    return redirect(loanAccounts)
+                else:
+                    # if account with holder already exists, it will added as an additional loan to the account.
+                    # account = LoanAccounts.objects.get(user = request.user, holder = BankHolders.objects.get(id = request.POST['acc_name']))
+                    
+                    # # adjusting balance
+                    # account.balance += float(request.POST['loan_amount'])
+                    # account.save()
+                    # interest = 0 if request.POST['interest_amount'] == '' else float(request.POST['interest_amount'])
+                    # #Transaction for additional loan
+                    # trans = LoanAccountTransactions(
+                    #     user = User.objects.get(id = request.user.id), loan_account = account, type = 'Additional Loan', date = date.today(), principal = float(request.POST['loan_amount']), interest = float(request.POST['interest_amount']),
+                    #     total = float(request.POST['loan_amount']) + interest, balance = account.balance
+                    # )
+                    # trans.save()
+
+                    
+
+                    messages.info(request, f'Loan Account for {holder.holder_name} already exists.. Try Additional Loan.!')
+                    return redirect(loanAccounts)
+        except Exception as e:
+            print(e)
+            return redirect(addLoanAccount)
+    return redirect('/')
+
+
+def viewLoanAccount(request,id):
+    if request.user:
+        try:
+            account = LoanAccounts.objects.get(id = id)
+            context = {
+                'account': account,
+                'transactions': LoanAccountTransactions.objects.filter(loan_account = account).order_by('-id'),
+                'all_loan_accounts': LoanAccounts.objects.filter(user = request.user),
+                'banks' : Bankcreation.objects.filter(user=request.user),
+            }
+            return render(request, 'view_loan_account.html', context)
+        except Exception as e:
+            print(e)
+            return redirect(loanAccounts)
+    return redirect('/')
+
+
+def deleteLoanAccount(request, id):
+    if request.user:
+        try:
+            account = LoanAccounts.objects.get(id = id)
+            LoanAccountTransactions.objects.filter(loan_account = account).delete()
+            account.delete()
+
+            return redirect(loanAccounts)
+        except Exception as e:
+            print(e)
+            return redirect(loanAccounts)
+    return redirect('/')
+
+
+def editLoanAccount(request, id):
+    if request.user:
+        try:
+            context = {
+                'account':LoanAccounts.objects.get(id = id),
+                'banks' : Bankcreation.objects.filter(user=request.user),
+                'bankHolders':BankHolders.objects.filter(user = request.user),
+            }
+            
+            return render(request, 'edit_loan_account.html',context)
+        except Exception as e:
+            print(e)
+            return redirect(loanAccounts)
+    return redirect('/')
+
+
+
+def updateLoanAccount(request,id):
+    if request.user:
+        try:
+            holder = BankHolders.objects.get(id = request.POST['acc_name'])
+            if request.method == 'POST':
+                account = LoanAccounts.objects.get(id = id)
+                acc_name = holder.holder_name
+                acc_number = request.POST['loan_acc_number']
+                lender_bank = request.POST['lender_bank']
+                loan_amount = float(request.POST['loan_amount'])
+                desc = request.POST['description']
+                amt_rcvd = request.POST['amount_received_in']
+                amt_rcvd_acc_num = None if request.POST['amt_rcvd_acc_num'] == '' else request.POST['amt_rcvd_acc_num']
+                amt_rcvd_upi_id = None if request.POST['amt_rcvd_upi_id'] == '' else request.POST['amt_rcvd_upi_id']
+                amt_rcvd_cheque_id = None if request.POST['amt_rcvd_cheque_id'] == '' else request.POST['amt_rcvd_cheque_id']
+
+                loan_date = request.POST['loan_date']
+                interest = 0 if request.POST['interest_amount'] == '' else float(request.POST['interest_amount'])
+                terms = int(request.POST['terms_duration'])
+
+                procs_fee = float(request.POST['procs_fee'])
+                procs_fee_paid_from = request.POST['procs_fee_received_from']
+                procs_fee_acc_num = None if request.POST['procs_fee_acc_num'] == '' else request.POST['procs_fee_acc_num']
+                procs_fee_upi_id = None if request.POST['procs_fee_upi_id'] == '' else request.POST['procs_fee_upi_id']
+                procs_fee_cheque_id = None if request.POST['procs_fee_cheque_id'] == '' else request.POST['procs_fee_cheque_id']
+
+                # bal = loan_amount+interest
+                status = 'Active'
+
+                new = loan_amount
+                current = account.loan_amount
+                diff = abs(new - current)
+
+                if account.holder.id == int(request.POST['acc_name']):
+                    # updating loan amount balance w r t current and new amounts..
+                    if account.loan_amount < loan_amount:
+                        account.balance += abs(account.loan_amount - loan_amount)
+                    elif account.loan_amount > loan_amount:
+                        account.balance -= abs(account.loan_amount - loan_amount)
+
+                    account.lender_bank = lender_bank
+                    account.description = desc
+                    account.loan_amount = loan_amount
+                    account.loan_date = loan_date
+                    account.amount_received = amt_rcvd
+                    account.amt_rcvd_cheque_id = amt_rcvd_cheque_id
+                    account.amt_rcvd_upi_id = amt_rcvd_upi_id
+                    account.amt_rcvd_bank_acc_number = amt_rcvd_acc_num
+                    account.interest = interest
+                    account.term_duration = terms
+                    account.procs_fee = procs_fee
+                    account.procs_fee_paid_from = procs_fee_paid_from
+                    account.procs_fee_cheque_id = procs_fee_cheque_id
+                    account.procs_fee_upi_id = procs_fee_upi_id
+                    account.procs_fee_bank_acc_number = procs_fee_acc_num
+
+                    account.save()
+
+                    #Transaction
+                    trans = LoanAccountTransactions.objects.get(user = User.objects.get(id = request.user.id), loan_account = account, type = 'Opening Loan')
+                    trans.date = account.loan_date
+                    trans.principal = account.loan_amount
+                    trans.interest = account.interest
+                    trans.total = account.loan_amount + account.interest
+                    if new > current:
+                        trans.balance += diff
+                    else:
+                        trans.balance -= diff
+                    trans.save()
+
+                    for i in LoanAccountTransactions.objects.filter(user = request.user, loan_account = account, id__gte = trans.id):
+                        if i.type == 'EMI Paid' or i.type == 'Additional Loan':
+                            if new > current:
+                                i.balance += diff
+                            else:
+                                i.balance -= diff
+                        i.save()
+
+                    return redirect(viewLoanAccount,id)
+                else:
+                    # if account name is changed. Checks whether the holder have a Loan account or not, if yes, alert user, ohterwise, updates account.
+                    if not LoanAccounts.objects.filter(user = request.user, holder = BankHolders.objects.get(id = request.POST['acc_name'])).exists():
+                        # account = LoanAccounts(
+                        #     user = User.objects.get(id = request.user.id),holder = holder,acc_name = acc_name, acc_number = acc_number, lender_bank = lender_bank, description = desc,
+                        #     loan_amount = loan_amount,balance = loan_amount, loan_date = loan_date, amount_received = amt_rcvd ,amt_rcvd_cheque_id = amt_rcvd_cheque_id, amt_rcvd_upi_id = amt_rcvd_upi_id, amt_rcvd_bank_acc_number = amt_rcvd_acc_num,
+                        #     interest = interest,term_duration = terms, procs_fee = procs_fee,procs_fee_paid_from = procs_fee_paid_from,procs_fee_cheque_id = procs_fee_cheque_id,procs_fee_upi_id = procs_fee_upi_id,procs_fee_bank_acc_number = procs_fee_acc_num, status = status,
+                        # )
+
+                        # account.save()
+
+                        # #Transaction
+                        # trans = LoanAccountTransactions(
+                        #     user = User.objects.get(id = request.user.id), loan_account = account, type = 'Opening Loan', date = date.today(), principal = account.loan_amount, interest = account.interest,
+                        #     total = account.loan_amount + account.interest, balance = account.balance
+                        # )
+                        # trans.save()
+
+
+                        if account.loan_amount < loan_amount:
+                            account.balance += abs(account.loan_amount - loan_amount)
+                        elif account.loan_amount > loan_amount:
+                            account.balance -= abs(account.loan_amount - loan_amount)
+                        account.holder = holder
+                        account.acc_name = acc_name
+                        account.acc_number = acc_number
+                        account.lender_bank = lender_bank
+                        account.description = desc
+                        account.loan_amount = loan_amount
+                        account.loan_date = loan_date
+                        account.amount_received = amt_rcvd
+                        account.amt_rcvd_cheque_id = amt_rcvd_cheque_id
+                        account.amt_rcvd_upi_id = amt_rcvd_upi_id
+                        account.amt_rcvd_bank_acc_number = amt_rcvd_acc_num
+                        account.interest = interest
+                        account.term_duration = terms
+                        account.procs_fee = procs_fee
+                        account.procs_fee_paid_from = procs_fee_paid_from
+                        account.procs_fee_cheque_id = procs_fee_cheque_id
+                        account.procs_fee_upi_id = procs_fee_upi_id
+                        account.procs_fee_bank_acc_number = procs_fee_acc_num
+
+                        account.save()
+
+                        #Transaction
+                        trans = LoanAccountTransactions.objects.get(user = User.objects.get(id = request.user.id), loan_account = account, type = 'Opening Loan')
+                        trans.date = account.loan_date
+                        trans.principal = account.loan_amount
+                        trans.interest = account.interest
+                        trans.total = account.loan_amount + account.interest
+                        if new > current:
+                            trans.balance += diff
+                        else:
+                            trans.balance -= diff
+                        trans.save()
+
+                        for i in LoanAccountTransactions.objects.filter(user = request.user, loan_account = account, id__gte = trans.id):
+                            if i.type == 'EMI Paid' or i.type == 'Additional Loan':
+                                if new > current:
+                                    i.balance += diff
+                                else:
+                                    i.balance -= diff
+                            i.save()
+
+
+                        return redirect(viewLoanAccount,id)
+                    else:
+                        # if account with holder already exists, it will added as an additional loan to the account.
+                        # account = LoanAccounts.objects.get(user = request.user, holder = BankHolders.objects.get(id = request.POST['acc_name']))
+                        
+                        # # adjusting balance
+                        # account.balance += float(request.POST['loan_amount'])
+                        # account.save()
+                        # interest = 0 if request.POST['interest_amount'] == '' else float(request.POST['interest_amount'])
+                        # #Transaction for additional loan
+                        # trans = LoanAccountTransactions(
+                        #     user = User.objects.get(id = request.user.id), loan_account = account, type = 'Additional Loan', date = date.today(), principal = float(request.POST['loan_amount']), interest = float(request.POST['interest_amount']),
+                        #     total = float(request.POST['loan_amount']) + interest,balance = account.balance
+                        # )
+                        # trans.save()
+
+                        messages.info(request, f'Loan Account for {holder.holder_name} already exists.. Try with another holder or Additional Loan.!')
+                        # messages.info(request, f'The amount {trans.principal} has been added as an Additional Loan as the account for {account.acc_name} already exists.')
+                        return redirect(viewLoanAccount,id)
+        except Exception as e:
+            print(e)
+            return redirect(viewLoanAccount,id)
+    return redirect('/')
+
+
+def loanAccountActive(request):
+    if request.user:
+        try:
+            context = {
+                'loan_accounts':LoanAccounts.objects.filter(user = request.user, status = "Active")
+            }
+            return render(request, 'loan_accounts.html',context)
+        except Exception as e:
+            print(e)
+            return redirect(loanAccounts)
+    return redirect('/')
+
+
+def loanAccountInactive(request):
+    if request.user:
+        try:
+            context = {
+                'loan_accounts':LoanAccounts.objects.filter(user = request.user, status = "Inactive")
+            }
+            return render(request, 'loan_accounts.html',context)
+        except Exception as e:
+            print(e)
+            return redirect(loanAccounts)
+    return redirect('/')
+
+
+def loanAccountSortByName(request):
+    if request.user:
+        try:
+            context = {
+                'loan_accounts':LoanAccounts.objects.filter(user = request.user).order_by('acc_name')
+            }
+            return render(request, 'loan_accounts.html',context)
+        except Exception as e:
+            print(e)
+            return redirect(loanAccounts)
+    return redirect('/')
+
+
+def loanAccountSortByAmount(request):
+    if request.user:
+        try:
+            context = {
+                'loan_accounts':LoanAccounts.objects.filter(user = request.user).order_by('loan_amount')
+            }
+            return render(request, 'loan_accounts.html',context)
+        except Exception as e:
+            print(e)
+            return redirect(loanAccounts)
+    return redirect('/')
+
+
+def loanAccountStatusInactive(request,id):
+    if request.user:
+        loan_account = LoanAccounts.objects.get(id = id)
+        loan_account.status = 'Inactive'
+        loan_account.save()
+
+        return redirect(viewLoanAccount,id)
+    return redirect('/')
+
+
+def loanAccountStatusActive(request,id):
+    if request.user:
+        loan_account = LoanAccounts.objects.get(id = id)
+        loan_account.status = 'Active'
+        loan_account.save()
+
+        return redirect(viewLoanAccount,id)
+    return redirect('/')
+
+
+def loanAccountNameAsc(request, id):
+    if request.user:
+        try:
+            account = LoanAccounts.objects.get(id = id)
+            context = {
+                'account': account,
+                'transactions': LoanAccountTransactions.objects.filter(loan_account = account).order_by('-id'),
+                'all_loan_accounts': LoanAccounts.objects.filter(user = request.user).order_by('acc_name'),
+                'banks' : Bankcreation.objects.filter(user=request.user),
+            }
+            return render(request, 'view_loan_account.html', context)
+        except Exception as e:
+            print(e)
+            return redirect(loanAccounts)
+    return redirect('/')
+
+
+def loanAccountNameDesc(request, id):
+    if request.user:
+        try:
+            account = LoanAccounts.objects.get(id = id)
+            context = {
+                'account': account,
+                'transactions': LoanAccountTransactions.objects.filter(loan_account = account).order_by('-id'),
+                'all_loan_accounts': LoanAccounts.objects.filter(user = request.user).order_by('-acc_name'),
+                'banks' : Bankcreation.objects.filter(user=request.user),
+            }
+            return render(request, 'view_loan_account.html', context)
+        except Exception as e:
+            print(e)
+            return redirect(loanAccounts)
+    return redirect('/')
+
+
+def editLoanAccountTransaction(request,id):
+    if request.user:
+        try:
+            trns = LoanAccountTransactions.objects.get(id = id)
+            context = {
+                'trans' : trns,
+            }
+            return render(request, 'edit_loan_account_transaction.html',context)
+        except Exception as e:
+            print(e)
+            return redirect(viewLoanAccount,trns.loan_account.id)
+    return redirect('/')
+
+
+def updateLoanAccountTransaction(request,id):
+    if request.user:
+        try:
+            if request.method == 'POST':
+                trans = LoanAccountTransactions.objects.get(id = id)
+                loan_account = LoanAccounts.objects.get(id = trans.loan_account.id)
+                current = float(trans.principal)
+                new = float(request.POST['principal_amount'])
+                diff = abs(float(request.POST['principal_amount']) - float(trans.principal))
+
+                if request.POST['trans_type'] == 'EMI Paid':
+                    if float(request.POST['principal_amount']) > trans.principal:
+                        loan_account.balance -= abs(float(request.POST['principal_amount']) - float(trans.principal))
+                    else:
+                        loan_account.balance += abs(float(request.POST['principal_amount']) - float(trans.principal))
+                elif request.POST['trans_type'] == 'Opening Loan' or request.POST['trans_type'] == 'Additional Loan':
+                    if float(request.POST['principal_amount']) > trans.principal:
+                        loan_account.balance += abs(float(request.POST['principal_amount']) - float(trans.principal))
+                    else:
+                        loan_account.balance -= abs(float(request.POST['principal_amount']) - float(trans.principal))
+                
+                loan_account.save()
+
+                trans.date = request.POST['trans_date']
+                trans.principal = float(request.POST['principal_amount'])
+                trans.interest = float(request.POST['trans_interest'])
+                trans.total = float(request.POST['principal_amount']) + float(request.POST['trans_interest'])
+                # trans.balance = loan_account.balance
+                trans.save()
+
+                for i in LoanAccountTransactions.objects.filter(user = request.user, loan_account = loan_account, id__gte = id):
+                    if i.type == 'EMI Paid' or i.type == 'Additional Loan':
+                        if new > current and trans.type == 'Additional Loan':
+                            i.balance += diff
+                        elif new < current and trans.type == 'Additional Loan':
+                            i.balance -= diff
+                        elif new > current and trans.type == 'EMI Paid':
+                            i.balance -= diff
+                        elif new < current and trans.type == 'EMI Paid':
+                            i.balance += diff
+                    # elif i.type == 'Additional Loan':
+                    #     if new > current and trans.type == 'Additional Loan':
+                    #         i.balance += diff
+                    #     elif new < current and trans.type == 'Additional Loan':
+                    #         i.balance -= diff
+                    #     elif new > current and trans.type == 'EMI Paid':
+                    #         i.balance -= diff
+                    #     elif new < current and trans.type == 'EMI Paid':
+                    #         i.balance += diff
+                    i.save()
+                
+                return redirect(viewLoanAccount,loan_account.id)
+
+        except Exception as e:
+            print(e)
+            return redirect(editLoanAccountTransaction,id)
+    return redirect('/')
+
+
+def deleteLoanAccountTransaction(request, id):
+    if request.user:
+        try:
+            trans = LoanAccountTransactions.objects.get(id = id)
+            loan_account = LoanAccounts.objects.get(id = trans.loan_account.id)
+            amt = trans.principal
+
+            if trans.type == 'EMI Paid':
+                loan_account.balance += trans.principal
+            elif trans.type == 'Opening Loan' or trans.type == 'Additional Loan':
+                loan_account.balance -= trans.principal
+            loan_account.save()
+
+            for i in LoanAccountTransactions.objects.filter(user = request.user, loan_account = loan_account, id__gt = id):
+                if trans.type == 'EMI Paid':
+                    i.balance += amt
+                elif trans.type == 'Additional Loan':
+                    i.balance -= amt
+                i.save()
+
+            trans.delete()
+
+            return redirect(viewLoanAccount, loan_account.id)
+        except Exception as e:
+            print(e)
+            return redirect(viewLoanAccount, loan_account.id)
+    return redirect('/')
+
+
+def makeEmiPayment(request, id):
+    if request.user:
+        if request.method == 'POST':
+            try:
+                account = LoanAccounts.objects.get(id = id)
+                emi_date = request.POST['emi_date']
+                principal = float(request.POST['emi_amount'])
+                interest = 0 if request.POST['emi_interest'] == '' else float(request.POST['emi_interest'])
+                total = principal + interest
+                paid_from = request.POST['emi_paid_from']
+                acc_num = None if request.POST['emi_paid_acc_num'] == "" else request.POST['emi_paid_acc_num']
+                emi_upi = request.POST['emi_paid_upi_id']
+                emi_cheque = request.POST['emi_paid_cheque_id']
+                
+                account.balance -= principal
+                account.save()
+
+                trans = LoanAccountTransactions(
+                    user = User.objects.get(id = request.user.id), loan_account = account, type = 'EMI Paid', date = emi_date, principal = principal, interest = interest,
+                    total = total, emi_paid = paid_from, emi_paid_upi_id = emi_upi,emi_paid_cheque_id=emi_cheque, emi_paid_bank_acc_number = acc_num, balance = account.balance
+                )
+                trans.save()
+                
+                
+
+                return redirect(viewLoanAccount, id)
+
+            except Exception as e:
+                print(e)
+                return redirect(viewLoanAccount, id)
+    return redirect('/')
+
+
+def getAdditionalLoan(request, id):
+    if request.user:
+        if request.method == 'POST':
+            try:
+                account = LoanAccounts.objects.get(id = id)
+                al_date = request.POST['add_loan_date']
+                principal = float(request.POST['add_loan_amount'])
+                interest = 0 if request.POST['add_loan_interest'] == '' else float(request.POST['add_loan_interest'])
+                total = principal + interest
+                rcvd_from = request.POST['add_loan_received_from']
+                acc_num = None if request.POST['add_loan_acc_num'] == "" else request.POST['add_loan_acc_num']
+                al_upi = request.POST['add_loan_upi_id']
+                al_cheque = request.POST['add_loan_cheque_id']
+                
+                account.balance += principal
+                account.save()
+
+                trans = LoanAccountTransactions(
+                    user = User.objects.get(id = request.user.id), loan_account = account, type = 'Additional Loan', date = al_date, principal = principal, interest = interest,
+                    total = total, additional_loan_received_from = rcvd_from, add_loan_upi_id = al_upi,add_loan_cheque_id=al_cheque, add_loan_bank_acc_number = acc_num, balance = account.balance
+                )
+                trans.save()
+                
+                
+
+                return redirect(viewLoanAccount, id)
+
+            except Exception as e:
+                print(e)
+                return redirect(viewLoanAccount, id)
+    return redirect('/')
+
+
+def transactionsInBetween(request, id):
+    if request.user:
+        try:
+            account = LoanAccounts.objects.get(id = id)
+            fromDate = request.GET['trans_from_date']
+            toDate = request.GET['trans_to_date']
+            if 'statement' in request.GET:
+                stat = 'true'
+            else:
+                stat = 'false'
+
+            context = {
+                'account': account,
+                'transactions': LoanAccountTransactions.objects.filter(loan_account = account,date__range = [fromDate,toDate]),
+                'all_loan_accounts': LoanAccounts.objects.filter(user = request.user),
+                'banks' : Bankcreation.objects.filter(user=request.user),
+                'from':fromDate,
+                'to':toDate,
+                'statement':stat,
+            }
+            return render(request, 'view_loan_account.html', context)
+        except Exception as e:
+            print(e)
+            return redirect(viewLoanAccount, id)
+
+    return redirect('/')    
+
+
+def shareLoanAccountStatementToEmail(request,id):
+    if request.user:
+        try:
+            if request.method == 'POST':
+                emails_string = request.POST['email_ids']
+
+                # Split the string by commas and remove any leading or trailing whitespace
+                emails_list = [email.strip() for email in emails_string.split(',')]
+                email_message = request.POST['email_message']
+                # print(emails_list)
+
+                account = LoanAccounts.objects.get(id = id)
+                trans = LoanAccountTransactions.objects.filter(loan_account = account).order_by('-id')
+                cmp = company_details.objects.get(user = request.user)
+
+                context = {'account': account,'transactions':trans,'company':cmp}
+                template_path = 'loan_account_statement_pdf.html'
+                template = get_template(template_path)
+
+                html  = template.render(context)
+                result = BytesIO()
+                pdf = pisa.pisaDocument(BytesIO(html.encode("ISO-8859-1")), result)#, link_callback=fetch_resources)
+                pdf = result.getvalue()
+                filename = f'Statement - {account.acc_name}.pdf'
+                subject = f"Transaction Statement - {account.acc_name}"
+                email = EmailMessage(subject, f"Hi,\nPlease find the attached Statment for -{account.acc_name}. \n{email_message}\n\n--\nRegards,\n{cmp.company_name}\n{cmp.address}\n{cmp.city} - {cmp.state}\n{cmp.contact_number}", from_email=settings.EMAIL_HOST_USER, to=emails_list)
+                email.attach(filename, pdf, "application/pdf")
+                email.send(fail_silently=False)
+
+                messages.success(request, 'Statement has been shared via email successfully..!')
+                return redirect(viewLoanAccount,id)
+        except Exception as e:
+            print(e)
+            messages.error(request, f'{e}')
+            return redirect(viewLoanAccount, id)
+
+
+def loanAccountStatementPdf(request,id):
+    if request.user:
+        account = LoanAccounts.objects.get(id = id)
+        trans = LoanAccountTransactions.objects.filter(loan_account = account).order_by('-id')
+        cmp = company_details.objects.get(user = request.user)
+        context = {'account': account,'transactions':trans,'company':cmp}
+    
+        
+        template_path = 'loan_account_statement_pdf.html'
+        fname = 'Statement_'+ account.acc_name
+        # return render(request, 'loan_account_statement_pdf.html',context)
+        # Create a Django response object, and specify content_type as pdftemp_creditnote
+        response = HttpResponse(content_type='application/pdf')
+        response['Content-Disposition'] =f'attachment; filename = {fname}.pdf'
+        # find the template and render it.
+        template = get_template(template_path)
+        html = template.render(context)
+
+        # create a pdf
+        pisa_status = pisa.CreatePDF(html, dest=response)
+        # if error then show some funny view
+        if pisa_status.err:
+            return HttpResponse('We had some errors <pre>' + html + '</pre>')
+        return response
+    return redirect('/')
+# --------------------------------------end-----------------------------------------------------
+
+def checkHolderName(request):
+    if request.user:
+        try:
+            name = request.GET['name']
+            if BankHolders.objects.filter(user = request.user, holder_name = name).exists():
+                return JsonResponse({'isTaken':True, 'message':f"'{name}' already exists.. Try another.!"})
+            return JsonResponse({'isTaken':False})
+        except Exception as e:
+            print(e)
+            return JsonResponse({'isTaken':False})
+    return redirect('/')
 
 
 
 
+def bankHoldersSortByBankName(request):
+    if request.user:
+        try:
+            context = {
+                'bank_holders':BankHolders.objects.filter(user = request.user).order_by('bank_name')
+            }
+            return render(request, 'bank_holders.html',context)
+        except Exception as e:
+            print(e)
+            return redirect(bankHolders)
+    return redirect('/')
+
+
+#................................  Views START............ Godown details & project details & GSTR9...... TINTO MT .......( start )......................
+
+
+def godown_details(request):
+    company = company_details.objects.get(user = request.user)
+    data = Addgodown.objects.filter(user = request.user.id)
+    
+    return render(request, 'godown_details.html', {'data':data, 'company': company})
+
+def shareGodownDetailsToEmail(request):
+    if request.user:
+        try:
+            if request.method == 'POST':
+                emails_string = request.POST['email_ids']
+
+                # Split the string by commas and remove any leading or trailing whitespace
+                emails_list = [email.strip() for email in emails_string.split(',')]
+                email_message = request.POST['email_message']
+                # print(emails_list)
+
+                cmp = company_details.objects.get( user = request.user.id)
+                data = Addgodown.objects.filter(user = request.user.id)
+                        
+                context = {'cmp': cmp,'data': data}
+                template_path = 'godown_detail_pdf.html'
+                template = get_template(template_path)
+
+                html  = template.render(context)
+                result = BytesIO()
+                pdf = pisa.pisaDocument(BytesIO(html.encode("ISO-8859-1")), result)#, link_callback=fetch_resources)
+                pdf = result.getvalue()
+                filename = f'Godown Report - {cmp.company_name}.pdf'
+                subject = f"Godown Report - {cmp.company_name}"
+                email = EmailMessage(subject, f"Hi,\nPlease find the attached Godown Report -of -{cmp.company_name}. \n{email_message}\n\n--\nRegards,\n{cmp.company_name}\n{cmp.address}\n{cmp.state} - {cmp.country}\n{cmp.contact_number}", from_email=settings.EMAIL_HOST_USER,to=emails_list)
+                email.attach(filename, pdf, "application/pdf")
+                email.send(fail_silently=False)
+
+                msg = messages.success(request, 'Report has been shared via email successfully..!')
+                return redirect(godown_details)
+        except Exception as e:
+            print(e)
+            messages.error(request, f'{e}')
+            return redirect(godown_details)
+
+
+def project_details(request):
+    company = company_details.objects.get(user=request.user)
+    
+        
+    return render(request,'project_details.html',{'company':company})
 
 
 
+def GSTR_9page(request):
+    company = company_details.objects.get(user=request.user)
+    context={
+       
+        'company':company
+    }
+    return render(request,'GSTR_9.html',context)
+
+
+def shareGSTR9ToEmail(request):
+    if request.user:
+        try:
+            if request.method == 'POST':
+                emails_string = request.POST['email_ids']
+                selected_year = request.POST['selected_year']
+
+                # Split the string by commas and remove any leading or trailing whitespace
+                emails_list = [email.strip() for email in emails_string.split(',')]
+                email_message = request.POST['email_message']
+                # print(emails_list)
+
+                cmp = company_details.objects.get( user = request.user.id)
+                data = Addgodown.objects.all()
+                        
+                context = {'cmp': cmp,'data': data,'selected_year': selected_year,'email_message':email_message}
+                template_path = 'gstr_9_pdf.html'
+                template = get_template(template_path)
+
+                html  = template.render(context)
+                result = BytesIO()
+                pdf = pisa.pisaDocument(BytesIO(html.encode("ISO-8859-1")), result)#, link_callback=fetch_resources)
+                pdf = result.getvalue()
+                filename = f'GSTR9 Report - {cmp.company_name}.pdf'
+                subject = f"GSTR9 Report - {cmp.company_name}"
+                email = EmailMessage(subject, f"Hi,\nPlease find the attached GSTR9 Report -of  -{cmp.company_name}. \n{email_message}\n\n--\nRegards,\n{cmp.company_name}\n{cmp.address}\n{cmp.state} - {cmp.country}\n{cmp.contact_number}", from_email=settings.EMAIL_HOST_USER,to=emails_list)
+                email.attach(filename, pdf, "application/pdf")
+                email.send(fail_silently=False)
+
+                msg = messages.success(request, 'Report has been shared via email successfully..!')
+                return redirect(GSTR_9page)
+        except Exception as e:
+            print(e)
+            messages.error(request, f'{e}')
+            return redirect(GSTR_9page)
+
+def GSTR9pdfs(request):
+    if request.user.is_authenticated:
+        try:
+            cmp = company_details.objects.get(user=request.user.id)
+            data = Addgodown.objects.all()
+
+            # Assuming you have definitions for selected_year and email_message
+            selected_year = '2023'
+            email_message = 'Hello, this is your email message.'
+
+            context = {'cmp': cmp, 'data': data, 'selected_year': selected_year, 'email_message': email_message}
+            template_path = 'gstr_9_pdf.html'
+            template = get_template(template_path)
+
+            html = template.render(context)
+
+            # Create a PDF response
+            response = HttpResponse(content_type='application/pdf')
+            response['Content-Disposition'] = f'attachment; filename="GSTR9_Report_{cmp.company_name}.pdf"'
+
+            pisa.pisaDocument(BytesIO(html.encode("ISO-8859-1")), response)
+
+            return response
+
+        except Exception as e:
+            print(e)
+            # Handle the exception and show an error message
+            messages.error(request, f'{e}')
+            return redirect(GSTR_9page)
+
+    # Add a default return statement in case the user is not authenticated
+    return HttpResponse("Authentication required")
+
+#................................  Views END............ Godown details & project details & GSTR9...... TINTO MT .......( end )......................
+
+def import_employee_details(request):
+    user = request.user
+    if request.method == 'POST':
+        try:
+            excel_bill = request.FILES['empfile']
+            excel_b = load_workbook(excel_bill)
+            eb = excel_b['Sheet1']
+
+            for row_number in range(2, eb.max_row + 1):
+                empsheet = [eb.cell(row=row_number, column=col_num).value for col_num in range(1, eb.max_column + 1)]
+                if not empsheet[0] or not empsheet[1] or not empsheet[2] or not empsheet[4] or not empsheet[5] or not empsheet[6]:
+                    return JsonResponse({'message': f'Error occured in line {row_number}'})
+                
+                if empsheet[6] == 'Time Based':
+                    if not empsheet[7] or not empsheet[8]:
+                        return JsonResponse({'message': f'Error occured in line {row_number}'})
+                
+                if not empsheet[9] or not empsheet[10] or not empsheet[11] or not empsheet[12] or not empsheet[13] or not empsheet[14] or not empsheet[15]:
+                    return JsonResponse({'message': f'Error occured in line {row_number}'})
+                
+                if not empsheet[18] or not empsheet[19] or not empsheet[20] or not empsheet[22] or not empsheet[23]:
+                    return JsonResponse({'message': f'Error occured in line {row_number}'})
+
+                if empsheet[23] == 'Yes':
+                    if not empsheet[24] or not empsheet[25] or not empsheet[26] or not empsheet[27]:
+                        return JsonResponse({'message': f'Error occured in line {row_number}'})
+                        
+                if not empsheet[28] or not empsheet[29]:
+                    return JsonResponse({'message': f'Error occured in line {row_number}'})
+
+                if empsheet[29] == 'Yes':
+                    if not empsheet[30] or not empsheet[31]:
+                        return JsonResponse({'message': f'Error occured in line {row_number}'})
+                        
+                if not empsheet[32] or not empsheet[33] or not empsheet[34] or not empsheet[35] or not empsheet[36]:
+                    return JsonResponse({'message': f'Error occured in line {row_number}'})
+            
+
+                payroll= Payroll(user=user, title=empsheet[0], first_name=empsheet[1], last_name=empsheet[2], joindate=empsheet[4], salaryrange=empsheet[5], 
+                                    salary=empsheet[9], emp_number=empsheet[10], designation=empsheet[11], location=empsheet[12], gender=empsheet[13], 
+                                    dob=empsheet[14], blood=empsheet[15], address=empsheet[18], permanent_address=empsheet[19], Phone=empsheet[20], 
+                                    email=empsheet[22], ITN=empsheet[32], Aadhar=empsheet[33], UAN=empsheet[34], PFN=empsheet[35], PRAN=empsheet[36])
+                payroll.save()
+
+                birthdate_date = empsheet[14]
+                current_date = datetime.now()
+                age = current_date.year - birthdate_date.year - ((current_date.month, current_date.day) < (birthdate_date.month, birthdate_date.day))
+                payroll.age = age
+
+                if not empsheet[3]:
+                    payroll.alias = ''
+                else:
+                    payroll.alias = empsheet[3]
+
+                if empsheet[6] == 'Time Based':
+                    payroll.salary_type = 'Variable'
+                    payroll.amountperhr = empsheet[7]
+                    payroll.workhr = empsheet[8]
+                else:
+                    payroll.salary_type = empsheet[6]
+                    payroll.amountperhr = ''
+                    payroll.workhr = ''
+
+                if not empsheet[16]:
+                    payroll.parent = ''
+                else:
+                    payroll.parent = empsheet[16]
+
+                if not empsheet[17]:
+                    payroll.spouse_name = ''
+                else:
+                    payroll.spouse_name = empsheet[17]
+
+                if not empsheet[21]:
+                    payroll.emergency_phone = ''
+                else:
+                    payroll.emergency_phone = empsheet[21]
+                
+                if empsheet[23] == 'Yes':
+                    Bankdetails.objects.create(payroll=payroll,acc_no=empsheet[24], IFSC=empsheet[25], bank_name=empsheet[26], 
+                                                branch=empsheet[27], transaction_type=empsheet[28])
+
+                if empsheet[29] == 'Yes':
+                    payroll.isTDS = empsheet[30]
+                    payroll.TDS = empsheet[31]
+                else:
+                    payroll.isTDS = 'No'
+                    payroll.TDS = 0
+
+                payroll.image = 'image/img.png'
+                payroll.save()
+
+            return JsonResponse({'success': 'File uploaded successfully!'})
+        except:
+            return JsonResponse({'message': 'File upload Failed!'})
+    else:
+        return JsonResponse({'message': 'File upload Failed!'})
+
+def create_loan_duration(request):
+    days=request.POST['days']
+    durs=request.POST['durs']
+    LoanDuration.objects.create(day=days,duration=durs,user=request.user)
+    return JsonResponse({'success': 'LoanDuration Saved'})
+
+def loan_duration(request):
+    dur = LoanDuration.objects.filter(user=request.user)
+    data = {}
+    for d in dur:
+        duration = str(d.day) + ' ' + d.duration
+        data[duration] = [duration]
+    return JsonResponse(data)
+
+
+def repayment_view(request,id):
+    today = datetime.now().strftime('%Y-%m-%d')
+    loan = Loan.objects.get(id=id)
+    bank = Bankcreation.objects.filter(user=request.user)
+    context = {
+        'loan':loan,
+        'today':today,
+        'bank':bank
+        }
+    return render(request,'repayment_due.html',context)
+
+def add_repayment(request,id):
+    if request.method == 'POST':
+        pamnt=float(request.POST.get('pamnt'))
+        interest=float(request.POST.get('interest'))
+        pdate=request.POST.get('paydate')
+        pmethod=request.POST.get('payment_method')
+        upi_id=request.POST.get('upi_id')
+        cheque_id=request.POST.get('cheque_id')
+        bank_id=request.POST.get('bnk_id')
+        total=float(request.POST.get('total'))
+
+        repay = LoanRepayment.objects.filter(loan=id).last()
+        balance = repay.balance
+        
+        if float(pamnt) > float(balance):
+            messages.info(request, 'Paid Amount is Greater Than Balance!!!')
+            return redirect('repayment_view',id)
+        else:
+            bal = float(balance) - float(pamnt)
+
+        rep = LoanRepayment(payment_made=pamnt,interest=interest,payment_date=pdate,payment_method=pmethod,total_payment = total,
+                            cheque_id=cheque_id,upi_id=upi_id,bank_id=bank_id,balance=bal,particular='EMI PAID',loan=repay.loan)
+        rep.save()
+        return redirect('employee_loan_details',id)
+
+def additional_loan_view(request,id):
+    today = datetime.now().strftime('%Y-%m-%d')
+    bank = Bankcreation.objects.filter(user=request.user)
+    repay = LoanRepayment.objects.filter(loan=id).last()
+    context = {
+        'repay':repay,
+        'today':today,
+        'bank':bank
+        }
+    return render(request,'additional_loan.html',context)
+
+def add_additional_loan(request,id):
+    if request.method == 'POST':
+        namnt=float(request.POST.get('namnt'))
+        adjdate=request.POST.get('adjdate')
+        pmethod=request.POST.get('payment_method')
+        upi_id=request.POST.get('upi_id')
+        cheque_id=request.POST.get('cheque_id')
+        bank_id=request.POST.get('bnk_id')
+        total=float(request.POST.get('total'))
+
+        loan = Loan.objects.get(id=id)
+
+        rep = LoanRepayment(payment_made=namnt,interest=0,total_payment=namnt,payment_date=adjdate,payment_method=pmethod, cheque_id=cheque_id,upi_id=upi_id,
+                            bank_id=bank_id,balance=total,particular='ADDITIONAL LOAN ISSUED',loan=loan)
+        rep.save()
+        return redirect('employee_loan_details',id)
+
+
+def delete_repayment(request,id):
+    repay = LoanRepayment.objects.get(id=id)
+    loan_id = repay.loan.id
+    id_to_delete = repay.id
+    repay.delete()
+
+    entry_list = []
+    gt_entries = LoanRepayment.objects.filter(id__gt=id_to_delete, loan=loan_id)
+    lt_entrie = LoanRepayment.objects.filter(id__lt=id_to_delete, loan=loan_id).last()
+
+    if gt_entries:
+        entry_list.append(lt_entrie)
+        for g in gt_entries:
+            entry_list.append(g)
+
+        for i in range(1,len(entry_list)):
+            if entry_list[i].particular == 'ADDITIONAL LOAN ISSUED':
+                entry_list[i].balance = float(entry_list[i-1].balance) + float(entry_list[i].payment_made)
+            else:
+                entry_list[i].balance = float(entry_list[i-1].balance) - float(entry_list[i].payment_made)
+            entry_list[i].save()
+
+    return redirect('employee_loan_details',loan_id)
+
+
+def edit_repayment_view(request,id):
+    repay = LoanRepayment.objects.get(id=id)
+    return render(request,'repayment_edit.html',{'repay':repay})
+
+def edit_repayment(request,id):
+    repay = LoanRepayment.objects.get(id=id)
+    repay.payment_made = request.POST.get('pamnt')
+    repay.interest=request.POST.get('interest')
+    repay.payment_date=request.POST.get('paydate')
+    repay.total_payment=request.POST.get('total')
+    repay.payment_method=request.POST.get('payment_method')
+    repay.upi_id=request.POST.get('upi_id')
+    repay.cheque_id=request.POST.get('cheque_id')
+    repay.bank_id=request.POST.get('bnk_id')
+
+    gt_entries = LoanRepayment.objects.filter(id__gt=repay.id, loan=repay.loan.id)
+    lt_entrie = LoanRepayment.objects.filter(id__lt=repay.id, loan=repay.loan.id).last()
+
+    bal = float(lt_entrie.balance)- float(request.POST.get('pamnt'))
+    repay.balance = bal
+    repay.save()
+
+    for entry in gt_entries:
+        if entry.particular == 'ADDITIONAL LOAN ISSUED':
+            entry.balance = bal + float(entry.payment_made)
+        else:
+            entry.balance = bal - float(entry.payment_made)
+        entry.save()
+        bal = entry.balance
+    return redirect('employee_loan_details',repay.loan.id)
+
+
+def edit_additional_loan_view(request,id):
+    repay = LoanRepayment.objects.get(id=id)
+    current_bal = float(repay.balance) - float(repay.payment_made)
+    return render(request,'additional_loan_edit.html',{'repay':repay,'current_bal':current_bal})
+
+
+def edit_additional_loan(request,id):
+    repay = LoanRepayment.objects.get(id=id)
+    repay.payment_made = request.POST.get('namnt')
+    repay.payment_date=request.POST.get('adjdate')
+    repay.balance=request.POST.get('total')
+    repay.payment_method=request.POST.get('payment_method')
+    repay.upi_id=request.POST.get('upi_id')
+    repay.cheque_id=request.POST.get('cheque_id')
+    repay.bank_id=request.POST.get('bnk_id')
+    repay.save()
+
+    gt_entries = LoanRepayment.objects.filter(id__gt=repay.id, loan=repay.loan.id)
+    bal = float(repay.balance)
+    for entry in gt_entries:
+        if entry.particular == 'ADDITIONAL LOAN ISSUED':
+            entry.balance = bal + float(entry.payment_made)
+        else:
+            entry.balance = bal - float(entry.payment_made)
+        entry.save()
+        bal = entry.balance
+    return redirect('employee_loan_details',repay.loan.id)
+
+
+def import_employee_loan_details(request):
+    user = request.user
+    if request.method == 'POST':
+        try:
+            excel_bill = request.FILES['loanfile']
+            excel_b = load_workbook(excel_bill)
+            eb = excel_b['Sheet1']
+            for row_number in range(2, eb.max_row + 1):
+                emploansheet = [eb.cell(row=row_number, column=col_num).value for col_num in range(1, eb.max_column + 1)]
+                payroll = Payroll.objects.get(emp_number=emploansheet[0],email=emploansheet[1])
+                loan_list = list(Loan.objects.filter(user=user).values_list('payroll', flat=True))
+                if payroll.id in loan_list:
+                    return JsonResponse({'message': f'{payroll.first_name} {payroll.last_name} in row {row_number} has already taken a loan.'})
+
+                if not emploansheet[0] or not emploansheet[1] or not emploansheet[2] or not emploansheet[4] or not emploansheet[5] or not emploansheet[6]:
+                    return JsonResponse({'message': f'error occured in line {row_number}'})
+                
+                if emploansheet[6] != 'Cash':
+                    if not emploansheet[7]:
+                        return JsonResponse({'message': f'error occured in line {row_number}'})
+                
+                if not emploansheet[8] or not emploansheet[10]:
+                    return JsonResponse({'message': f'error occured in line {row_number}'})
+
+                if emploansheet[8] == 'Percentage':
+                    if not emploansheet[9]:
+                        return JsonResponse({'message': f'error occured in line {row_number}'})
+
+                loan = Loan(date_issue= emploansheet[3],date_expiry= emploansheet[5],loan_amount= emploansheet[2],duration= emploansheet[4],payroll= payroll,user=user)
+
+                if emploansheet[8] == 'Percentage':
+                    loan.monthly_cutting_type = 'percentage'
+                    loan.monthly_cutting_percentage = emploansheet[9]
+                    loan.monthly_cutting_amount = (float(payroll.salary) * float(emploansheet[9]))/100
+                else:
+                    loan.monthly_cutting_type = 'amount_wis'
+                    loan.monthly_cutting_percentage = ''
+                    loan.monthly_cutting_amount = emploansheet[10]
+
+                if emploansheet[6] == 'Cash':
+                    loan.pay_method = 'Cash'
+                    loan.cheque_id = ''
+                    loan.upi_id = ''
+                    loan.bank_id = ''
+                elif emploansheet[6] == 'Cheque':
+                    loan.pay_method = 'Cheque'
+                    loan.cheque_id = emploansheet[7]
+                    loan.upi_id = ''
+                    loan.bank_id = ''
+                elif emploansheet[6] == 'UPI':
+                    loan.pay_method = 'UPI'
+                    loan.cheque_id = ''
+                    loan.upi_id = emploansheet[7]
+                    loan.bank_id = ''
+                else:
+                    loan.pay_method = emploansheet[6]
+                    loan.cheque_id = ''
+                    loan.upi_id = ''
+                    loan.bank_id = emploansheet[7]
+
+                if not emploansheet[11]:
+                    loan.note = ''
+                else:
+                    loan.note = emploansheet[11]
+
+                loan.save()
+
+                repay = LoanRepayment(payment_made=emploansheet[2],interest=0,total_payment=emploansheet[2],payment_date=emploansheet[3],balance=emploansheet[2],
+                                        particular='LOAN ISSUED',loan=loan)
+                
+                if emploansheet[6] == 'Cash':
+                    repay.pay_method = 'Cash'
+                    repay.cheque_id = ''
+                    repay.upi_id = ''
+                    repay.bank_id = ''
+                elif emploansheet[6] == 'Cheque':
+                    repay.pay_method = 'Cheque'
+                    repay.cheque_id = emploansheet[7]
+                    repay.upi_id = ''
+                    repay.bank_id = ''
+                elif emploansheet[6] == 'UPI':
+                    repay.pay_method = 'UPI'
+                    repay.cheque_id = ''
+                    repay.upi_id = emploansheet[7]
+                    repay.bank_id = ''
+                else:
+                    repay.pay_method = emploansheet[6]
+                    repay.cheque_id = ''
+                    repay.upi_id = ''
+                    repay.bank_id = emploansheet[7]
+
+                repay.save()
+            return JsonResponse({'success': 'File uploaded successfully!'})
+        except:
+            return JsonResponse({'message': 'File upload Failed!'})
+    else:
+        return JsonResponse({'message': 'File upload Failed!'})
+
+def share_loan_email(request,id):
+    if request.user:
+        try:
+            if request.method == 'POST':
+                emails_string = request.POST['email_ids']
+                emails_list = [email.strip() for email in emails_string.split(',')]
+                email_message = request.POST['email_message']
+                loan = Loan.objects.get(id=id,user=request.user)
+                repay = LoanRepayment.objects.filter(loan=loan.id)
+                last_loan = LoanRepayment.objects.filter(loan=loan.id).last().balance
+                company = company_details.objects.get(user=request.user)
+                context = {'loan':loan,'repay':repay,'last_loan':last_loan,'company':company}
+                template_path = 'loan_detail_template.html'
+                template = get_template(template_path)
+                html  = template.render(context)
+                
+                result = BytesIO()
+                pdf = pisa.pisaDocument(BytesIO(html.encode("ISO-8859-1")), result)
+                pdf = result.getvalue()
+                filename = f'{loan.payroll.first_name}_{loan.payroll.last_name}_loan.pdf'
+                subject = f"Loan Details"
+                email = EmailMessage(subject, f"Hi,\nPlease find the attached Looan Details for {loan.payroll.first_name} {loan.payroll.last_name} - Bill-. \n{email_message}\n\n--\nRegards,", from_email=settings.EMAIL_HOST_USER, to=emails_list)
+                email.attach(filename, pdf, "application/pdf")
+                email.send(fail_silently=False)
+
+                messages.success(request, 'Details has been shared via email successfully..!')
+                return redirect('employee_loan_details',repay.loan.id)
+        except Exception as e:
+            loan = Loan.objects.get(id=id,user=request.user)
+            repay = LoanRepayment.objects.filter(loan=loan.id).last()
+            messages.error(request, f'{e}')
+            return redirect('employee_loan_details',repay.loan.id)
+
+
+def purchaseOrderDetailsToEmail(request):
+    if request.user:
+        try:
+            if request.method == 'POST':
+                cmp = company_details.objects.get(user=request.user)
+                if cmp.company_name == None:
+                    cmp.company_name = 'Add Company'
+                fromdate_str = request.POST['from_date']
+                todate_str = request.POST['to_date']
+        
+                if fromdate_str and todate_str:
+                    fromdate = datetime.strptime(fromdate_str, '%Y-%m-%d').date()
+                    todate = datetime.strptime(todate_str, '%Y-%m-%d').date()
+                    subject = f"Purchase Order Report from {fromdate} to {todate} - {cmp.company_name}"
+                    data = Purchase_Order.objects.filter(user=request.user, Ord_date__range=[fromdate, todate])
+                else:
+                    subject = f"Purchase Order Report - {cmp.company_name}"
+                    data = Purchase_Order.objects.filter(user=request.user)
+
+                emails_string = request.POST['email_ids']
+                email_message = request.POST['email_message']
+                for i in data:
+                    if i.vendor_name:
+                        i.vendor_name=i.vendor_name.split()
+                        i.vendor_name=i.vendor_name[:-1]
+                        i.vendor_name=' '.join(i.vendor_name)
+                for i in data:
+                    if i.convert_status == 1:
+                        i.convert_status='Converted'
+                    else:
+                        i.convert_status='Not Converted'
+                emails_list = [email.strip() for email in emails_string.split(',')]
+                
+                response = HttpResponse(content_type='text/csv')
+                response['Content-Disposition'] = f'attachment; filename=purchase_order_details-{cmp.company_name}.csv'
+
+                writer = csv.writer(response)
+                
+                # Write header row
+                header = ["DATE", "ORDER NO ", "DUE DATE","VENDOR NAME", "STATUS", "AMOUNT"]  # Replace with your field names
+                writer.writerow(header)
+                count,amt=0,0
+                # Write data rows
+                for item in data:
+                    row = [item.Ord_date, item.Pur_no, item.exp_date,item.vendor_name, item.convert_status, item.grand_total]  # Replace with your field names
+                    writer.writerow(row)
+                    amt+=item.grand_total
+                    count+=1
+                t_amount=["Total Amount: ",amt]
+                t_disp=["Total data: ",count]
+                writer.writerow(t_amount)
+                writer.writerow(t_disp)
+                # Send email
+                
+                email = EmailMessage(subject, f"{email_message}", from_email=settings.EMAIL_HOST_USER, to=emails_list)
+                email.attach(f'purchase_order_details-{cmp.company_name}.csv', response.getvalue(), "text/csv")
+                email.send(fail_silently=False)
+                return redirect('purchase_order_details')
+        except Exception as e:
+            return redirect('purchase_order_details')
+
+
+
+def JournalReportToEmail(request):
+    if request.user:
+        try:
+            if request.method == 'POST':
+                cmp = company_details.objects.get(user=request.user)
+                if cmp.company_name == None:
+                    cmp.company_name = 'Add Company'
+                fromdate_str = request.POST['from_date']
+                todate_str = request.POST['to_date']
+        
+                if fromdate_str and todate_str:
+                    fromdate = datetime.strptime(fromdate_str, '%Y-%m-%d').date()
+                    todate = datetime.strptime(todate_str, '%Y-%m-%d').date()
+                    subject = f"Journal Report from {fromdate} to {todate} - {cmp.company_name}"
+                    data = JournalEntry.objects.filter(user=request.user, journal__user=request.user, journal__date__range=[fromdate, todate])
+                else:
+                    subject = f"Journal Report - {cmp.company_name}"
+                    data = JournalEntry.objects.filter(user=request.user)
+
+                emails_string = request.POST['email_ids']
+                email_message = request.POST['email_message']
+                emails_list = [email.strip() for email in emails_string.split(',')]
+                
+                response = HttpResponse(content_type='text/csv')
+                response['Content-Disposition'] = f'attachment; filename=journal_report-{cmp.company_name}.csv'
+
+                writer = csv.writer(response)
+                
+                # Write header row
+                header = ["PARTICULARS", "DEBIT","CREDITS"]  # Replace with your field names
+                writer.writerow(header)
+                # Write data rows
+                for item in data:
+                    row = [item.account, item.debits,item.credits]  # Replace with your field names
+                    writer.writerow(row)
+                # Send email
+                
+                email = EmailMessage(subject, f"{email_message}", from_email=settings.EMAIL_HOST_USER, to=emails_list)
+                email.attach(f'journal_report-{cmp.company_name}.csv', response.getvalue(), "text/csv")
+                email.send(fail_silently=False)
+                return redirect('journal_report')
+        except Exception as e:
+            return redirect('journal_report')
+
+     
+def shareEstimateToEmail(request,pk):
+    if request.user: 
+        # try:
+            if request.method == 'POST':
+                emails_string = request.POST['email_ids']
+                print("11111111111111111111111111111111")
+
+                # Split the string by commas and remove any leading or trailing whitespace
+                emails_list = [email.strip() for email in emails_string.split(',')]
+                email_message = request.POST['email_message']
+                # print(emails_list)
+                user = request.user
+                company = company_details.objects.get(user=user)
+                estimate = Estimates.objects.get(id=pk)
+                print("22222222222222222222222222222")
+                
+                items = EstimateItems.objects.filter(estimate=estimate)
+                context = {
+                    'company': company,
+                    'estimate': estimate,
+                    'items': items,
+                }
+                template_path = 'estimate_mail.html'
+                template = get_template(template_path)
+                html  = template.render(context)
+                result = BytesIO()
+                print("3333333333333333333333333")
+                pdf = pisa.pisaDocument(BytesIO(html.encode("ISO-8859-1")), result)#, link_callback=fetch_resources)
+                pdf = result.getvalue()
+                filename = f'Estimate .pdf'
+                subject = f"ESTIMATE BILL"
+                email = EmailMessage(subject, f"Hi,\nPlease find the attached EXPENSE BILL . \n{email_message}\n\n--\nRegards,\n{company.company_name}\n{company.address}\n{company.state} - {company.country}\n{company.contact_number}", from_email=settings.EMAIL_HOST_USER,to=emails_list)
+                email.attach(filename,pdf,"application/pdf")
+                email.send(fail_silently=False)
+                msg = messages.success(request, 'Bill has been shared via email successfully..!')
+                return redirect('estimateslip',pk)
+        # except Exception as e:
+        #     print(e)
+        #     messages.error(request, f'{e}')
+        #     return redirect('estimateslip',pk)
+
+
+        
+def shareExpenseToEmail(request,pk):
+    if request.user: 
+        try:
+            if request.method == 'POST':
+                emails_string = request.POST['email_ids']
+                # Split the string by commas and remove any leading or trailing whitespace
+                emails_list = [email.strip() for email in emails_string.split(',')]
+                email_message = request.POST['email_message']
+                # print(emails_list)
+                user = request.user
+                user1=User.objects.get(id=user.id)
+                expense = ExpenseE.objects.filter(user=user)
+                company = company_details.objects.get(user = request.user)
+                expense_account=ExpenseE.objects.get(id=pk)
+                
+                context = {
+                    'expenses': expense,
+                    'expense': expense_account,
+                    'company':company,
+                }
+                template_path = 'expense_email.html'
+                template = get_template(template_path)
+                html  = template.render(context)
+                result = BytesIO()
+                pdf = pisa.pisaDocument(BytesIO(html.encode("ISO-8859-1")), result)#, link_callback=fetch_resources)
+                pdf = result.getvalue()
+                filename = f'Expense_Bill.pdf'
+                subject = f"EXPENSE BILL"
+                email = EmailMessage(subject, f"Hi,\nPlease find the attached EXPENSE BILL . \n{email_message}\n\n--\nRegards,\n{company.company_name}\n{company.address}\n{company.state} - {company.country}\n{company.contact_number}", from_email=settings.EMAIL_HOST_USER,to=emails_list)
+                email.attach(filename,pdf,"application/pdf")
+                email.send(fail_silently=False)
+                msg = messages.success(request, 'Bill has been shared via email successfully..!')
+                return redirect(expense_details,pk)
+        except Exception as e:
+            print(e)
+            messages.error(request, f'{e}')
+            return redirect(expense_details,pk)        
+
+    
+
+
+    
+
+    
+    
+    
+
+    
+    
 
 
 

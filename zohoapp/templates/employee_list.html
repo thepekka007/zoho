@@ -1,297 +1,343 @@
-<!-- RIJIN -->
 {% extends 'base.html' %}
 {% block content %}
 {% load static %}
+
+<script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
+<script src="https://unpkg.com/htmx.org@1.9.6" integrity="sha384-FhXw7b6AlE/jyjlZH5iHa/tTe9EpJ1Y55RjcgPbjeWMskSxZt1v9qkxLJWNJaGni" crossorigin="anonymous"></script>
+<script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
+
 <style>
-    * {
+  #over:hover{
+    background-color: rgba(110, 110, 110, 0.616);
+  }
 
-        font-family: "Gill Sans", sans-serif;
-        color: white;
-    }
+  .dropdown-item:hover{
+    color: chocolate;
+  }
 
-    .searchbar {
-        align-items: center;
-        display: flex;
-        justify-content: space-between;
-        padding: 1rem .8rem;
-    }
+  #loantable tbody{
+    cursor: pointer;
+  }
 
-    .searchbar .left input[text] {
+  #loantable tbody tr {
+    counter-increment: rowNumber;
+  }
 
-        width: 15vw;
-    }
+  #loantable tbody tr td:first-child::before {
+    content: counter(rowNumber);
+  }
 
-    .searchbar .right .btn {
-        width: 10vw;
-        border: 2px solid rgb(0, 102, 255);
-        font-size: 1.2vw;
-        color: rgb(235, 197, 31);
-    }
-
-    .searchbar .right .btn i {
-        color: rgb(235, 197, 31);
-    }
-
-    .table tbody tr:hover {
-        font-weight: 600;
-    }
-</style>
-<style>
-    
-
-    /* Additional styles for the popup */
-    .popup {
-        display: none;
-        position: fixed;
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%, -50%);
-        background: white;
-        padding: 1rem;
-        border-radius: 5px;
-        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-    }
-
-    .popup h4 {
-        margin-top: 0;
-    }
-
-    .popup p {
-        color: #333; /* Match the text color to the page */
-    }
-
-    .popup-buttons {
-        display: flex;
-        justify-content: flex-end;
-        margin-top: 1rem;
-    }
-
-    .popup-buttons button {
-        margin-left: 1rem;
-    }
-
-
-    .actoinacto .dropdown-item:hover {
-        background-color: #0baef4;
-    }
+  .modal-backdrop {
+    z-index: -1;
+  }
 </style>
 
-<section>
-    <div class="containerprof p-3">
-        <!-- Your existing content -->
-
-        <div class="containerprof p-3">
-            <div class="head text-light p-3">
-                <h4>ALL EMPLOYEE LOAN</h4>
+<div class="container-fluid">
+  <div class="fixed-top" style="top: 7rem; margin-left: 18rem;">
+    <div style="height: 600px;overflow-y: scroll;">
+      <div class="row container-fluid">
+        <div class="col-md-3"><a class="text-white" style="font-size: 2rem;">All Employee Loan</a></div>
+        <div class="col-md-5"></div>
+        <div class="col-md-3">
+          <div class="d-flex" style="margin-left: 9vh; margin-top: 2vh;" >
+            <a onclick="ExportToExcel()" class="btn text-center pt-2 btn-outline-warning d-flex" style="width: fit-content;">
+              <i class='fas fa-file-export' style='font-size:20px'></i> <span style="margin-top: 3px;">Export</span>
+            </a>
+            <a data-toggle="modal" data-target="#importmodal" class="btn text-center pt-2 btn-outline-warning d-flex" style="width: fit-content; margin-left: 2vh;" onclick="sampleexcel()">
+              <i class="fas fa-file-import" style='font-size:20px'></i> <span style="margin-top: 3px;">Import</span>
+            </a>
+          </div>
+        </div>
+      </div>    
+      <br>
+      <div class="row container-fluid mb-3">
+        <div class="col-md-3"><input type="text" id="search" class="form-control bg-light text-dark" placeholder="Search.." autocomplete="off"></div>
+        <div class="col-md-2">
+          <div class="dropdown">
+            <a class="btn text-center px-4 pt-2 btn-outline-warning" id="sortbutton" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false" role="button" >
+              <i  class="fas fa-sort m-1"></i>
+            </a>
+            <div class="dropdown-menu m-1">
+              <a class="dropdown-item" href="{% url 'employee_list' %}">All</a>
+              <a class="dropdown-item" onclick="sortTableName()">Employee Name</a>
+              <a class="dropdown-item" onclick="sortTableLoan()">Loan Amount</a>
             </div>
-            <!-- <span class="text-danger" id="no-data"></span> -->
-            <!-- <input type="text" id="no-data" style="color: rgb(255, 255, 255);background: transparent;"> -->
-            <div class="searchbar">
-                <div class="left">
-                    <input class="form-control" type="text" placeholder="Search..." name="search" id="search"
-                        onkeyup="searchFunction()" style="color: rgb(255, 255, 255);background: transparent;">
-                </div>
-                <div class="right">
-                    <a class="btn btn-outline-primary" href="" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false"
-                    role="button"><i class="fa fa-filter"></i>
-                    </a>
-                    <div class="dropdown-menu actoinacto">
-                        <a class="dropdown-item filter-link" data-status="all" href="#" style="font-size: 14px;">All</a>
-                        <a class="dropdown-item filter-link" data-status="active" href="#" style="font-size: 14px;">Active</a>
-                        <a class="dropdown-item filter-link" data-status="inactive" href="#" style="font-size: 14px;">Inactive</a>
-                    </div>
-                    <a class="btn btn-outline-primary" href="{% url 'create_loan' %}"><i class="fa fa-plus"></i>NEW</a>
-                </div>
-    
+          </div>
+        </div>
+        <div class="col-md-4"></div>
+        <div class="col-md-3">
+          <div class="dropdown d-flex">
+            <a class="btn text-center px-4 pt-2 btn-outline-warning" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false" role="button" >
+              <i class="fa fa-filter mt-1"></i>
+            </a>
+            <div class="dropdown-menu m-1">
+              <a class="dropdown-item" onclick="applyFilter('All')">All</a>
+              <a class="dropdown-item" onclick="applyFilter('Active')">Active</a>
+              <a class="dropdown-item" onclick="applyFilter('Inactive')">Inactive</a>
             </div>
-
-        <table class="table" id="mytable">
+            <a style="height: 5vh; margin-left: 2vh;" class="btn btn-outline-warning text-right px-3 py-2" role="button" style="margin-left: 5px;" href="{% url 'create_loan' %}">
+              <i class="fa fa-plus" style="font-size: large;"></i><span style="font-size: 3vh;">New</span>
+            </a>
+          </div>
+        </div>
+      </div>
+      <br>
+      <div class="row container-fluid">
+        <div class="col-sm-12 col-md-11 col-lg-11">
+          <table class="table  text-white" id="loantable">
             <thead>
-                <tr id="ckeck_th">
-                    <th scope="col">DATE</th>
-                    <th scope="col">NAME</th>
-                    <th scope="col">EMAIL</th>
-                    <th scope="col">EMPLOYEE NUMBER</th>
-                    <th scope="col">LOAN AMOUNT</th>
-                    <th scope="col">EXPIRY DATE</th>
-                    <th scope="col">ACTION</th>
-                </tr>
+              <tr>
+                <th style="text-align: center;">#</th>
+                <th style="text-align: center;">DATE</th>
+                <th style="text-align: center;">EMPLOYEE NAME</th>
+                <th style="text-align: center;">EMPLOYEE MAIL</th>
+                <th style="text-align: center;">EMPLOYEE NUMBER</th>
+                <th style="text-align: center;">LOAN AMOUNT</th>
+                <th style="text-align: center;">EXPIRY DATE</th>
+                <th style="text-align: center;">STATUS</th>
+              </tr>
             </thead>
             <tbody>
-                {% for employee in employees %}
-                <tr class="clickable-row" data-href="{% url 'employee_loan_details' employee.id %}" data-status="{{employee.loan_info.active }}">
-                    <td class="pt-3">{{ employee.joindate }}</td>
-                    <td class="pt-3">{{ employee.first_name }} {{ employee.last_name }}</td>
-                    <td class="pt-3">{{ employee.email }}</td>
-                    <td class="pt-3">{{ employee.emp_number }}</td>
-                    <td class="pt-3">{{ employee.loan_info.loan_amount }}</td>
-                    <td class="pt-3">{{ employee.loan_info.date_expiry }}</td>
-                    <td class="pt-3">
-                        <a href="#" onclick="return confirm('Do you want to Delete this Employee loan details?');" class="delete-link" data-id="{{ employee.loan_info.id }}">
-                            <i class="fa fa-trash text-danger" style="font-size: large;"></i>
-                        </a>
-                    </td>
+              {% for employee in employees %}
+                <tr id="over" class='clickable-row' data-href="{% url 'employee_loan_details' employee.loan_info.id %}">
+                  <td style="text-align: center;"></td>
+                  <td style="text-align: center;">{{employee.joindate | date:'d-m-Y'}}</td>
+                  <td style="text-align: center;">{{employee.first_name}} {{i.last_name}}</td>
+                  <td style="text-align: center;">{{employee.email}}</td>
+                  <td style="text-align: center;">{{employee.emp_number}}</td>
+                  <td style="text-align: center;">{{employee.loan_info.loan_amount }}</td>
+                  <td style="text-align: center;">{{employee.loan_info.date_expiry | date:'d-m-Y'}}</td>
+                  {% if employee.loan_info.active == 1 %}
+                  <td style="text-align: center;">Active</td>
+                  {% else %}
+                  <td style="text-align: center;">Inctive</td>
+                  {% endif %}
                 </tr>
-                
-                {% endfor %}
+              {% endfor %}
             </tbody>
-            
-            
+          </table>
+        </div>
+      </div>
+      <div class="row" hidden>
+        <table id="employeeloanmodeltable">
+          <thead>
+            <th>EMP NUMBER</th>
+            <th>EMAIL</th>
+            <th>LOAN AMOUNT</th>
+            <th>LOAN ISSUE DATE</th>
+            <th>LOAN DURATION</th>
+            <th>LOAN EXPIRY DATE</th>
+            <th>PAYMENT METHOD</th>
+            <th>PAYMENT ID</th>
+            <th>PAYMENT TYPE</th>
+            <th>PERCENTAGE</th>
+            <th>MONTHLY CUTTING AMOUNT</th>
+            <th>NOTE</th>
+          </thead>
+          <tbody>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td>Ex: 1 Year</td>
+            <td></td>
+            <td>Cash/UPI/Cheque/Bank Name</td>
+            <td>UPI NO/Cheque NO/Bank Account NO</td>
+            <td>Amount/Percentage</td>
+            <td></td>
+            <td></td>
+            <td></td>
+          </tbody>
         </table>
-        <script>
-            document.addEventListener("DOMContentLoaded", function () {
-                const filterLinks = document.querySelectorAll(".filter-link");
-                const tableRows = document.querySelectorAll(".clickable-row");
-        
-                filterLinks.forEach(function (link) {
-                    link.addEventListener("click", function (event) {
-                        event.preventDefault();
-        
-                        const status = link.getAttribute("data-status");
-        
-                        tableRows.forEach(function (row) {
-                            if (status === "all" || (status === "active" && row.getAttribute("data-status") === "True") || (status === "inactive" && row.getAttribute("data-status") === "False")) {
-                                row.style.display = "table-row";
-                            } else {
-                                row.style.display = "none";
-                            }
-                        });
-                    });
-                });
-            });
-        </script>
+      </div>
     </div>
-</section>
-<!-- Popup for delete confirmation -->
+  </div>
 
-
-<style>
-    /* Existing styles for the popup */
-    .popup {
-        display: none;
-        position: fixed;
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%, -50%);
-        background: black; /* Change background color to black */
-        padding: 1rem;
-        border-radius: 5px;
-        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-    }
-
-    /* Additional styles for the popup content */
-    .popup-title {
-        color: white; /* Set text color to white */
-        margin-top: 0;
-    }
-
-    .popup-text {
-        color: white !important; /* Set text color to white */
-        margin-bottom: 1rem;
-    }
-
-    .popup-buttons {
-        display: flex;
-        justify-content: flex-end;
-        margin-top: 1rem;
-    }
-
-    .popup-button {
-        background-color: white;
-        color: black;
-        border: none;
-        padding: 0.5rem 1rem;
-        border-radius: 5px;
-        cursor: pointer;
-        transition: background-color 0.3s ease;
-    }
-
-    .popup-button.delete-button {
-        background-color: red; /* Change background color for delete button */
-        color: white; /* Set text color for delete button */
-    }
-
-    .popup-button.cancel-button:hover,
-    .popup-button.delete-button:hover {
-        background-color: lightgray;
-    }
-</style>
-
+  <div class="modal fade" id="importmodal" style="margin-top: 7vh;">
+    <div class="modal-dialog ">
+      <div class="modal-content" style="background: rgb(32, 35, 37);border-radius: 20px;">
+        <div class="modal-header">
+          <h5 class="modal-title" id="excelModalLabel">Upload File
+          <label for="" style="color: red; font-size: x-small;" >* Refer Downloaded Sheet For Format </label><br></h5>
+          <button type="button" class="btn close" data-dismiss="modal" aria-label="Close">
+              <span aria-hidden="true" style="font-size: x-large;">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body" style="background: rgb(32, 35, 37);">
+          <div class="card">
+            <form action="" method="post" class="needs-validation" novalidate autocomplete="off" id="excelForm">
+              {% csrf_token %}
+              <div class="form-group mt-3" style="margin-left: 2vh;">
+                <label for="file" style="font-size: medium;">Choose Excel File for Employee Loans- </label> <br><br>
+                <input type="file" class="form-control-file" id="loanfile" name="loanfile" accept=".xls, .xlsx"><br>
+              </div>
+              <div class="modal-footer">
+                <button type="button" class="btn text-center pt-2 btn-outline-warning" onclick="uploadFile()" data-dismiss="modal">Upload</button>
+                <button type="button" class="btn text-center pt-2 btn-outline-warning" data-dismiss="modal">Close</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>  
+  </div>  
+</div>
 
 <script>
-    $(document).ready(function() {
-        // Handle row clicks
-        $(".clickable-row").click(function() {
-            window.location = $(this).data("href");
-        });
-
-        // Handle delete button clicks
-        $(".delete-link").click(function(event) {
-            event.preventDefault();
-            var loanId = $(this).data("id");
-            var csrfToken = "{{ csrf_token }}";
-
-            $.ajax({
-                type: "POST",
-                url: "{% url 'delete_loan' 0 %}".replace('0', loanId),
-                data: {
-                    csrfmiddlewaretoken: csrfToken
-                },
-                success: function(response) {
-                    // Reload the page content
-                    refreshPageContent();
-                },
-                error: function(xhr, status, error) {
-                    console.error(error);
-                    alert("An error occurred while deleting the loan.");
-                }
-            });
-        });
-
-        // Function to refresh page content
-        function refreshPageContent() {
-            // Reload the current page
-            location.reload();
+  function sortTableName() {
+    var table, rows, switching, i, x, y, shouldSwitch;
+    table = document.getElementById("loantable");
+    switching = true;
+    while (switching) {
+      switching = false;
+      rows = table.rows;
+      for (i = 1; i < rows.length - 1; i++) {
+        shouldSwitch = false;
+        x = rows[i].getElementsByTagName("td")[2];
+        y = rows[i + 1].getElementsByTagName("td")[2];
+        if (x.innerHTML.toLowerCase() > y.innerHTML.toLowerCase()) {
+          shouldSwitch = true;
+          break;
         }
-    });
-
-
-
-
-
-
-
-
-    function searchFunction() {
-        var input, filter, table, tr, td, i, txtValue;
-        input = document.getElementById("search");
-        filter = input.value.toLowerCase();
-        table = document.getElementById("mytable");
-        tr = table.getElementsByTagName("tr");
-        // input.style.borderColor = "green";
-        for (i = 1; i < tr.length; i++) {
-            let rowVisible = false;
-            td = tr[i].getElementsByTagName("td");
-            for (j = 0; j < td.length; j++) {
-                  if (td[j]) {
-                      txtValue = td[j].textContent || td[j].innerText;
-                      if (txtValue.toLowerCase().indexOf(filter) > -1) {
-                          rowVisible = true;
-                          break;
-                      }
-                  }
-              }
-  
-              // Show/hide the row based on the search results
-              tr[i].style.display = rowVisible ? "" : "none";
-          }
       }
+      if (shouldSwitch) {
+          rows[i].parentNode.insertBefore(rows[i + 1], rows[i]);
+          switching = true;
+      }
+    }
+  }
+
+  function sortTableLoan() {
+    var table, rows, switching, i, x, y, shouldSwitch;
+    table = document.getElementById("loantable");
+    switching = true;
+    while (switching) {
+      switching = false;
+      rows = table.rows;
+      for (i = 1; i < rows.length - 1; i++) {
+        shouldSwitch = false;
+        x = rows[i].getElementsByTagName("td")[5];
+        y = rows[i + 1].getElementsByTagName("td")[5];
+        if (parseInt(x.innerHTML) > parseInt(y.innerHTML)) {
+          shouldSwitch = true;
+          break;
+        }
+      }
+      if (shouldSwitch) {
+          rows[i].parentNode.insertBefore(rows[i + 1], rows[i]);
+          switching = true;
+      }
+    }
+  }
 </script>
 
+<script>
+  jQuery(document).ready(function($) {
+    $(".clickable-row").click(function() {
+      window.location = $(this).data("href");
+    });
+  });
+</script>
 
+<script>
+  var $rows = $('table tbody tr');
+  $('#search').keyup(function() {
+    var val = $.trim($(this).val()).replace(/ +/g, ' ').toLowerCase();
+    $rows.hide().filter(function() {
+      var text = $(this).text().replace(/\s+/g, ' ').toLowerCase();
+      return ~text.indexOf(val);
+    }).show();
+  });
+</script>
 
-    
+<script>
+  function applyFilter(currentFilter) {
+    var rows = $("#loantable tbody tr");
+    rows.show();
+    if (currentFilter === "Active" || currentFilter === "Inactive") {
+      rows.filter(":not(:contains('" + currentFilter + "'))").hide();
+    }
+  }
+</script>
 
+<script>
+  function ExportToExcel(){
+    var tableData = $("#loantable tbody tr:visible").map(function(index) {
+      return {
+        "#": index + 1, 
+        "DATE": $(this).find("td:eq(1)").text(),
+        "EMPLOYEE NAME": $(this).find("td:eq(2)").text(),
+        "EMPLOYEE MAIL": $(this).find("td:eq(3)").text(),
+        "EMPLOYEE NUMBER": $(this).find("td:eq(4)").text(),
+        "EMPLOYEE LOAN": $(this).find("td:eq(5)").text(),
+        "EXPIREY DATE": $(this).find("td:eq(6)").text(),
+      };
+    }).get();
+    var ws = XLSX.utils.json_to_sheet(tableData);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, 'Sheet1');
+    XLSX.writeFile(wb, 'EmployeeLoan.xlsx');
+  }
+</script>
 
+<script>
+  function sampleexcel(){
+    const table1 = document.querySelector('#employeeloanmodeltable');
+    const ws1 = XLSX.utils.table_to_sheet(table1);
+    const wb1 = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb1, ws1, 'Sheet1');
+    XLSX.writeFile(wb1, 'EmployeLoanModel.xlsx');
+  }
+</script>
+
+<script>
+  function uploadFile() {
+    const form = document.getElementById('excelForm');
+    const formData = new FormData(form);
+      
+    fetch('/import_employee_loan_details', {
+      method: 'POST',
+      body: formData
+    })
+    .then(response => {
+      if (!response.ok) {
+         throw new Error(`HTTP error! Status: ${response.status}`);
+      }
+      return response.json();
+    })
+    .then(jsonResponse => {
+      if (jsonResponse.message) {
+        swal({
+            title: 'Error',
+            text: jsonResponse.message,
+            icon: 'error',
+            buttons: false,
+        });
+      } else {
+        swal({
+            title: 'Imported!',
+            text: jsonResponse.success,
+            icon: 'success',
+            buttons: false,
+        });
+      }
+    })
+    .then(response => {
+      setTimeout(function () {
+        location.reload();
+      }, 1500);
+    })
+  }
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/popper.js@1.12.9/dist/umd/popper.min.js"
+    integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q"
+    crossorigin="anonymous">
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@4.0.0/dist/js/bootstrap.min.js"
+    integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl"
+    crossorigin="anonymous">
+</script>
 {% endblock %}
-

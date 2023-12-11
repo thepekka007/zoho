@@ -1,459 +1,579 @@
-
-<!-- RIJIN -->
 {% extends 'base.html' %}
 {% block content %}
 {% load static %}
 
-<!-- Include the necessary CSS styles here to match the create loan page style -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+<script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
 <style>
-    /* Your CSS styles for the edit loan page go here */
+    .modal{
+        z-index: 9999;
+        overflow: scroll;
+    }
+    
+    input[type="text"],
+    input[type="date"],
+    input[type="number"],
+    input[type="email"],
+    input[type="file"],
+    .gen-info textarea,
+    .gen-info select,
+    .data select,
+    .data option,
+    .gen-info option {
+        color: rgb(7, 7, 7);
+        border: 1px solid rgb(0, 0, 0);
+    }
+
+    .gen-info .left {
+        padding-right: 2rem;
+    }
+
+    .action-button {
+        display: flex;
+        align-items: center;
+    }
+
+    .action-button button {
+        width: 8vw;
+        font-size: 1.2vw;
+        margin: 0.5rem .3rem;
+    }
+
+    label {
+        font-size: 1.2vw;
+    }
+
+    .containerprof {
+        position: relative;
+    }
+
+    .fixed-width-label {
+        display: inline-block;
+        width: 150px;
+        margin-right: 10px;
+    }
 </style>
 
 <section>
     <div class="containerprof p-5">
         <div class="header pb-5">
-            <h3>EDIT EMPLOYEE LOAN</h3>
+            <h2 class="mb-0 text-uppercase text-right">EDIT EMPLOYEE LOAN</h2>
             <hr>
         </div>
-        <form method="POST" action="{% url 'edit_loan' loan.id %}" id="editLoanForm">
+        <form method="POST" action="{% url 'edit_loan' loan.id %}" id="myForm" onsubmit="return validateform()">
             {% csrf_token %}
-            <!-- Form fields for editing the loan go here -->
-
             <div class="row">
-                <div class="data col-6 col-lg-6 col-md-6 col-sm-12">
-                    <!-- Display payroll components -->
+                <div class="data">
                     <div class="row pb-3">
-                        <div class="col-6">
-                            <label for="">Employee Name</label>
+                        <div class="col-3">
+                            <label for="">Select Employee</label>
                         </div>
-                        <div class="input-container col-6">
-                            <select class="form-control text-dark" name="employee" id="employee" onchange="fillEmployeeDetails()" style="width: 500px;">
-                                {% for payroll in payrolls %}
-                                    <option value="{{ payroll.id }}"
-                                        data-email="{{ payroll.email }}"
-                                        data-emp-number="{{ payroll.emp_number }}"
-                                        data-salary="{{ payroll.salary }}"
-                                        data-joindate="{{ payroll.joindate|date:'Y-m-d' }}"
-                                        {% if payroll.id == loan.payroll.id %}selected{% endif %}>
-                                        {{ payroll.title }} {{ payroll.first_name }} {{ payroll.last_name }}
-                                    </option>
-                                {% endfor %}
-                            </select>
-                            
-                            
-                            
+                        <div class="col-5">
+                            <input class="form-control text-dark bg-light" type="text" name="employee" id="employee" value="{{loan.payroll.first_name}} {{loan.payroll.last_name}}" readonly>
                         </div>
                     </div>
                     <div class="row pb-3">
-                        <div class="col-6">
+                        <div class="col-md-3">
                             <label for="">Email</label>
                         </div>
-                        <div class="input-container col-6">
-                            <input type="email" class="form-control text-dark" name="email" id="email" value="{{ loan.payroll.email }}" readonly style="width: 500px;">
+                        <div class=" col-5">
+                            <input type="email" class="form-control text-dark bg-light" name="email" id="email" value="{{loan.payroll.email}}" readonly>
                         </div>
                     </div>
                     <div class="row pb-3">
-                        <div class="col-6">
-                            <label for="">Employee ID</label>
+                        <div class="col-3">
+                            <label for="">Employee Number</label>
                         </div>
-                        <div class="input-container col-6">
-                            <input type="text" class="form-control text-dark" name="emp_id" id="emp_id" value="{{ loan.payroll.emp_number }}" readonly style="width: 500px;">
+                        <div class="col-5">
+                            <input type="text" class="form-control text-dark bg-light" name="emp_id" id="emp_id" value="{{loan.payroll.emp_number}}" readonly>
                         </div>
                     </div>
                     <div class="row pb-3">
-                        <div class="col-6">
+                        <div class="col-3">
                             <label for="">Salary</label>
                         </div>
-                        <div class="input-container col-6">
-                            <input type="number" class="form-control text-dark" name="salary" id="salary" value="{{ loan.payroll.salary }}" readonly style="width: 500px;">
+                        <div class="col-5">
+                            <input type="number" class="form-control text-dark bg-light" name="salary" id="salary" value="{{loan.payroll.salary}}" readonly>
                         </div>
                     </div>
                     <div class="row pb-3">
-                        <div class="col-6">
+                        <div class="col-3">
                             <label for="">Joining Date</label>
                         </div>
-                        <div class="input-container col-6">
-                            <input type="date" class="form-control text-dark" name="joindate" id="joindate" value="{{ loan.payroll.joindate|date:'Y-m-d' }}" readonly style="width: 500px;">
+                        <div class="col-5">
+                            <input type="date" class="form-control text-dark bg-light" name="joindate" id="joindate" value="{{loan.payroll.joindate|date:'Y-m-d'}}" readonly>
                         </div>
                     </div>
-                    <!-- Include other payroll components as needed -->
-
-                   <!-- ... (previous code) ... -->
-
-<div class="row pb-3">
-    <div class="col-6">
-        <label for="">Date of Loan Issue</label>
-    </div>
-    <div class="input-container col-6">
-        <input type="date" class="form-control text-dark" name="date_issue" id="date_issue" value="{{ loan.date_issue|date:'Y-m-d' }}" required style="width: 500px;">
-    </div>
-</div>
-<div class="row pb-3">
-    <div class="col-6">
-        <label for="">Expiry Date</label>
-    </div>
-    <div class="input-container col-6">
-        <input type="date" class="form-control text-dark" name="date_expiry" id="date_expiry" value="{{ loan.date_expiry|date:'Y-m-d' }}" required style="width: 500px;">
-    </div>
-</div>
-
-<div class="row pb-3">
-    <div class="col-6">
-        <label for="">Loan Amount</label>
-    </div>
-    <div class="input-container col-6">
-        <input type="number" class="form-control text-dark" name="loan_amount" id="loan_amount" value="{{ loan.loan_amount }}" required style="width: 500px;">
-    </div>
-</div>
-
-<div class="row pb-3">
-    <div class="col-6">
-        <label for="payment_method" class="mr-2 mb-0" style="width: 150px;">Payment Method</label>
-    </div>
-    <div class="input-container col-6">
-        <select class="form-control text-dark" name="payment_method" id="payment_method" required onchange="showAdditionalFields()" style="width: 500px;">
-            {% if loan.monthly_cutting_type == 'percentage' %}
-            <option value="percentage_wise">Percentage Wise</option>
-            <option value="amount_wise">Amount Wise</option>
-            {%else%}
-            <option value="amount_wise">Amount Wise</option>
-            <option value="percentage_wise">Percentage Wise</option>
-            {%endif%}
-        </select>
-    </div>
-</div>
-
-<div class="row pb-3" id="percentageWiseFields">
-    <div class="col-6">
-        <label for="percentage" class="fixed-width-label">Percentage</label>
-    </div>
-    <div class="input-container col-6">
-        <input type="number" class="form-control text-dark" name="percentage" id="percentage" step="0.01" min="0" max="100" oninput="updateMonthlyCuttingAmount()" value="{{ loan.monthly_cutting_percentage }}" required style="width: 500px;">
-    </div>
-</div>
-
-
-<div class="row pb-3" id="percentageWiseMonthlyFields">
-    <div class="col-6 d-flex align-items-center">
-        <label for="monthly_cutting_amount" class="mr-2 mb-0" style="width: 150px;">Monthly Cutting Amount</label>
-    </div>
-    <div class="input-container col-6">
-        <input type="number" class="form-control text-dark" name="monthly_cutting_amount" id="monthly_cutting_amount" step="0.01" min="0" value="{{ loan.monthly_cutting_amount}}" required oninput="handleFormSubmission()" style="width: 500px;">
-    </div>
-</div>
-<div id="error-message" class="text-danger"></div>
-<script>
-    // Check if the error message exists and is not empty
-    const errorMessage = "{{ error_message }}";
-    if (errorMessage) {
-        // Get the error message container by its ID
-        const errorMessageContainer = document.getElementById("error-message");
-        
-        // Update the content of the error message container
-        errorMessageContainer.textContent = errorMessage;
-    }
-</script>
-
-
-
-<script>
-   
-    function updateMonthlyCuttingAmount() {
-        var percentage = parseFloat(document.getElementById('percentage').value);
-        var salary = parseFloat(document.getElementById('salary').value);
-        
-        if (!isNaN(percentage) && !isNaN(salary)) {
-            var monthlyCuttingAmount = (percentage / 100) * salary;
-            document.getElementById('monthly_cutting_amount').value = monthlyCuttingAmount.toFixed(2);
-        } else {
-            document.getElementById('monthly_cutting_amount').value = '';
-        }
-    }
-</script>
-
-{% if error_message %}
-
-            <div id="error-message" style="color: red;"></div> <!-- Error message for cutting amount validation -->
-            {% endif %}
-        </div>
-    </div>
-                    
-                   
-
-                    <div class="action-button">
-                        <button class="btn btn-primary" type="submit">Save Changes</button>
-                        <a class="btn btn-danger" href="{% url 'employee_list' %}">Cancel</a>
+                    <div class="row pb-3">
+                        <div class="col-3">
+                            <label for="">Date of Loan Issue</label>
+                        </div>
+                        <div class="col-5">
+                            <input type="date" class="form-control text-dark bg-light" name="loan_issue_date" id="loan_issue_date" value="{{loan.date_issue|date:'Y-m-d'}}" required>
+                        </div>
                     </div>
-                    <div class="text-center">
-                        <!-- ... (Message alerts) ... -->
+                    <div class="row pb-3" >
+                        <div class="col-3">
+                            <label for="duration" class="mr-2 mb-0" style="width: 150px;">Loan Duration</label>
+                        </div>
+                        <div class="col-5 d-flex">
+                            <select class="form-control text-dark bg-light" name="duration" id="duration" onchange="updateExpDate()" required>
+                                <option value="{{loan.duration}}" selected hidden>{{loan.duration}}</option>
+                                <option value="6 Months">6 Months</option>
+                                <option value="1 Year">1 Year</option>
+                                {% for d in dur %}
+                                <option value="{{d.day}} {{d.duration}}">{{d.day}} {{d.duration}}</option>
+                                {% endfor %}
+                            </select>
+                            <a data-toggle="modal" data-target="#newduration" class="btn" style="background-color: chocolate; color: black; height: 100%; margin-left: 2vh; font-size: large; padding-top: 10px; ">+</a>
+                        </div>
                     </div>
+                    <div class="row pb-3">
+                        <div class="col-3">
+                            <label for="">Expiry Date</label>
+                        </div>
+                        <div class="col-5">
+                            <input type="date" class="form-control text-dark bg-light" name="loan_expiry_date" id="loan_expiry_date" value="{{loan.date_expiry|date:'Y-m-d'}}" readonly>
+                        </div>
+                    </div>
+                    <div class="row pb-3">
+                        <div class="col-3">
+                            <label for="">Loan Amount</label>
+                        </div>
+                        <div class="col-5">
+                            <input type="number" class="form-control text-dark bg-light" name="loan_amount" id="loan_amount" value='{{loan.loan_amount}}' required>
+                        </div>
+                    </div>
+                    <div class="row pb-3">
+                        <div class="col-3">
+                            <label for="">Payment Method</label>
+                        </div>
+                        <div class="col-5">
+                            <select class="form-control text-dark bg-light" name="payment_type" id="payment_type" required>
+                                <option value="{{loan.pay_method}}" selected hidden>{{loan.pay_method}}</option>
+                                <option value="Cash">Cash</option>
+                                <option value="UPI">UPI</option>
+                                <option value="Cheque">Cheque</option>
+                                {% for item in bank %}
+                                <option value="{{item.name}}">{{item.name}}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                    {% if loan.cheque_id %}
+                    <div class="row pb-3" id="chequediv">
+                        <div class="col-3">
+                            <label for="date2">Cheque ID</label>
+                        </div>
+                        <div class="col-5">
+                            <input type="text" class="form-control text-black bg-white" name="cheque_id" id="cheque_id" value="{{loan.cheque_id}}">
+                        </div>
+                    </div>  
+                    {% else %}
+                    <div class="row pb-3" id="chequediv" style="display: none;">
+                        <div class="col-3">
+                            <label for="date2">Cheque ID</label>
+                        </div>
+                        <div class="col-5">
+                            <input type="text" class="form-control text-black bg-white" name="cheque_id" id="cheque_id">
+                        </div>
+                    </div>  
+                    {% endif %}
+                    {% if loan.upi_id %}
+                    <div class="row pb-3" id="upidiv">
+                        <div class="col-3">
+                            <label for="date2">UPI ID</label>
+                        </div>
+                        <div class="col-5">
+                            <input type="text" class="form-control text-black bg-white" name="upi_id" id="upi_id" value="{{loan.upi_id}}">
+                        </div>
+                    </div>  
+                    {% else %}
+                    <div class="row pb-3" id="upidiv" style="display: none;">
+                        <div class="col-3">
+                        <label for="date2">UPI ID</label>
+                        </div>
+                
+                        <div class="col-5">
+                            <input type="text" class="form-control text-black bg-white" name="upi_id" id="upi_id" >
+                        </div>
+                    </div>  
+                    {% endif %}
+                    {% if loan.bank_id %}
+                    <div class="row pb-3" id="bnkdiv">
+                        <div class="col-3">
+                            <label for="date2">Bank Account</label>
+                        </div>
+                        <div class="col-5">
+                            <input type="text" class="form-control text-black bg-white" name="bnk_id" id="bnk_id" value="{{loan.bank_id}}" readonly>
+                        </div>
+                    </div>  
+                    {% else %}
+                    <div class="row pb-3" id="bnkdiv" style="display: none;">
+                        <div class="col-3">
+                            <label for="date2">Bank Account</label>
+                        </div>
+                        <div class="col-5">
+                            <input type="text" class="form-control text-black bg-white" name="bnk_id" id="bnk_id" readonly>
+                        </div>
+                    </div>  
+                    {% endif %}
+                    <div class="row pb-3">
+                        <div class="col-3">
+                            <label for="payment_method" class="mr-2 mb-0" style="width: 150px;">Payment Type</label>
+                        </div>
+                        <div class="col-5">
+                            <select class="form-control text-dark bg-light" name="payment_method" id="payment_method"  onchange="showAdditionalFields()" required>
+                                {% if loan.monthly_cutting_type == 'percentage' %}
+                                <option value="percentage_wise" selected hidden>Percentage Wise</option>
+                                <option value="percentage_wise">Percentage Wise</option>
+                                <option value="amount_wise">Amount Wise</option>
+                                {% else %}
+                                <option value="amount_wise" selected hidden>Amount Wise</option>
+                                <option value="percentage_wise" >Percentage Wise</option>
+                                <option value="amount_wise">Amount Wise</option>
+                                {% endif %}
+                            </select>
+                        </div>
+                    </div>
+                    {% if loan.monthly_cutting_percentage != 0.00 %}
+                    <div id="percentageWiseFields">
+                        <div class="row pb-3">
+                            <div class="col-3" >
+                                <label for="percentage" class="mr-2 mb-0" style="width: 150px;">Percentage</label>
+                            </div>
+                            <div class="col-5" >
+                                <input type="number" class="form-control text-dark bg-light" name="percentage" id="percentage" step="0.01" min="0" max="100" value="{{loan.monthly_cutting_percentage}}" onchange="updateMonthlyCuttingAmount()">
+                                <div id="error-percentage" style="color: red;"></div>
+                            </div>
+                        </div>
+                    </div>
+                    {% else %}
+                    <div id="percentageWiseFields" style="display: none;">
+                        <div class="row pb-3">
+                            <div class="col-3" >
+                                <label for="percentage" class="mr-2 mb-0" style="width: 150px;">Percentage</label>
+                            </div>
+                            <div class="col-5" >
+                                <input type="number" class="form-control text-dark bg-light" name="percentage" id="percentage" step="0.01" min="0" max="100"  onchange="updateMonthlyCuttingAmount()">
+                                <div id="error-percentage" style="color: red;"></div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
+                    <div id="percentageWiseMonthlyFields">
+                        <div class="row pb-3" >
+                            <div class="col-3">
+                                <label for="monthly_cutting_amount" class="mr-2 mb-0" style="width: 150px;">Monthly Cutting Amount</label>
+                            </div>
+                            <div class="col-5">
+                                <input type="number" class="form-control text-dark bg-light" name="monthly_cutting_amount" id="monthly_cutting_amount" step="0.01" min="0" value="{{loan.monthly_cutting_amount}}" onchange="handleFormSubmission()">
+                                <div id="error-amount" style="color: red;"></div>
+                            </div>
+                        </div>                    
+                    </div>
+                    <div class="row pb-3">
+                        <div class="col-3">
+                            <label for="payment_method" class="mr-2 mb-0" style="width: 150px;">Note</label>
+                        </div>
+                        <div class="col-5">
+                            <textarea class="text-dark bg-white"  name="note" id="note" cols="50" rows="4" style="border-radius: 5px;">{{loan.note}}</textarea>
+                        </div>
+                    </div>
+                </div>
+                <div class="action-button">
+                    <button class="btn" type="submit" style="background-color: chocolate;">Submit</button>
+                    <button class="btn" type="reset" style="background-color: chocolate;">Cancel</button>
+                </div>
+                <div class="text-center">
+                    <!-- ... (Message alerts) ... -->
                 </div>
             </div>
         </form>
     </div>
+
+    <div class="modal fade" id="newduration" style="margin-top: 7vh;">
+        <div class="modal-dialog ">
+            <div class="modal-content" style="background: rgb(32, 35, 37);border-radius: 20px;">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="excelModalLabel">Add Loan Duration</h5>
+                    <button type="button" class="btn close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true" style="font-size: x-large;">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body" style="background: rgb(32, 35, 37);">
+                    <div class="card">
+                        <form action="" method="post" class="needs-validation" novalidate autocomplete="off" id="durationform">
+                        {% csrf_token %}
+                            <div class="form-group mt-3" style="margin-left: 2vh;">
+                                <div class="row">
+                                    <div class="col-md-3 mt-2">
+                                        <label for="lday" style="font-size: medium;">Enter Day </label> <br><br>
+                                    </div>
+                                    <div class="col-md-8" style="margin-left: 2vh;">
+                                        <input type="number" class="form-control text-dark bg-white" name="lday" id="lday">
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-3 mt-2">
+                                        <label for="ldur" style="font-size: medium;">Enter Duration </label> <br><br>
+                                    </div>
+                                    <div class="col-md-8" style="margin-left: 2vh;">
+                                        <select class="form-control text-dark bg-white" name="ldur" id="ldur">
+                                            <option value="" selected hidden>Select</option>
+                                            <option value="Month">Month</option>
+                                            <option value="Year">Year</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn text-center pt-2 btn-outline-warning" data-dismiss="modal" id="durationsave">Submit</button>
+                                <button type="button" class="btn text-center pt-2 btn-outline-warning" data-dismiss="modal">Close</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>  
+    </div>  
 </section>
 
+<script>
+    function showAdditionalFields() {
+        var paymentMethod = document.getElementById('payment_method').value;
+        var percentageWiseFields = document.getElementById('percentageWiseFields');
+        var percentageWiseMonthlyFields = document.getElementById('percentageWiseMonthlyFields');
+        var monthlyCuttingAmountLabel = document.querySelector('[for="monthly_cutting_amount"]');
+        var monthlyCuttingAmountField = document.getElementById('monthly_cutting_amount');
+        if (paymentMethod === 'percentage_wise') {
+            percentageWiseFields.style.display = 'block';
+            percentageWiseMonthlyFields.style.display = 'block';
+            monthlyCuttingAmountLabel.style.display = 'block';
+            monthlyCuttingAmountField.style.display = 'block';
+        } else if (paymentMethod === 'amount_wise') {
+            percentageWiseFields.style.display = 'none';
+            percentageWiseMonthlyFields.style.display = 'block';  // Show the "Monthly Cutting Amount" field
+            monthlyCuttingAmountLabel.style.display = 'block';
+            monthlyCuttingAmountField.style.display = 'block';
+            document.getElementById('percentage').value = '';
+            document.getElementById('monthly_cutting_amount').value = '';
+        } else {
+            percentageWiseFields.style.display = 'none';
+            percentageWiseMonthlyFields.style.display = 'none';
+            monthlyCuttingAmountLabel.style.display = 'none';
+            monthlyCuttingAmountField.style.display = 'none';
+        }
+    }
+</script>
 
 <script>
-    // var loadAttachment = function (event) {
-    //                     var reader = new FileReader();
-    //                     reader.onload = function () {
-    //                         var output = document.getElementById('img2');
-    //                         output.innerHTML = reader.result.trim;
-    //                     };
-    //                     reader.readAsDataURL(event.target.files[0]);
-    //                 };
-    function bankdisplay() {
-        var e = document.getElementById("dropId").value;
-
-        if (e == 0) {
-            document.getElementById("bank").style.display = 'none'
-
-        }
-        else {
-            document.getElementById("bank").style.display = 'block'
-        }
-
-    }
-    function salFunction() {
-        var e = document.getElementById("sal");
-        var sal = e.value;
-        if (sal == 'Fixed') {
-            document.getElementById("fixed").style.display = 'block'
-            document.getElementById("variable").style.display = 'none'
-        }
-        else if (sal == 'Variable') {
-            document.getElementById("variable").style.display = 'block'
-            document.getElementById("fixed").style.display = 'none'
-        }
-
-    }
-    function calculateAmount(val) {
-        var a = document.getElementById("amnt").value;
-        var h = document.getElementById("hours").value;
-        var tot = h * a;
-        document.getElementById('vsalary').value = tot;
-
-    }
-
-    function tdsFunction() {
-        var e = document.getElementById("tds");
-        var sal = e.value;
-        if (sal == '1') {
-            document.getElementById("tds-div").style.display = 'block'
-        }
-        else {
-            document.getElementById("tds-div").style.display = 'none'
-        }
-
-    }
-    function tdsFunction2() {
-        var e = document.getElementById("pora");
-        var sal = e.value;
-        if (sal == 'Percentage') {
-            document.getElementById("p").style.display = 'block';
-            document.getElementById("a").style.display = 'none';
-        }
-        else if (sal == 'Amount') {
-            document.getElementById("a").style.display = 'block';
-            document.getElementById("p").style.display = 'none'
-        }
-    }
-    function emailvalidate() {
-        var email = document.getElementById('email')
-        var error = document.getElementById('error')
-        if (!email.value.match(/^[A-Za-z\._\-0-9]*[@][A-Za-z]*[\.][a-z]{2,4}$/)) {
-            error.style.fontSize = ".8rem"
-            error.innerHTML = "*Please enter a valid email"
+    function validateform() {
+        var pay_method = document.getElementById('payment_type').value;
+        var cheque_id = document.getElementById('cheque_id').value;
+        var upi_id = document.getElementById('upi_id').value;
+        if (pay_method === ''){
+            alert('Please select a Payment Method');
             return false;
-
-        }
-        error.innerHTML = ""
-        return true;
-    }
-    function phoneValidate(phn, pherror) {
-        if (!phn.value.match(/^[6-9]\d{9}$/)) {
-            pherror.style.display = "block"
-            pherror.style.fontSize = ".8rem"
-            pherror.innerHTML = "*Please enter a valid phone number"
-            return false;
-        }
-        pherror.style.display = "none"
-        pherror.innerHTML = ""
-        return true;
-    }
-    function empValidation(emp) {
-        emp.addEventListener("input", function () {
-            emp.value = emp.value.toUpperCase();
-        });
-
-    }
-    inputvalue = document.getElementById('ifsc')
-    inputvalue.addEventListener("input", function () {
-        inputvalue.value = inputvalue.value.toUpperCase();
-    });
-    const inputFields = document.querySelectorAll("input[type='text']");
-
-    inputFields.forEach(function (input) {
-        input.addEventListener("input", function () {
-            const inputValue = input.value;
-            input.value = inputValue.charAt(0).toUpperCase() + inputValue.slice(1);
-        });
-    });
-
-    document.getElementById("an").addEventListener("input", function () {
-        const input = this.value;
-        if (input.length > 14) {
-            this.value = input.slice(0, 14); // Truncate the input to 10 characters
-        }
-    });
-    document.getElementById("acc_no").addEventListener("input", function () {
-        const input = this.value;
-        if (input.length > 15) {
-            this.value = input.slice(0, 15); // Truncate the input to 10 characters
-        }
-    });
-
-    $(document).ready(function () {
-        $("#filladdress").on("click", function () {
-            if (this.checked) {
-                $("#adrs1").val($("#padrs1").val());
-                $("#adrs2").val($("#padrs2").val());
-
+        }else if(pay_method === 'Cheque'){
+            if (cheque_id === ''){
+                alert('Add a cheque number');
+                return false;
             }
-            else {
-                $("#adrs1").val('');
-                $("#adrs2").val('');
+        }else if(pay_method === 'UPI'){
+            if (upi_id === ''){
+                alert('Add a UPI number');
+                return false;
+            }
+        }
+        return true; 
+    }
+</script>
+        
+<script>
+    $(document).ready(function() {
+        $("#payment_type").change(function() {
+            var x=$('#payment_type').val();
+            if(x==='Cash'){
+                $('#chequediv').hide()
+                $('#bnkdiv').hide()
+                $('#upidiv').hide()
+                document.getElementById('cheque_id').value=null
+                document.getElementById('upi_id').value=null
+            }else if(x==='Cheque'){
+                $('#chequediv').show()
+                $('#bnkdiv').hide()
+                $('#upidiv').hide()
+                document.getElementById('upi_id').value=null
+            }else if(x==='UPI'){
+                $('#upidiv').show()
+                $('#bnkdiv').hide()
+                $('#chequediv').hide()
+                document.getElementById('cheque_id').value=null
+            }else{
+                $('#bnkdiv').show()
+                $('#chequediv').hide()
+                $('#upidiv').hide()
+                document.getElementById('cheque_id').value=null
+                document.getElementById('upi_id').value=null
+                $.ajax({
+                    type: "GET",
+                    url: "{% url 'bankdata' %}",
+                    data: {
+                    id: x,
+                    },
+                    success: function (response) {
+                        data = response.bank
+                        document.getElementById('cheque_id').value=null
+                        document.getElementById('upi_id').value=null
+                        document.getElementById("bnk_id").value = data
+                    }
+                });
             }
         });
     });
 </script>
 
+<script>
+    document.getElementById('loan_issue_date').addEventListener('change', updateExpDate);
+    function updateExpDate() {
+        var selectedDate = new Date( document.getElementById('loan_issue_date').value);
+        var newdate = new Date(selectedDate);
+        var loandur = document.getElementById('duration').value;
+        ldays = parseInt(loandur.split(' ')[0])
+        lduration = loandur.split(' ')[1]
+        if (lduration == 'Year' || lduration == 'Years'){
+            ldays = ldays * 365
+            newdate.setDate(selectedDate.getDate() + ldays);
+            var loandate = newdate.toISOString().split('T')[0];
+            document.getElementById('loan_expiry_date').value = loandate;
+        }else{
+            ldays = ldays * 30
+            newdate.setDate(selectedDate.getDate() + ldays);
+            var loandate = newdate.toISOString().split('T')[0];
+            document.getElementById('loan_expiry_date').value = loandate;       
+        }
+    }
+    $(document).on('change','#duration', function(){
+        var selectedDate = new Date(document.getElementById('loan_issue_date').value);
+        if(isNaN(selectedDate)){
+            alert('Select an Loan Issue Date')
+            document.getElementById('duration').value = ''
+        }
+    })
+</script>
 
+<script>
+    $(document).on("click", "#durationsave", function () {
+        days = $("#lday").val()
+        durs = $("#ldur").val()
+        if(days != 1){
+            if(durs == 'Month'){
+                durs = 'Months'
+            }else{
+                durs = 'Years'
+            }
+        }
+        $.ajax({
+            type: "POST",
+            url: "{% url 'create_loan_duration' %}",
+            data: {
+                days:days,
+                durs:durs,
+                csrfmiddlewaretoken: '{{ csrf_token }}'
+            },
+            success: function (response) {
+                document.getElementById("durationform").reset();
+                reload_duration();
+            },
+        });
+    });
 
+    function reload_duration() {
+        $.ajax({
+            url: "{% url 'loan_duration' %}",
+            type: "GET",
+            dataType: "json",
+            data: $(this).serialize(),
+            csrfmiddlewaretoken: '{{ csrf_token }}',
+            success: function(data) {
+                var dropdown = $('#duration');
+                dropdown.empty();
+                dropdown.append($('<option value="" hidden selected>Select</option>'));
+                dropdown.append($('<option value="6 Months">6 Months</option>'));
+                dropdown.append($('<option value="1 Year">1 Year</option>'));
+            $.each(data, function(key, value) {
+                dropdown.append($('<option></option>').attr('value', key).text(value).val(key));
+                });
+            },
+            error: function(xhr, status, error) {
+                console.error(xhr.responseText);
+            }
+        });
+    }
+</script>
 
-                    
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-                    <script>
-                        function fillEmployeeDetails() {
-                            var selectedOption = document.getElementById("employee").selectedOptions[0];
-                            
-                            var email = selectedOption.getAttribute("data-email");
-                            var empNumber = selectedOption.getAttribute("data-emp-number");
-                            var salary = selectedOption.getAttribute("data-salary");
-                            var joinDate = selectedOption.getAttribute("data-joindate");
-                            
-                            document.getElementById("email").value = email;
-                            document.getElementById("emp_id").value = empNumber;
-                            document.getElementById("salary").value = salary;
-                            document.getElementById("joindate").value = joinDate;
-                        }
-
-
-
-                        function showAdditionalFields() {
-                            var paymentMethod = document.getElementById('payment_method').value;
-                            var percentageWiseFields = document.getElementById('percentageWiseFields');
-                            var amountWiseFields = document.getElementById('amountWiseFields');
-                        
-                            if (paymentMethod === 'percentage_wise') {
-                                percentageWiseFields.style.visibility = 'visible';
-                                amountWiseFields.style.visibility = 'hidden';
-                            } else if (paymentMethod === 'amount_wise') {
-                                percentageWiseFields.style.visibility = 'hidden';
-                                amountWiseFields.style.visibility = 'visible';
-                            } else {
-                                percentageWiseFields.style.visibility = 'hidden';
-                                amountWiseFields.style.visibility = 'hidden';
-                            }
-                        }
-                        
-                    
-                      
-                    
-                    
+<script>
     function handleFormSubmission() {
-        // Get the selected payment method
         var paymentMethod = document.getElementById('payment_method').value;
-        
-        // Validate the form based on the selected payment method
+        var salary = parseFloat(document.getElementById('salary').value);
+        var monthlyCuttingAmount = parseFloat(document.getElementById('monthly_cutting_amount').value);
+        var loan_amount = parseFloat(document.getElementById('loan_amount').value);
         if (paymentMethod === 'percentage_wise') {
-            // Validate percentage and monthly cutting amount
             var percentage = parseFloat(document.getElementById('percentage').value);
-            var salary = parseFloat(document.getElementById('salary').value);
-            var monthlyCuttingAmount = parseFloat(document.getElementById('monthly_cutting_amount').value);
-            
-            if (isNaN(percentage) || isNaN(salary) || isNaN(monthlyCuttingAmount) || percentage < 0 || percentage > 100 || monthlyCuttingAmount < 0 || monthlyCuttingAmount > salary) {
-                document.getElementById('error-message').innerText = "Invalid percentage or monthly cutting amount.";
-                return false; // Prevent form submission
-            } else {
-                document.getElementById('error-message').innerText = ""; // Clear error message
-                return true; // Allow form submission
-            }
+            var monthlyCuttingAmount = (percentage / 100) * salary;
+            document.getElementById('monthly_cutting_amount').value = monthlyCuttingAmount.toFixed(2);
+            document.getElementById('error-amount').innerText = 'Changing this value is not Possible';
         } else if (paymentMethod === 'amount_wise') {
-            // Validate monthly cutting amount
-            var monthlyCuttingAmount = parseFloat(document.getElementById('monthly_cutting_amount').value);
-            var salary = parseFloat(document.getElementById('salary').value);
-            
-            if (isNaN(monthlyCuttingAmount) || monthlyCuttingAmount < 0 || monthlyCuttingAmount > salary) {
-                document.getElementById('error-message').innerText = "Invalid monthly cutting amount.";
-                return false; // Prevent form submission
+            if(isNaN(salary)){
+                document.getElementById('error-amount').innerText = 'Please Select an Employee'
+                document.getElementById('monthly_cutting_amount').value = ''
+            }else if(isNaN(loan_amount)){
+                document.getElementById('error-amount').innerText = 'Please Specify loan Amount'
+                document.getElementById('monthly_cutting_amount').value = ''
+            }else if (monthlyCuttingAmount < 0 || monthlyCuttingAmount > salary ) {
+                document.getElementById('error-amount').innerText = "Monthly cutting amount Greater than Salary";
+                document.getElementById('monthly_cutting_amount').value = ''
+            } else if(monthlyCuttingAmount < 0 || monthlyCuttingAmount > loan_amount) {
+                document.getElementById('error-amount').innerText = "Monthly cutting amount Greater than Loan Amount";
+                document.getElementById('monthly_cutting_amount').value = ''
             } else {
-                document.getElementById('error-message').innerText = ""; // Clear error message
-                return true; // Allow form submission
+                document.getElementById('error-amount').innerText = "";
             }
         }
-        
-        return true; // Allow form submission for other cases
+        return true; 
     }
 
-
-   
-
-function showAdditionalFields() {
-        var paymentMethod = document.getElementById("payment_method").value;
-        var percentageField = document.getElementById("percentage");
-        var percentageLabel = document.querySelector("#percentageWiseFields .col-6 label");
-
-        // Check if the selected payment method is "percentage_wise"
-        if (paymentMethod === "percentage_wise") {
-            percentageField.classList.remove("hidden");
-            percentageLabel.classList.remove("hidden");
+    function updateMonthlyCuttingAmount() {
+        document.getElementById('error-percentage').innerText = "";
+        var percentage = parseFloat(document.getElementById('percentage').value);
+        var salary = parseFloat(document.getElementById('salary').value);
+        var loan_amount = parseFloat(document.getElementById('loan_amount').value);
+        if (!isNaN(salary) && !isNaN(loan_amount) && percentage > 0 && percentage <= 100) {
+            var monthlyCuttingAmount = (percentage / 100) * salary;
+            if (monthlyCuttingAmount > loan_amount){
+                document.getElementById('error-percentage').innerText = 'Monthly Cutting Amount Greater Than Loan Amount'
+                document.getElementById('percentage').value = ''
+            }else{
+                document.getElementById('monthly_cutting_amount').value = monthlyCuttingAmount.toFixed(2);
+                document.getElementById('error-percentage').innerText = '';
+            }
         } else {
-            percentageField.classList.add("hidden");
-            percentageLabel.classList.add("hidden");
+            if(isNaN(salary)){
+                document.getElementById('error-percentage').innerText = 'Please Select an Employee'
+                document.getElementById('percentage').value = ''
+            }else if(isNaN(loan_amount)){
+                document.getElementById('percentage').value = ''
+                document.getElementById('error-percentage').innerText = 'Please Specify Loan Amount'
+            }else{
+                document.getElementById('monthly_cutting_amount').value = '';
+                document.getElementById('error-percentage').innerText = "Invalid Percentage.";
+            }
         }
     }
-
-    // Add an event listener to the dropdown to trigger the function
-    document.getElementById("payment_method").addEventListener("change", showAdditionalFields);
-
-    // Call the function initially to set the initial visibility
-    showAdditionalFields();
-
-    function updateOptionValues() {
-        var paymentMethodSelect = document.getElementById("payment_method");
-        
-        // Check the selected value and update option values accordingly
-        if (paymentMethodSelect.value === "percentage") {
-            paymentMethodSelect.querySelector("option[value='percentage']").textContent = "Percentage Wise";
-            paymentMethodSelect.querySelector("option[value='amount']").textContent = "Amount Wise";
-        } else {
-            paymentMethodSelect.querySelector("option[value='percentage']").textContent = "Percentage Wise";
-            paymentMethodSelect.querySelector("option[value='amount']").textContent = "Amount Wise";
-        }
-    }
-
-    // Add an event listener to the dropdown to trigger the function
-    document.getElementById("payment_method").addEventListener("change", updateOptionValues);
-
-    // Call the function initially to set the initial option values
-    updateOptionValues();
 </script>
-
-
-    
 
 {% endblock %}
-
-

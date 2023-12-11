@@ -1,725 +1,903 @@
-<!-- RIJIN -->
 {% extends 'base.html' %}
-{% block content %}
 {% load static %}
+{% load social_share %}
+{% block content %}
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.9.3/html2pdf.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/popper.js@1.12.9/dist/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@4.0.0/dist/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
 
+<style>            
+  body {
+    font-family: Arial, sans-serif;
+    background-color: #f2f2f2;
+    padding: 1px;
+    margin: 0;
+  }
+  
+  header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px;
+    box-shadow: 0 0 10px rgba(0,0,0,0.2);
+    margin-bottom: 20px;
+  }
 
-<style>
-    * {
+  table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+  
+  th, td {
+    padding: 10px;
+    text-align: left;
+    border-bottom: 1px solid #ddd;
+  }
+  
+  #th {
+    background-color: #f2f2f2;
+    color: black;
+  }
+  
+  footer {
+    background-color: #fff;
+    padding: 20px;
+    box-shadow: 0 0 10px rgba(0,0,0,0.2);
+    text-align: center;
+    font-size: 0.8em;
+    color: #888;
+    margin-top: 20px;
+  }
+  
+  footer p {
+    margin: 5px 0;
+  }
+ 
+  .dropdown-item:hover{
+    color: chocolate;
+  }
 
-        font-family: "Gill Sans", sans-serif;
-        color: white;
+  tr.clickable {
+    cursor: pointer;
+  }
+
+  @media print{
+    body{
+      visibility: hidden !important; /* hide everything in body when in print mode*/
     }
 
-    .list {
-        background-color: rgb(29, 29, 29);
-    }
+    .printContainer {
+      visibility: visible !important; /* Override the rule above to only show the printables*/
+      position: absolute;
+      z-index: 99999;
+      top: 0;
+      bottom: 0;
+      width: 70vh;
+      height: 100%;
+    } 
+  }
 
-    .overview {
-        background-color: black;
-    }
+  .scrollable-table {
+    max-height: 80%; 
+    overflow-y: auto; 
+  }
 
-    .searchbar,
-    .overview .bar {
-        align-items: center;
-        display: flex;
-        justify-content: space-between;
-        /* margin: 0 1rem; */
-    }
+  .modal-backdrop {
+    z-index: -1;
+  }
 
-    .searchbar .btn {
-        width: 5vw;
-        background-color: rgb(28, 117, 233);
-        font-size: 1vw;
-        color: rgb(255, 255, 255);
-    }
+  .over:hover{
+    background-color: rgba(110, 110, 110, 0.616);
+  }
 
-    .table .bold {
-        font-size: 1rem;
-        font-weight: 600;
-    }
+  #transactiontable tbody{
+    cursor: pointer;
+  }
 
-    .table tr:hover {
-        background-color: rgb(19, 19, 19);
-    }
+  #transactiontable tbody tr {
+    counter-increment: rowNumber;
+  }
 
-    .overview .bar .btn {
-        background-color: rgb(238, 164, 27);
-        color: #ffff;
-        padding: .3rem .3rem;
-        align-items: center;
-    }
+  #transactiontable tbody tr td:first-child::before {
+    content: counter(rowNumber);
+  }
 
-    .overview .bar .btn:hover,
-    .overview .bar .btn i:hover {
-        background-color: rgb(182, 180, 178);
-        color: #000000;
-    }
+  #statementtable tbody tr {
+    counter-increment: rowNumber;
+  }
 
-    .p-name {
-        height: 2.5vw;
-    }
+  #statementtable tbody tr td:first-child::before {
+    content: counter(rowNumber);
+  }
 
-    #div-to-pdf .p-info label,
-    #div-to-pdf .bank-div label {
-        color: #ffffff;
-        font-size: .8rem;
-    }
+  #sharelink:hover #share {
+    display: block;
+  }
 
-    #div-to-pdf .gen-info label {
-        color: #000000;
-        font-size: .8rem;
-    }
-
-    #div-to-pdf .gen-info .bold {
-        color: #000000;
-        font-size: 1rem;
-    }
-
-    .div-to-pdf div {
-        color: #000000;
-    }
-
-
-    #div-to-pdf .p-info .bold,
-    #div-to-pdf .bank-div .bold {
-        font-size: 1rem;
-        color: #ffffff;
-        /* font-weight: bold; */
-    }
-
-    .modal {
-        z-index: 9999;
-        overflow: scroll;
-    }
-
-    .right .dropdown-menu {
-        width: 30vw;
-    }
-
-    .modal-backdrop {
-        background-color: rgb(0, 0, 0);
-    }
-
-    .modal .table th {
-        color: #ffffff;
-    }
-
-    .modal-content {
-        padding: 1.5rem;
-        width: 50vw;
-        height: auto !important;
-        margin: auto;
-    }
-
-
-    
-.table-container {
-    display: inline-block;
-    overflow-x: auto; 
-    max-width: 100%; 
-}
-
-
-.truncate-text {
-    max-width: 350px; 
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    display: inline-block;
-}
-#mytable tr {
-    display: table-row;
-}
-
-
-.actoinacto .dropdown-item:hover {
-    background-color: #0baef4;
-}
+  ::-webkit-scrollbar{
+    display: none;
+  }
 </style>
-<section>
-    <div class="row p-3">
-        <div class="list col-4 col-lg-4 col-md-3  col-sm-2 py-3">
-            <div class="header">
-                <h5>ALL EMPLOYEES LOAN LIST</h5>
-            </div>
-            <div class="searchbar">
-                
-                <input class="form-control" type="text" placeholder="Search by Name" name="search" id="search"
-                    onkeyup="searchFunction()"
-                    style="color: rgb(255, 255, 255);background: transparent;margin-right: 5px;">
-                <a class="btn btn-outline-primary mx-1" href="" data-bs-toggle="dropdown" aria-haspopup="true"
-                    aria-expanded="false" role="button">
-                    <i class="fa fa-filter"></i>
-                </a>
-               
-                <div class="dropdown-menu actoinacto" >
-                    <a class="dropdown-item filter-link" data-status="all" href="#" style="font-size: 14px;">All</a>
-                    <a class="dropdown-item filter-link" data-status="active" href="#" style="font-size: 14px;">Active</a>
-                    <a class="dropdown-item filter-link" data-status="inactive" href="#" style="font-size: 14px;">Inactive</a>
-                </div>
-                
-                <a class="btn btn-outline-primary mr-1" href="{% url 'create_loan' %}"><i class="fa fa-plus"></i></a>
-            </div>
-            <hr>
-            <table class="table table-borderless" id="mytable">
-                <tr></tr>
-                {% for l in l %}
-                <tr class='clickable-row' data-href="{% url 'employee_loan_details' l.payroll_id %}" data-status="{{ l.active }}">
-                    <td class="pt-2">
-                        <p class="bold">{{ l.payroll.first_name }} {{ l.payroll.last_name }}</p>
-                        <p>{{ l.date_issue }}</p>
-                    </td>
-                    <td class="pt-2">{{ l.loan_amount }}</td>
-                </tr>
-                {% endfor %}
-            </table>
-            
-<script>
-    document.addEventListener("DOMContentLoaded", function () {
-        const filterLinks = document.querySelectorAll(".filter-link");
-        const tableRows = document.querySelectorAll(".clickable-row");
-
-        filterLinks.forEach(function (link) {
-            link.addEventListener("click", function (event) {
-                event.preventDefault();
-
-                const status = link.getAttribute("data-status");
-
-                tableRows.forEach(function (row) {
-                    if (status === "all" || (status === "active" && row.getAttribute("data-status") === "True") || (status === "inactive" && row.getAttribute("data-status") === "False")) {
-                        row.style.display = "table-row";
-                    } else {
-                        row.style.display = "none";
-                    }
-                });
-            });
-        });
-    });
-</script>
-            
-        </div>
-        <div class="overview col-8 col-lg-8 col-md-9  col-sm-10 py-3">
-            <div id="overview">
-                <div class="p-name">
-                    <h3 class="px-2 pb-2" id="id1">{{p.first_name}} {{p.last_name}}</h3>
-                </div>
-
-                <div class="bar pt-3">
-                    <div class="left">
-                        {% for loan in loans %}
-                        <a class="btn mx-1 fa fa-file-word" href="{% url 'employee_loan_template' payroll_id=loan.payroll.id %}">Template</a>
-
-
-                    
-                        <a class="btn mx-1, fa fa-eye"  href="#home">Overview</a>
-                    </div>
-                    {% endfor %}
-                    <div class="right">
-                        {% for loan in loans %}
-                        <a class="btn ml-1" href="{% url 'edit_loan' loan_id=loan.id %}" data-toggle="tooltip" title="Edit"><i
-                                class="fas fa-edit"></i></a>
-                                {% endfor %}
-                        <a class="btn btn_print ml-1" href="" id="convertToPDFButton" data-toggle="tooltip"
-                            title="Pdf"><i class="mdi mdi-file-pdf"></i></a>
-                        <!-- onclick="generatePDF()" -->
-                        
-                        <script type="text/javascript">
-                            $(document).ready(function ($) {
-                                console.log('print');
-
-                                $(document).on('click', '.btn_print', function (event) {
-                                    console.log('print1');
-                                    event.preventDefault();
-                                    var element = document.getElementById('div-to-pdf');
-                                    var opt =
-                                    {
-                                        margin: 1,
-                                        filename: 'employee loan' + '.pdf',
-                                        image: { type: 'jpeg', quality: 0.98 },
-                                        html2canvas: { scale: 2 },
-                                        jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' }
-                                    };
-                                    html2pdf().set(opt).from(element).save();
-
-                                });
-
-                            });
-                        </script>
-                        
-                        <a class="btn ml-1" href="" id="dd1" data-bs-toggle="dropdown" aria-haspopup="true"
-                            data-toggle="tooltip" title="Download Attachments" aria-expanded="false" role="button">
-                            <i class="fas fa-download"></i>
-                        </a>
-                        <div class="dropdown-menu">
-                            {% if attach %}
-                            <div class="table-container">
-                            <table class="table table-borderless">
-                                {% for a in attach %}
-                                {% for loan in loans %}
-                                <tr>
-                                    <td>{{forloop.counter}}.</td>
-                                    <td>
-                                        
-                                        <a href="{% url 'download_loan_attach' payroll_id=loan.payroll.id attachment_id=a.id %}">
-                                            <div class="truncate-text">{{ a.attach.name }}</div>
-                                        </a>
-                                    </td>
-                                    <td><a href="{% url 'delete_loan_attach' a.id %}"><i class="fas fa-trash"></i></a></td>
-                                </tr>
-                                {% endfor %}
-                                {% endfor %}
-                            </table>
-                        </div>
-                            {% else %}
-                            <div class="text-center">No Attachment found</div>
-                            {% endif %}
-                        </div>
-                        {% for loan in loans %}
-                        <a class="btn ml-1" href="{% url 'delete_loan' loan.id %}" data-toggle="tooltip" data-placement="top" title="Delete Loan"
-
-                            title="Delete" onclick="return confirm('Do you want to Delete this Employee loan details?');"><i class="fa fa-trash"></i></a>
-                            
-                        <a class="btn ml-1" href="" data-toggle="modal" data-target="#commentModal"
-                            data-toggle="tooltip" title="comment"><i class="far fa-comment"></i></a>
-                            <form  class="btn ml-1" method="post" action="{% url 'add_loan_attach' payroll_id=loan.payroll.id %}" enctype="multipart/form-data">
-                                {% csrf_token %}
-                                <label for="file-input"  data-toggle="tooltip" title="Upload Attachments">
-                                    <i class="fas fa-paperclip"></i>
-                                </label>
-                                <input id="file-input" type="file" name="file" style="display: none;" onchange="uploadFile()">
-                                <input type="hidden" id="payroll-id" value="{{ loan.payroll.id }}">
-                            </form>
-                            {% endfor %}
-                            
-
-                    <script>    
-                        function uploadFile() {
-                            const fileInput = document.getElementById("file-input");
-                            const file = fileInput.files[0];
-                            const csrfToken = getCookie('csrftoken');
-                            const payrollId = document.getElementById("payroll-id").value;
-                            
-                            const formData = new FormData();
-                            formData.append("file", file);
-                            
-                            fetch(`/add_loan_attach/${payrollId}/`, {
-                                method: "POST",
-                                headers: { 'X-CSRFToken': csrfToken },
-                                body: formData
-                            })
-                            .then(response => response.json())
-                            .then(data => {
-                                // Handle the response from the server (if needed)
-                                const messageDiv = document.getElementById("upload-message");
-        if (data.message) {
-            // Display the success message
-            messageDiv.textContent = data.message;
-            messageDiv.style.color = "green";
-        }
-        messageDiv.style.display = "block";
-    })
-    .catch(error => {
-        console.error("Error:", error);
-    });
-}
-                        
-                    </script>                    
-{%for loan in loans%}
-{% if loan.active %}
-                    <a class="btn ml-1" href="{% url 'loan_deactive' loan.id %}" id="sts">Active</a>
-                    {%else%}
-                    <a class="btn ml-1" href="{% url 'loan_active' loan.id %}" id="sts">Deactive</a>
-                    {%endif%}
-                    {%endfor%}
-                        
-                    </div>
-                </div>
-                <div id="upload-message" style="display:none;"></div>
-                <hr>
-                
-
-                <div class="div-to-pdf row" id="div-to-pdf" style="height: 100%;background-color: burlywood">
-                    <div class="bar pt-2 pb-4">
-                        <div class="left text-uppercase" style="font-size: 1rem;font-weight: 600;"> {{p.designation}}
-                        </div>
-                        <div class="right" style="font-size: 1rem;font-weight: 600;">Emp no: {{p.emp_number}} <br>join
-                            Date: {{p.joindate}}</div>
-                    </div>
-
-                    <div class="row text-center">
-                        <h3 style="color: #000000;">EMPLOYEE LOAN DETAILS
-                            <hr>
-                        </h3>
-                    </div>
-                    <div class="gen-info col-6 " style="padding-left: 3rem;">
-                       
-                        <div class="row text-center">
-                            <h5 class="h4 text-dark">{{p.title}} {{p.first_name}} {{p.last_name}}</h5>
-                            <div class="h5">({{p.alias}}) {{p.gender}}</div>
-                        </div>
-                        
-                        <div class="row mt-5">
-                            <div class="col-4"><label for="">Email :</label></div>
-                            <div class="col-8">
-                                <p class="bold">{{p.email}}</p>
-                            </div>
-                        </div>
-                        <div class="row mt-3">
-                            <div class="col-4"><label for="">Phone :</label></div>
-                            <div class="col-8">
-                                <p class="bold">{{p.Phone}}</p>
-                            </div>
-                        </div>
-                        <div class="row mt-3">
-                            <div class="col-5"><label for="">Location :</label></div>
-                            <div class="col-7">
-                                <p class="bold">{{p.location}}</p>
-                            </div>
-                        </div>
-
-                        <div class="h4 mt-3">More info
-                            <hr>
-                        </div>
-                        <div class="row mt-3">
-                            <div class="col-7"><label for="">Emergency Contact number :</label></div>
-                            <div class="col-5">
-                                <p class="bold">{{p.emergency_phone}}</p>
-                            </div>
-                        </div>
-                        <div class="row mt-3">
-                            <div class="col-7"><label for="">Permanent Address :</label></div>
-                            <div class="col-5">
-                                <p class="bold" style="max-width: 10rem;word-wrap: break-word;">{{p.permanent_address}}
-                                </p>
-                            </div>
-                        </div>
-                        <div class="row mt-3">
-                            <div class="col-7"><label for="">Temperory Address :</label></div>
-                            <div class="col-5">
-                                <p class="bold" style="max-width: 10rem;word-wrap: break-word;">{{p.address}}</p>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="p-info col-6 my-2" style="height: 100%;">
-                        <div class="card" style="background-color: rgb(110, 61, 46); padding:1rem;">
-                            {% for loan in loans %}
-                            <div class="row my-2">
-                                <div class="col-4"><label for="">Issued loan amount :</label></div>
-                                <div class="col-8">
-                                    <p class="h3">{{ loan.loan_amount }} INR</p>
-                                </div>
-                            </div>
-                            <hr>
-                            {% endfor %}
-                            <!-- <div class="card-title my-2">General information <hr></div> -->
-
-                            <div class="row mt-2">
-                                <div class="col-5"><label for="">Salary:</label></div>
-                                <div class="col-7">
-                                    <p class="bold">{{ p.salary }}</p>
-                                </div>
-
-                                {% for loan in loans %}
-                                <div class="col-5"><label for="">Date of Issue:</label></div>
-                                <div class="col-7">
-                                    <p class="bold">{{ loan.date_issue }}</p>
-                                </div>
-                            </div>
-                            <div class="row mt-2">
-                                <div class="col-5"><label for="">Date of Expiry:</label></div>
-                                <div class="col-7">
-                                    <p class="bold">{{ loan.date_expiry }}</p>
-                                </div>
-                            </div>
-                            <div class="row mt-2">
-                                <div class="col-5"><label for="">Loan Amount:</label></div>
-                                <div class="col-7">
-                                    <p class="bold">{{ loan.loan_amount }} ₹</p>
-                                </div>
-                            </div>
-                            <div class="row mt-2">
-                                <div class="col-5"><label for="">Monthly Cutting Type:</label></div>
-                                <div class="col-7">
-                                    {% if loan.monthly_cutting_type == 'amount_wis' %}
-                                        <p class="bold">Amount Wise</p>
-
-                             </div>       
-                                        
-                                            <div class="col-5"><label for="">Monthly Cutting Amount:</label></div>
-                                            <div class="col-7">
-                                                <p class="bold">{{ loan.monthly_cutting_amount }} ₹</p>
-                                            </div>
-                                        </div>
-                                    {% elif loan.monthly_cutting_type == 'percentage' %}
-                                        <p class="bold">Percentage Wise</p>
-                                    </div>
-                                        <div class="row mt-2">
-                                            <div class="col-5"><label for="">Percentage:</label></div>
-                                            <div class="col-7">
-                                                <p class="bold">{{ loan.monthly_cutting_percentage }}%</p>
-                                            </div>
-                                        </div>
-                                        
-                                            <div class="col-5"><label for="">Monthly Cutting Amount:</label></div>
-                                            <div class="col-7">
-                                                <p class="bold">{{ loan.monthly_cutting_amount }} ₹</p>
-                                            </div>
-                                        </div>
-                                    {% endif %}
-                                </div>
-                            </div>
-                            
-                            
-                            
-                            
-                            {% endfor %}
-                            <!-- Add more fields as needed -->
-                            
-                            
-                <!-- </div> -->
-            </div>
-        </div>
-
-    </div>
-
-
-
-
-    <!-- Modal -->
-    <!-- Add Comments Modal -->
-    <div class="modal fade" id="commentModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
-        aria-hidden="true">
-        <div class="modal-dialog" role="document">
-            <div class="modal-content" style="background-color: #3b3b3b;">
-                <div class="modal-header">
-                    <h3 class="modal-title" id="exampleModalLabel">Add Comments</h3>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">&times;</span><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-x" viewBox="0 0 16 16">
-                            <path d="M.646 1.646a.5.5 0 0 1 .708 0L8 7.293 15.646.646a.5.5 0 1 1 .708.708L8.707 8l7.647 7.646a.5.5 0 0 1-.708.708L8 8.707l-7.646 7.647a.5.5 0 0 1-.708-.708L7.293 8 .646 1.646a.5.5 0 0 1 0-.708z"/>
-                          </svg>
-                    </button>
-                </div>
-               
-
     
- {%for loan in loans%}
-                
-                <form method="post" action="{% url 'add_loan_comment' payroll_id=loan.payroll.id %}">
-                  
-{%endfor%}
-
-                    
-                    {% csrf_token %}
-                    <div class="modal-body">
-                        <textarea type="text" class="form-control text-dark" name="comment"></textarea>
-                        <input type="hidden" value="{{loans.id}}" name="loans_id" >
-                        <div class="container-fluid">
-
-                            <table class="table  mt-4">
-                                <thead>
-                                    <tr>
-                                        <th>sl no.</th>
-                                        <th>Comments</th>
-                                        <th>Delete</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {% for c in comments %}
-                                    <tr class="table-row">
-                                        <td>{{forloop.counter }}</td>
-                                        <td>{{c.comment}}</td>
-                                        
-                                        <td><a class="text-danger"
-                                            href="{% url 'delete_loan_comment' c.id %}">Delete</a></td>
-                                    </tr>
-                                    {% endfor %}
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-
-                        <button type="submit" class="btn btn-primary" id="save">Save</button>
-                    </div>
-                </form>
+<section >
+  <div class="row fixed-top  " style="top: 7rem; margin-left: 15rem;position: fixed; ">
+    <div class="col-md-12"  style="width: 100%;">
+      <div class="row">
+        <div class="col-md-3" style="border-right: 1px solid white; overflow-y: scroll; height: 84vh;">
+          <div class="row">
+            <div class="col-md-2">
+              <a class="text-white" style="font-size: 1.5rem;">Loans</a>
             </div>
+            <div class="col-md-6"></div>
+            <div class="col-md-4">              
+              <a style="width: 4rem;height: 2rem; width: fit-content;" class="btn btn btn-outline-warning text-right px-3 py-2 mt-1" href="{% url 'create_loan' %}"><i class="fa fa-plus "></i>New</a>
+            </div>
+            <div class="col-md-12">
+              <input type="text" id="search" class="form-control bg-light text-dark mt-2 " placeholder="Search.." autocomplete="off">
+            </div>
+            <div class="col-md-2">
+              <div class="dropdown">
+                <a class="btn text-center px-4 pt-1 mt-1 btn-outline-warning" id="sortbutton" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false" role="button" style="width: 4rem;height: 2rem;">
+                  <i  class="fas fa-sort m-1"></i>
+                </a>
+                <div class="dropdown-menu m-1">
+                  <a class="dropdown-item" href="">All</a>
+                  <a class="dropdown-item" onclick="sortTable()">Employee Name</a>
+                  <a class="dropdown-item" onclick="sortTablebal()">Loan Amount</a>
+                </div>
+              </div>
+            </div>
+            <div class="col-md-6"></div>
+            <div class="col-md-4">      
+              <div class="dropdown">
+                <a class="btn text-center pt-1 mt-1 btn-outline-warning" id="filterbutton" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false" role="button" style="width: 4rem;height: 2rem; margin-left: 2vh;">
+                  <i  class="fas fa-filter m-1"></i>
+                </a>
+                <div class="dropdown-menu m-1">
+                  <a class="dropdown-item" onclick="applyFilter('All')">All</a>
+                  <a class="dropdown-item" onclick="applyFilter('Active')">Active</a>
+                  <a class="dropdown-item" onclick="applyFilter('Inactive')">Inactive</a>
+                </div>
+              </div>        
+            </div>
+          </div>   
+
+          <div class="scrollable-table mt-3" >
+            <table class="table  text-white" id="myTable">
+              <tbody>
+                {% for l in all_loan %}
+                  <tr class="clickable" id="{{l.id}}">
+                    <td class="justify-content-between align-items-center ">
+                        <b style="font-size: large;">{{ l.payroll.first_name }} {{ l.payroll.last_name }}</b><br><br>
+                        <label>{{ l.date_issue }}</label>
+                    </td>
+                    <td>
+                        {% if l.active == 1 %}
+                        <label class="text-end d-block">Active</label>
+                        {% else %}
+                        <label class="text-end d-block">Inactive</label>
+                        {% endif %}
+                        <br>
+                        <label class="text-end d-block">₹{{ l.loan_amount }}</label>
+                    </td>
+                  </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </div> 
+
+        <div class="col-md-9 ml-1  mb-5 " id="overviewdiv" >
+          <div class="row">
+            <div class="col-md-7" >
+              <a class="text-white" style="font-size: 1.5rem;"><h2>{{loan.payroll.first_name}} {{loan.payroll.last_name}}</h2></a>
+            </div>
+          </div>
+          <div class="row">
+            <div class="col-md-6" >
+              <a class="btn" style="background-color: chocolate; margin-right: 2vh;"><i class="fas fa-eye"></i> Overview</a>
+              <a class="btn" onclick="totransaction()" style="background-color: white; color: black; margin-right: 2vh;"><i class="fa fa-list"></i>Transactions</a>
+              <a class="btn" onclick="tostatement()" style="background-color: white; color: black; margin-right: 2vh;"><i class="fas fa-file-alt"></i>Statement</a>
+            </div>
+            <div class="col-md-6" style="text-align: right; margin-left: -2vh;">
+              <a href="{% url 'edit_loan' loan_id=loan.id %}"  class=" text-dark" >
+                <button class="btn btn-outline-warning"  title="Edit"><i class="fas fa-edit"></i></button>
+              </a>
+              <a class="btn btn-outline-warning" href="" data-toggle="modal" data-target="#commentModal" data-toggle="tooltip" title="comment">
+                <i class="far fa-comment"></i>
+              </a>
+              <a class="btn btn-outline-warning" href="" id="dd1" data-bs-toggle="dropdown" aria-haspopup="true"
+                  data-toggle="tooltip" title="Download Attachments" aria-expanded="false" role="button">
+                <i class="fas fa-download"></i>
+              </a>
+              <div class="dropdown-menu" id="dd1">
+                {% if attach %}
+                  <table class="table table-borderless">
+                    {% for a in attach %}
+                    <tr>
+                      <td>{{forloop.counter}}.</td>
+                      <td><a href="{% url 'download_loan_attach' a.id %}">{{a.attach.name}}</a></td>
+                      <td><a href="{% url 'delete_loan_attach' a.id %}"><i class="fas fa-trash"></i></a></td>
+                    </tr>
+                    {% endfor %}
+                  </table>
+                  {% else %}
+                    <div class="text-center">No Attachment found</div>
+                  {% endif %}
+              </div>
+              <label for="file-input" class="btn btn-outline-warning" data-toggle="tooltip" title="Upload Attachments">
+                  <i class="fas fa-paperclip"></i>
+              </label>
+              <a href="{% url 'delete_loan' loan.id %}" class="  text-dark" >
+                <button class="btn btn-outline-warning"  title="Delete"><i class="fas fa-trash-alt"></i></button>
+              </a>
+              <input id="file-input" type="file" name="file" style="display:none;" onchange="uploadFile()">
+              {% if loan.active == 1 %}
+              <a class="btn btn-outline-warning" href="{% url 'loan_deactive' loan.id %}" id="sts">Active</a>
+              {% else %}
+              <a class="btn btn-outline-warning" href="{% url 'loan_active' loan.id %}" id="sts">Inactive</a>
+              {% endif %}
+            </div>
+          </div><br>
+
+          <div style="overflow-y: scroll; height: 71vh;">
+            <div class="row" style="background-color: #ffddb0; margin-left:1px; margin-right: 1rem; ">
+              <br>
+              <div class="row">
+                <div class="col-md-3 mt-3" >
+                  <label style="font-size: medium; color: black;"><b>Name : {{loan.payroll.first_name}} {{loan.payroll.last_name}}</b></label><br>
+                  <label style="font-size: medium; color: black;"><b>Position : {{loan.payroll.designation}}</b></label>
+                </div>
+                <div class="col-md-6"></div>
+                <div class="col-md-3 mt-3" style="text-align: right;">
+                  <label style="font-size: medium; color: black;"><b>Emp No : {{loan.payroll.emp_number}}</b></label><br>
+                  <label style="font-size: medium; color: black;"><b>Join Date : {{loan.payroll.joindate | date:'d-m-Y'}}</b></label>
+                </div>
+              </div>
+              <div class="row text-center" style="margin-top: -4vh;">
+                <h2 style="color: #000000;">
+                  <br>
+                  Employee Loan Details
+                  <hr>
+                </h2>
+              </div>
+              <div class="gen-info col-6 " style="padding-left: 3rem; ">
+                <div class="row mt-1">
+                  <div class="col-2"></div>
+                  <div class="col-6" style="text-align: center; ">
+                    <a href=" " download>
+                      <img class="img-fluid" src="{{loan.payroll.image.url}}" alt="" width="150px" name="img">
+                      <br><br>
+                      <p style="color: black;">{{loan.payroll.title}} &nbsp;{{loan.payroll.first_name}} &nbsp;{{loan.payroll.last_name}}
+                        {% if loan.payroll.alias %}
+                          <br>
+                          ( {{loan.payroll.alias}} )
+                        {% endif %}
+                      </p>
+                    </a>
+                    <div class="col-3"></div>
+                  </div>
+                </div><br>
+                <div class="row mt-1">
+                  <div class="col-5"><label class="text-dark" for=""> Email : </label></div>
+                  <div class="col-7">
+                    <p class="bold text-dark" style="max-width: 15rem;word-wrap: break-word;">{{loan.payroll.email}}</p>
+                  </div>
+                </div>
+                <div class="row mt-3">
+                  <div class="col-5"><label class="text-dark" for="">Phone Number:</label></div>
+                  <div class="col-7">
+                    <p class="bold text-dark" style="max-width: 15rem;word-wrap: break-word;">{{loan.payroll.Phone}}</p>
+                  </div>
+                </div>
+                {% if p.emergency_phone %}
+                  <div class="row mt-3">
+                    <div class="col-5"><label class="text-dark" for="">Emergency Number :</label></div>
+                    <div class="col-7">
+                      <p class="bold text-dark" style="max-width: 15rem;word-wrap: break-word;">{{loan.payroll.emergency_phone}}</p>
+                    </div>
+                  </div>
+                {% endif %}
+                <div class="row mt-3">
+                  <div class="col-5"><label class="text-dark" for="">Location :</label></div>
+                  <div class="col-7">
+                    <p class="bold text-dark" style="max-width: 15rem;word-wrap: break-word;">{{loan.payroll.location}}</p>
+                  </div>
+                </div>
+                <div class="h3 mt-4 text-black">Personal info
+                  <hr>
+                </div>
+                <div class="row mt-3">
+                  <div class="col-5"><label class="text-dark" for="">Permanent Address :</label></div>
+                  <div class="col-7">
+                    <p class="bold text-dark" style="max-width: 15rem;word-wrap: break-word;">{{loan.payroll.permanent_address}}</p>
+                  </div>
+                </div>
+                <div class="row mt-3">
+                  <div class="col-5"><label class="text-dark" for="">Temporary Address :</label></div>
+                  <div class="col-7">
+                    <p class="bold text-dark" style="max-width: 15rem;word-wrap: break-word;">{{loan.payroll.address}}</p>
+                  </div>
+                </div>
+              </div>
+              <div class="p-info col-6">
+                <div class="card" style="background-color: rgb(110, 61, 46); padding-left: 1rem; padding-top: 1rem;">
+                  <div class="h3 mt-4 text-white" style="margin-right: 2vh;">
+                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Loan Info
+                    <hr>
+                  </div>
+                                            
+                  <div class="row mt-2">
+                    <div class="col-1"></div>
+                    <div class="col-5"><label for="">Loan Amount :</label></div>
+                    <div class="col-6">
+                      <p class="bold">{{loan.loan_amount}}</p>
+                    </div>
+                  </div>
+                                            
+                  <div class="row mt-2">
+                    <div class="col-1"></div>
+                    <div class="col-5"><label for="">Loan Issue Date :</label></div>
+                    <div class="col-6">
+                      <p class="bold">{{loan.date_issue}}</p>
+                    </div>
+                  </div>
+                                        
+                  <div class="row mt-2">
+                    <div class="col-1"></div>
+                    <div class="col-5"><label for="">Duration  :</label></div>
+                    <div class="col-6">
+                    <p class="bold">{{loan.duration}}</p>
+                    </div>
+                  </div>
+                                        
+                  <div class="row mt-2">
+                    <div class="col-1"></div>
+                    <div class="col-5"><label for="">Loan Expiry Date  :</label></div>
+                    <div class="col-6">
+                    <p class="bold">{{loan.date_expiry}}</p>
+                    </div>
+                  </div>
+  
+                  {% if loan.monthly_cutting_type == 'percentage' %}
+                    <div class="row mt-2">
+                      <div class="col-1"></div>
+                      <div class="col-5"><label for="">Monthly Cutting : Percentage</label></div>
+                      <div class="col-6">
+                        <p class="bold">{{loan.monthly_cutting_percentage}}%</p>
+                      </div>
+                    </div>
+                  {% endif %}
+  
+                  <div class="row mt-2">
+                    <div class="col-1"></div>
+                    <div class="col-5"><label for="">Monthly Cutting : Amount</label></div>
+                    <div class="col-6">
+                      <p class="bold">{{loan.monthly_cutting_amount}}</p>
+                    </div>
+                  </div>
+                                            
+                  <div class="row mt-2">
+                    <div class="col-1"></div>
+                    <div class="col-5"><label for="">Payment Method :</label></div>
+                    <div class="col-6">
+                      <p class="bold">{{loan.pay_method}}</p>
+                    </div>
+                  </div>
+                  
+                  {% if loan.pay_method == 'Cheque' %}                      
+                  <div class="row mt-2">
+                    <div class="col-1"></div>
+                    <div class="col-5"><label for="">Cheque No:</label></div>
+                    <div class="col-6">
+                      <p class="bold">{{loan.cheque_id}}</p>
+                    </div>
+                  </div>
+                  
+                  {% elif loan.pay_method == 'UPI' %}                      
+                  <div class="row mt-2">
+                    <div class="col-1"></div>
+                    <div class="col-5"><label for="">UPI No :</label></div>
+                    <div class="col-6">
+                      <p class="bold">{{loan.upi_id}}</p>
+                    </div>
+                  </div>
+                  {% else %}
+                                        
+                  
+                  {% if loan.pay_method != 'Cash' %}                      
+                  <div class="row mt-2">
+                    <div class="col-1"></div>
+                    <div class="col-5"><label for="">Bank No:</label></div>
+                    <div class="col-6">
+                      <p class="bold">{{loan.bank_id}}</p>
+                    </div>
+                  </div>
+
+                  {% endif %}
+                  {% endif %}
+       
+                </div><br>
+              </div>
+            </div>       
+          </div>
         </div>
+
+        <div class="col-md-9" id="transactiondiv" style="display: none;">
+          <div class="row">
+            <div class="col-md-7" >
+              <a class="text-white" style="font-size: 1.5rem;"><h2>{{loan.payroll.first_name}} {{loan.payroll.last_name}}</h2></a>
+            </div>
+          </div>
+          <div class="row">
+            <div class="col-md-6" >
+              <a class="btn" onclick="tooverview()" style="background-color: white; color: black; margin-right: 2vh;"><i class="fas fa-eye"></i> Overview</a>
+              <a class="btn" style="background-color: chocolate; margin-right: 2vh;"><i class="fa fa-list"></i>Transactions</a>
+              <a class="btn" onclick="tostatement()" style="background-color: white; color: black; margin-right: 2vh;"><i class="fas fa-file-alt"></i>Statement</a>
+            </div>
+            <div class="col-md-3"></div>
+            <div class="col-md-3" style="text-align: right;">
+              <div class="d-flex">
+                <div class="dropdown">
+                  <a class="btn text-center px-4 p-2 btn-outline-warning" id="sortbutton" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false" role="button">
+                    Make Payment
+                  </a>
+                  <div class="dropdown-menu m-1">
+                    <a class="dropdown-item" href="{% url 'repayment_view' loan.id %}" >Repayment Due</a>
+                    <a class="dropdown-item" href="{% url 'additional_loan_view' loan.id %}">Issue New Loan</a>
+                  </div>
+                </div>
+                &nbsp;
+                <a  class="text-dark px-2"  onclick="exporttoexcel()" id="pdflink" >
+                  <button class="btn btn-outline-warning"  title="Excel" style="height: 33px;"><i class="fas fa-file-excel-o"></i></button>
+                </a>
+              </div>
+            </div>
+          </div>
+          <div class="row mt-3 mb-1">
+            <div class="col-md-5"><input type="text" id="searchtransaction" class="form-control bg-light text-dark" placeholder="Search.." autocomplete="off" style="height: 85%;width: 102%;"></div>
+            <div class="col-md-2"></div>
+            <div class="col-md-5">
+              <a class="text-white" style="font-size: small; text-align: right;"><h2>Loan Amount : {{last_loan}} &nbsp;</h2></a>
+            </div>
+          </div>
+          <div style="background-color: #ffddb0; border-radius: 5px;">
+            <div class="mt-3 p-1" >
+              <table class="table  text-white" id="transactiontable" >
+                <thead>
+                  <tr>
+                    <th style="text-align: center; font-size: medium; color: white; background-color: #8b3131;">#</th>
+                    <th style="text-align: center; font-size: medium; color: white; background-color: #8b3131;">LOAN DATE</th>
+                    <th style="text-align: center; font-size: medium; color: white; background-color: #8b3131;">PARTICULAR</th>
+                    <th style="text-align: center; font-size: medium; color: white; background-color: #8b3131;">AMOUNT</th>
+                    <th style="text-align: center; font-size: medium; color: white; background-color: #8b3131;">INTEREST</th>
+                    <th style="text-align: center; font-size: medium; color: white; background-color: #8b3131;">TOTAL AMOUNT</th>
+                    <th style="text-align: center; font-size: medium; color: white; background-color: #8b3131;">BALANCE</th>
+                    <th style="text-align: center; font-size: medium; color: white; background-color: #8b3131;">ACTION</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {% for r in repay %}
+                    <tr class="over">
+                      <td style="text-align: center; color: black;"></td>
+                      <td style="text-align: center; color: black;">{{r.payment_date | date:'d-m-Y'}}</td>
+                      <td style="text-align: center; color: black;">{{r.particular}}</td>
+                      <td style="text-align: center; color: black;">{{r.payment_made}}</td>
+                      <td style="text-align: center; color: black;">{{r.interest}}</td>
+                      <td style="text-align: center; color: black;">{{r.total_payment}}</td>
+                      <td style="text-align: center; color: black;">{{r.balance}}</td>
+                      {% if r.particular == 'LOAN ISSUED' %}
+                      <td></td>
+                      {% else %}
+                      <td style="text-align: center; color: black;">
+                        <button style="border: none;background: none;" type="button" class="ropdown-toggle dropdown-toggle-split" data-bs-toggle="dropdown" aria-expanded="false">
+                          <span class="fa fa-ellipsis-v" style="color: #8b3131;"></span>
+                      </button>
+                        <ul class="dropdown-menu">
+                          <li>
+                            {% if r.particular == 'ADDITIONAL LOAN ISSUED' %}
+                            <a class="dropdown-item" href="{% url 'edit_additional_loan_view' r.id %}" >
+                              <span class="fa fa-edit pe-2"></span> Edit
+                            </a>
+                            {% else %}
+                            <a class="dropdown-item" href="{% url 'edit_repayment_view' r.id %}" >
+                              <span class="fa fa-edit pe-2"></span> Edit
+                            </a>
+                            {% endif %}
+                          </li>
+                          <li>
+                            <a class="dropdown-item" href="{% url 'delete_repayment' r.id %}" >
+                              <span class="fa fa-trash" style="padding-inline-start: 0.1rem;padding-inline-end:0.7rem ;"></span> Delete
+                            </a>
+                          </li>
+                        </ul>
+                      </td>
+                      {% endif %}
+                    </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-md-9" id="statementdiv" style="display: none;">
+          <div class="row">
+              <div class="col-md-7" >
+                <a class="text-white" style="font-size: 1.5rem;"><h2>{{loan.payroll.first_name}} {{loan.payroll.last_name}}</h2></a>
+              </div>
+          </div>
+          <div class="row">
+            <div class="col-md-6" >
+              <a class="btn" onclick="tooverview()" style="background-color: white; color: black; margin-right: 2vh;"><i class="fas fa-eye"></i> Overview</a>
+              <a class="btn" onclick="totransaction()" style="background-color: white; color: black; margin-right: 2vh;"><i class="fa fa-list"></i>Transactions</a>
+              <a class="btn" style="background-color: chocolate; margin-right: 2vh;"><i class="fas fa-file-alt"></i>Statement</a>
+            </div>
+            <div class="col-md-6" style="text-align: right; margin-left: -2vh;">
+              <a  class="text-dark"  onclick="exportToPDF()" id="pdflink">
+                <button class="btn btn-outline-warning"  title="Pdf"><i class="fas fa-file-pdf-o"></i></button>
+              </a>
+              <a class=" text-dark"  onclick="printSelectedArea()"  >
+                <button class="btn btn-outline-warning"  title="Print"> <i class="fas fa-print"></i> </button> 
+              </a>
+              <a class="btn btn-outline-warning" href="" data-toggle="modal" data-target="#commentModal" data-toggle="tooltip" title="comment">
+                <i class="far fa-comment"></i>
+              </a>
+              <a class="btn btn-outline-warning" href="" id="dd1" data-bs-toggle="dropdown" aria-haspopup="true"
+                  data-toggle="tooltip" title="Download Attachments" aria-expanded="false" role="button">
+                <i class="fas fa-download"></i>
+              </a>
+              <div class="dropdown-menu">
+                {% if attach %}
+                  <table class="table table-borderless">
+                    {% for a in attach %}
+                    <tr>
+                      <td>{{forloop.counter}}.</td>
+                      <td><a href="{% url 'download_loan_attach' a.id %}">{{a.attach.name}}</a></td>
+                      <td><a href="{% url 'delete_loan_attach' a.id %}"><i class="fas fa-trash"></i></a></td>
+                    </tr>
+                    {% endfor %}
+                  </table>
+                {% else %}
+                  <div class="text-center">No Attachment found</div>
+                {% endif %}
+              </div>
+              <label for="file-input" class="btn btn-outline-warning" data-toggle="tooltip" title="Upload Attachments">
+                  <i class="fas fa-paperclip"></i>
+              </label>
+              <a class="btn btn-outline-warning" href="" id="sharelink" data-bs-toggle="dropdown" aria-haspopup="true"
+              data-toggle="tooltip" title="Download Attachments" aria-expanded="false" role="button">
+                <i class="fas fa-share"></i>
+              </a>
+              <div class="dropdown-menu " id="sharelink" >
+                <a class="dropdown-item" href="#shareBillEmail" data-bs-toggle="modal">Mail</a>
+                <a class="dropdown-item" href="whatsapp://send?text=Check out this website: [Your URL]" data-action="share/whatsapp/share">WhatsApp</a>
+              </div>
+            </div>
+
+            <div id="printdiv" class="mt-3" style="overflow-y: scroll;height: 600px;width: 100%; margin-left: -1vh">
+              <section  id="div-to-pdf" style="background-color: rgb(255, 221, 176);"class=" p-2 m-2">
+                <header style="	background-color: #8b3131;border-radius: 1rem;">
+                    <div class="logo ">
+                      <h2 class="text-white">{{company.company_name}}</h2>
+                    </div>
+                    <div style="background: #8b3131;color: white;" class="company-info">
+                      <p class="text-white"> {{company.address}}<br>{{company.contact_number}} <br> {{company.company_email}}</p>
+                    </div>
+                </header>
+                <div class="invoice-box">
+                  <div class="row">
+                    <div class="col-md-1"></div>
+                    <div class="col-md-5">
+                      <br>
+                      <h3 class="text-dark">Employee Details</h3>
+                      <table>
+                        <tr>
+                          <td class="table-cell text-black" style="border: none;">Employee No</td>
+                          <td class="table-cell text-black" style="border: none;">:</td>
+                          <td class="table-cell text-black" style="border: none;">{{loan.payroll.emp_number}}</td>
+                        </tr>
+                        <tr>
+                          <td class="table-cell text-black" style="border: none;">Employee Name</td>
+                          <td class="table-cell text-black" style="border: none;">:</td>
+                          <td class="table-cell text-black" style="border: none;">{{loan.payroll.first_name}} {{loan.payroll.last_name}}</td>
+                        </tr>
+                        <tr>
+                          <td class="table-cell text-black" style="border: none;">Employee Email</td>
+                          <td class="table-cell text-black" style="border: none;">:</td>
+                          <td class="table-cell text-black" style="border: none;">{{loan.payroll.email}}</td>
+                        </tr>
+                      </table>
+                      <br>
+                    </div>
+                    <div class="col-md-5">
+                      <br>
+                      <h3 class="text-dark">Loan Details</h3>
+                      <table>
+                        <tr>
+                          <td class="table-cell text-black" style="border: none;">Loan Amount</td>
+                          <td class="table-cell text-black" style="border: none;">:</td>
+                          <td class="table-cell text-black" style="border: none;">{{last_loan}}</td>
+                        </tr>
+                        <tr>
+                          <td class="table-cell text-black" style="border: none;">Loan Issue Date</td>
+                          <td class="table-cell text-black" style="border: none;">:</td>
+                          <td class="table-cell text-black" style="border: none;">{{loan.date_issue}}</td>
+                        </tr>
+                        <tr>
+                          <td class="table-cell text-black" style="border: none;">Loan Expiry Date</td>
+                          <td class="table-cell text-black" style="border: none;">:</td>
+                          <td class="table-cell text-black" style="border: none;">{{loan.date_expiry}}</td>
+                        </tr>
+                      </table>
+                      <br>
+                    </div>
+                  </div>
+                  <br>
+                  <table id="statementtable">
+                    <thead >
+                      <tr>
+                        <th id="th" style="text-align: center;">#</th>
+                        <th id="th" style="text-align: center;">Loan Date</th>
+                        <th id="th" style="text-align: center;">Particular</th>
+                        <th id="th" style="text-align: center;">Amount</th>
+                        <th id="th" style="text-align: center;">Interest</th>
+                        <th id="th" style="text-align: center;">Total Amount</th>
+                        <th id="th" style="text-align: center;">Balance</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {% for r in repay %}
+                      <tr style="color: black;">
+                        <td style="text-align: center;"></td>
+                        <td style="text-align: center;">{{r.payment_date | date:'d-m-Y'}}</td>
+                        <td style="text-align: center;">{{r.particular}}</td>
+                        <td style="text-align: center;">{{r.payment_made}}</td>
+                        <td style="text-align: center;">{{r.interest}}</td>
+                        <td style="text-align: center;">{{r.total_payment}}</td>
+                        <td style="text-align: center;">{{r.balance}}</td>
+                      </tr>
+                      {% endfor %}
+                    </tbody>
+                  </table><br>
+                </div>
+                <footer class="mb-5">
+                  <p class="text-dark">&copy; Zho Books 2023 | Info park kakkanad kochi, Ernamkulam, kerala India 12345 | Phone: (123) 456-7890 | Email: info@zohodjango.com</p>
+                </footer>
+              </section>
+            </div>
+          </div>
+        </div>
+        
+        <div class="modal fade" id="commentModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"  aria-hidden="true" style="margin-top: 8vh;">
+          <div class="modal-dialog" role="document">
+            <div class="modal-content" style="background-color: #3b3b3b;">
+              <div class="modal-header">
+                <h3 class="modal-title" id="exampleModalLabel">Add Comments</h3>
+                <button type="button" class="btn close" data-dismiss="modal" aria-label="Close">
+                  <span aria-hidden="true" style="font-size: x-large;">&times;</span>
+                </button>
+              </div>
+              <form action="{% url 'add_loan_comment' loan.id %}" method="POST" enctype="multipart/form-data">
+                {% csrf_token %}
+                <div class="modal-body">
+                  <textarea type="text" class="form-control text-dark" name="comments"></textarea>
+                  <div class="container-fluid">
+                    <table class="table  text-white">
+                      <thead>
+                        <tr>
+                          <th style="text-align: center; font-size: large;">sl no.</th>
+                          <th style="text-align: center; font-size: large;">Comments</th>
+                          <th style="text-align: center; font-size: large;">Delete</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {% for c in comments %}
+                          <tr class="table-row">
+                            <td style="text-align: center;">{{forloop.counter }}</td>
+                            <td style="text-align: center;">{{c.comment}}</td>
+                            <td style="text-align: center;">
+                              <a class="text-danger" href="{% url 'delete_loan_comment' c.id  %}"><i class="fa fa-trash" style="font-size:20px;"></i></a>
+                            </td>
+                          </tr>
+                        {% endfor %}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+                <div class="modal-footer">
+                  <button type="button" class="btn btn-outline-warning" data-dismiss="modal">Close</button>
+                  <button type="submit" class="btn btn-outline-warning">Save</button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+
+        <div class="modal fade" id="shareBillEmail" tabindex="-1" aria-labelledby="shareBillEmailLabel" aria-hidden="true" style="margin-top: 8vh;">
+          <div class="modal-dialog">
+            <div class="modal-content" style="background-color: #3b3b3b;">
+              <div class="modal-header">
+                <h5 class="modal-title" id="shareBillEmailLabel">Share Bill Via Email</h5>
+                <button type="button" class="btn"  data-bs-dismiss="modal" aria-label="Close">
+                  <span aria-hidden="true" style="font-size: x-large;" >&times;</span>
+                </button>
+              </div>
+              <div class="modal-body">
+                <form action="{% url 'share_loan_email' loan.id %}" method="post" class="needs-validation" id="share_to_email_form">
+                  {% csrf_token %}
+                  <div class="form-group">
+                      <label for="emailIds">Email IDs</label>
+                      <textarea class="form-control text-dark" name="email_ids" id="emailIds" rows="3" placeholder="Multiple emails can be added by separating with a comma(,)." required></textarea>
+                  </div>
+                  <div class="form-group mt-2">
+                      <label for="item_unitname">Message(optional)</label>
+                      <textarea name="email_message" id="email_message" class="form-control text-dark" cols="" rows="4" placeholder="This message will be sent along with Bill details."></textarea>
+                  </div>
+                  <div class="modal-footer d-flex justify-content-center">
+                    <button type="submit" id="share_with_email" class="btn btn-outline-warning w-50 text-uppercase">SEND MAIL</button>
+                  </div>
+                </form>
+              </div>
+
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
+  </div>
 </section>
 
-
 <script>
-    function getCookie(name) {
-        var cookieValue = null;
-        if (document.cookie && document.cookie !== '') {
-            var cookies = document.cookie.split(';');
-            for (var i = 0; i < cookies.length; i++) {
-                var cookie = cookies[i].trim();
-                // Check if the cookie name matches the CSRF cookie name
-                if (cookie.substring(0, name.length + 1) === (name + '=')) {
-                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-                    break;
-                }
-            }
-        }
-        return cookieValue;
-    }
-   
-
-
+  function exporttoexcel(){
+    var tableData = $("#transactiontable tbody tr:visible").map(function(index) {
+      return {
+        "#": index + 1, 
+        "LOAN DATE": $(this).find("td:eq(1)").text(),
+        "PARTICULAR": $(this).find("td:eq(2)").text(),
+        "AMOUNT": $(this).find("td:eq(3)").text(),
+        "INTEREST": $(this).find("td:eq(4)").text(),
+        "TOTAL AMOUNT": $(this).find("td:eq(5)").text(),
+        "BALANCE": $(this).find("td:eq(6)").text(),
+      };
+    }).get();
+    var ws = XLSX.utils.json_to_sheet(tableData);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, 'Sheet1');
+    XLSX.writeFile(wb, 'EmployeeLoanPayment.xlsx');
+  }
 </script>
-<script>
 
-    jQuery(document).ready(function ($) {
-        $(".clickable-row").click(function () {
-            window.location = $(this).data("href");
-        });
+<script>
+  function tooverview(){
+    document.getElementById('overviewdiv').style.display = 'block'
+    document.getElementById('transactiondiv').style.display = 'none'
+    document.getElementById('statementdiv').style.display = 'none'
+  }
+
+  function totransaction(){
+    document.getElementById('transactiondiv').style.display = 'block'
+    document.getElementById('overviewdiv').style.display = 'none'
+    document.getElementById('statementdiv').style.display = 'none'
+  }
+
+  function tostatement(){
+    document.getElementById('statementdiv').style.display = 'block'
+    document.getElementById('transactiondiv').style.display = 'none'
+    document.getElementById('overviewdiv').style.display = 'none'
+  }
+</script>
+
+<script>
+  function exportToPDF(){
+    var content = document.getElementById('div-to-pdf');
+    content.style.height = 'auto';
+    content.style.marginRight = '-1rem';
+    html2pdf().from(content).save('Employee.pdf')
+    setTimeout(function() {
+      content.style.marginRight = '1rem';
+    }, 1);
+  }
+</script>
+
+<script>
+  function printSelectedArea(){
+    var printContents = document.getElementById("printdiv").innerHTML;
+    var $printerDiv = $('<div class="printContainer bg-white"></div>');
+    $printerDiv.html(printContents);
+    $('body').append($printerDiv).addClass("printingContent");
+    window.print();
+    $printerDiv.remove();
+    $('body').removeClass("printingContent");
+  }
+</script>
+
+<script>
+  const rows = document.querySelectorAll('.clickable');
+  rows.forEach(row => {
+    row.addEventListener('click', () => {
+      var currentURL = window.location.href
+      const rowId = row.id;
+      var replacementPattern = new RegExp('/employee/\\d+/loan/');
+      var newURL = currentURL.replace(replacementPattern, '/employee/' + rowId + '/loan/');
+      window.location.href = newURL;
     });
-
-    function searchFunction() {
-        var input, filter, table, tr, td, i, txtValue;
-        input = document.getElementById("search");
-        filter = input.value.toLowerCase();
-        table = document.getElementById("mytable");
-        tr = table.getElementsByTagName("tr");
-        // input.style.borderColor = "green";
-        for (i = 0; i < tr.length; i++) {
-            let rowVisible = false;
-            td = tr[i].getElementsByTagName("td");
-            for (j = 0; j < td.length; j++) {
-                if (td[j]) {
-                    txtValue = td[j].textContent || td[j].innerText;
-                    if (txtValue.toLowerCase().indexOf(filter) > -1) {
-                        rowVisible = true;
-                        break;
-                    }
-                }
-            }
-
-            // Show/hide the row based on the search results
-            tr[i].style.display = rowVisible ? "" : "none";
-        }
-    }
+  });
 </script>
+
 <script>
-    function sortTable(columnIndex) {
-        let sortAscending = false
-        const table = document.getElementById("mytable");
-        const rows = Array.from(table.rows).slice(1); // Exclude the header row
+  var $rows = $('#myTable tbody tr');
+  $('#search').keyup(function() {
+    var val = $.trim($(this).val()).replace(/ +/g, ' ').toLowerCase();
+    $rows.hide().filter(function() {
+      var text = $(this).text().replace(/\s+/g, ' ').toLowerCase();
+      return ~text.indexOf(val);
+    }).show();
+  });
 
-        rows.sort((row1, row2) => {
-            const cellValue1 = row1.cells[columnIndex].textContent.toLowerCase();
-            const cellValue2 = row2.cells[columnIndex].textContent.toLowerCase();
-
-            if (cellValue1 < cellValue2) {
-                return -1;
-            } else if (cellValue1 > cellValue2) {
-                return 1;
-            } else {
-                return 0;
-            }
-        });
-
-        // Clear the table body
-        while (table.rows.length > 1) {
-            table.deleteRow(1);
-        }
-
-        // Append the sorted rows back to the table
-        rows.forEach(row => table.appendChild(row));
-        sortAscending = !sortAscending;
-    }
-
-    function rsortTable(columnIndex) {
-        let sortAscending = false
-        const table = document.getElementById("mytable");
-        const rows = Array.from(table.rows).slice(1); // Exclude the header row
-
-        rows.sort((row1, row2) => {
-            const cellValue1 = row1.cells[columnIndex].textContent.toLowerCase();
-            const cellValue2 = row2.cells[columnIndex].textContent.toLowerCase();
-
-            if (sortAscending) {
-                if (cellValue1 < cellValue2) {
-                    return -1;
-                } else if (cellValue1 > cellValue2) {
-                    return 1;
-                } else {
-                    return 0;
-                }
-            } else {
-                if (cellValue1 > cellValue2) {
-                    return -1;
-                } else if (cellValue1 < cellValue2) {
-                    return 1;
-                } else {
-                    return 0;
-                }
-            }
-        });
-
-        // Clear the table body
-        while (table.rows.length > 1) {
-            table.deleteRow(1);
-        }
-
-        // Append the sorted rows back to the table
-        rows.forEach(row => table.appendChild(row));
-
-        // Toggle the sorting order for the next click
-        sortAscending = !sortAscending;
-    }
-
-
-
-
-
-    function toggleLoanActiveStatus(loanId) {
-        // Send an AJAX request to toggle the active status
-        $.ajax({
-            url: `/toggle_loan_active/${loanId}/`,
-            method: 'POST',
-            dataType: 'json',
-            success: function (data) {
-                // Update the button text and style based on the response
-                const activeButton = document.getElementById('active-button');
-                if (data.active) {
-                    activeButton.textContent = 'Deactivate';
-                    activeButton.classList.remove('btn-success');
-                    activeButton.classList.add('btn-danger');
-                } else {
-                    activeButton.textContent = 'Activate';
-                    activeButton.classList.remove('btn-danger');
-                    activeButton.classList.add('btn-success');
-                }
-            },
-            error: function (error) {
-                console.error('Error:', error);
-            }
-        });
-    }
-    
+  var $rows = $('#transactiontable tbody tr');
+  $('#searchtransaction').keyup(function() {
+    var val = $.trim($(this).val()).replace(/ +/g, ' ').toLowerCase();
+    $rows.hide().filter(function() {
+      var text = $(this).text().replace(/\s+/g, ' ').toLowerCase();
+      return ~text.indexOf(val);
+    }).show();
+  });
 </script>
-<!-- <script>
-    function generatePDF() {
-        const container = document.getElementById('div-to-pdf');
-        const options = {
-            filename: 'employee.pdf',
-            image: { type: 'jpeg', quality: 0.98 },
-            htmt2canvas: { scale: 2 },
-            jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
-        };
-        html2pdf().from(container).set(options).save();
-    };
 
+<script>
+  function sortTable() {
+    var table, rows, switching, i, x, y, shouldSwitch;
+    table = document.getElementById("myTable");
+    switching = true;
+    while (switching) {
+      switching = false;
+      rows = table.rows;
+      for (i = 0; i < rows.length - 1; i++) {
+        shouldSwitch = false;
+        x = rows[i].getElementsByTagName("b")[0];
+        y = rows[i + 1].getElementsByTagName("b")[0];
+        if (x.innerHTML.toLowerCase() > y.innerHTML.toLowerCase()) {
+          shouldSwitch = true;
+          break;
+        }
+      }
+      if (shouldSwitch) {
+        rows[i].parentNode.insertBefore(rows[i + 1], rows[i]);
+        switching = true;
+      }
+    }
+  }
 
-</script> -->
+  function sortTablebal() {
+    var table, rows, switching, i, x, y, shouldSwitch;
+    table = document.getElementById("myTable");
+    switching = true;
+    while (switching) {
+      switching = false;
+      rows = table.rows;
+      for (i = 0; i < (rows.length - 1); i++) {
+        shouldSwitch = false;
+        x = parseFloat(rows[i].getElementsByTagName("label")[2].textContent.replace('₹', '').trim());
+        y = parseFloat(rows[i + 1].getElementsByTagName("label")[2].textContent.replace('₹', '').trim());
+        if (x > y) {
+          shouldSwitch = true;
+          break;
+        }
+      }
+      if (shouldSwitch) {
+        rows[i].parentNode.insertBefore(rows[i + 1], rows[i]);
+        switching = true;
+      }
+    }
+  }
 
+  function applyFilter(currentFilter) {
+    var rows = $("#myTable tbody tr");
+    rows.show();
+    if (currentFilter === "Active" || currentFilter === "Inactive") {
+      rows.filter(":not(:contains('" + currentFilter + "'))").hide();
+    }
+  }
+</script>
 {% endblock %}
-
-<!-- edit com attach dele active/inactive -->

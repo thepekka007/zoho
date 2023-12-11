@@ -204,7 +204,7 @@
                         <div class="dropdown-menu" id="sort-options">
                             <a class="dropdown-item" href="{% url 'expensepage' %}" data-sort="all">All</a>
                             <a class="dropdown-item" href="{% url 'exp_sort_by_amount' %}" data-sort="name">Amount</a>
-                            <a class="dropdown-item" href="{% url 'exp_sort_by_expen_acc' %}" data-sort="amount">Expense A/C</a>
+                            <a class="dropdown-item" href="{% url 'exp_sort_by_expen_acc' %}" data-sort="amount">Expense Account</a>
                         </div>
                     </div>
                 </div>
@@ -245,13 +245,13 @@
             <table id="table" class="table mt-4" >
             <thead>
                 <tr>
-                            <th>Date</th>
-                            <th>Vendor Name</th>
-                            <th>Account</th>
-                            <th>Expense Type</th>
-                            <th>Payment Method</th>
-                            <th>Amount</th>
-                            <th>Status</th>
+                            <th>DATE</th>
+                            <th>EXPENCE NUMBER</th>
+                            <th>EXPENCE ACCOUNT</th>
+                            <th>EXPENCE TYPE</th>
+                            <th>PAYMENT METHOD</th>
+                            <th>AMOUNT</th>
+                            <th>STATUS</th>
                 </tr>
             </thead>
             <tbody id="tbl">

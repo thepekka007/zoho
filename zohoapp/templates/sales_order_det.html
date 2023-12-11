@@ -399,7 +399,8 @@
                       <p><b>{{i.sales_no}}</b></p>
                       <label>{{i.customer.customerName}} </label>
                     </td>
-                    <td><br><br>
+                    <td>
+                      <label class="text-end d-block">{{i.status}}</label>
                       <label class="text-end d-block">₹{{i.grandtotal}}</label>
 
                     </td>
@@ -1062,7 +1063,7 @@
                             {{j.hsn}}
                           </div>
                           <div class="equal-length-item" style="text-align: center; ">
-                            {{j.qty}}
+                            {{j.quantity}}
                           </div>
                           <div class="equal-length-item" style="text-align: center; ">
                             {{j.rate}}
@@ -1089,7 +1090,7 @@
                             {{ sale.subtotal }}
                           </div>
                         </div>
-                        {% if sale.IGST != '0' %}
+                        {% if sale.igst != '0.00' %}
                         <div class="row ">
                           <div class="col-md-5 text-left " style=" color: black;">
                             IGST

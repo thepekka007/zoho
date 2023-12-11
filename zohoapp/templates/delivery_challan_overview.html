@@ -314,18 +314,19 @@ style="height: auto;background-color: burlywood">
                     {% for item in items %}
                     <tr>
                         <td style="color: black;font-weight: bold;">{{ forloop.counter }}</td>
-                        <td style="color: black;font-weight: bold;">{{ item.item_name }}</td>
+                        <td style="width: 10rem; color: black; font-weight: bold; text-align: center;">{{ item.item_name }}</td>
+
                         <!-- <td class="text-right">{{ item.hsn }}</td> -->
                         <!-- <td class="text-right">{{ item.desc }}</td> -->
 
 
-                        <td class="text-right" style="color: black;font-weight: bold;">{{ item.hsn }}</td>
-                        <td class="text-right" style="color: black;font-weight: bold;">{{ item.quantity }}</td>
-                        <td class="text-right" style="color: black;font-weight: bold;">{{ item.rate|floatformat:1 }}</td>
-                        <td class="text-right" style="color: black;font-weight: bold;">{{ item.discount|floatformat:1 }}</td>
+                        <td class="text-right" style="color: black;font-weight: bold; text-align: center;">{{ item.hsn }}</td>
+                        <td class="text-right" style="color: black;font-weight: bold; text-align: center;">{{ item.quantity }}</td>
+                        <td class="text-right" style="color: black;font-weight: bold; text-align: center;">{{ item.rate|floatformat:1 }}</td>
+                        <td class="text-right" style="color: black;font-weight: bold; text-align: center;">{{ item.discount|floatformat:1 }}</td>
         
-                        <td class="text-right" style="color: black;font-weight: bold;">{{ item.tax_percentage }}</td>
-                        <td class="text-right" style="color: black;font-weight: bold;">{{ item.amount|floatformat:1 }}</td>
+                        <td class="text-right" style="color: black;font-weight: bold; text-align: center;">{{ item.tax_percentage }}</td>
+                        <td class="text-right" style="color: black;font-weight: bold; text-align: center;">{{ item.amount|floatformat:1 }}</td>
                     </tr>
                     {% endfor %}
                     

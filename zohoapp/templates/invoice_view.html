@@ -378,7 +378,12 @@
                                             <p class="text-white"><b>{{i.retainer_invoice_number}}</b></p>
                                             <label class="text-white">{{i.customer_name1}} </label>
                                         </td>
-                                        <td><br><br>
+                                        <td>
+                                            {% if i.is_draft == 1 %}
+                                            <label class="text-end d-block text-white">Draft</label>
+                                            {% else %}
+                                            <label class="text-end d-block text-white">Send</label>
+                                            {% endif %}
                                             <label class="text-end d-block text-white">₹{{i.total_amount}}</label>
 
                                         </td>
@@ -949,7 +954,7 @@
                                                 <div class="mt-2">
 
                                                     <p style="color: #000;">Date:
-                                                        <b>{{ invoice.retainer_invoice_number | date:'d-m-Y'}}</b>
+                                                        <b>{{ invoice.retainer_invoice_date | date:'d-m-Y'}}</b>
                                                     </p>
                                                 </div>
                                             </div>

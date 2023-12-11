@@ -137,25 +137,24 @@
               <table class="table text-white" id="mytable">
                 <thead>
                   <tr>
-                    <th>PROJECT NAME</th>
+                    <th>DATE</th>
+                    <th>DUE DATE</th>
                     <th>CUSTOMER NAME</th>
-                    <th>CUSTOMER EMAIL</th>
+                    <th>PROJECT NAME</th>
                     <th>BILLING METHOD</th>
-                    <th>USER NAME</th>
-                    <th>RATE</th>
-                    <th></th>
-                    <th>STATUS</th>
+                    <th>ACTION</th>
+                    
                   </tr>
                 </thead>
                 <tbody>
                   {% for v in proj %}
                   <tr id="over" class='clickable-row' data-href="{% url 'overview' v.id %}">
-                    <td>{{v.name}}</td>
+                    <td>{{v.start}}</td>
                     <!--<td onclick="location.href ='{% url 'detail' v.id %}' " > {{v.name}}</td> -->
-                    <td>  {{v.c_name.customerName}} </td>
-                    <td>{{v.c_name.customerEmail}}</td>
+                    <td>  {{v.end}} </td>
+                    <td>{{v.c_name.Fname}}&nbsp;    {{v.c_name.Lname}}</td>
+                    <td>{{v.name}}</td>
                     <td>{{v.billing}}</td>
-                    <td>{{v.uname}}</td>
                     <td>{{v.rate}}<td>
                     <td>{{v.status}}</td>
                    

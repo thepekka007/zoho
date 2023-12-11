@@ -435,15 +435,15 @@
                       <div class="dropdown me-1">
                         <a class="btn btns  px-2 py-2" type="button" data-bs-toggle="dropdown" aria-expanded="false" ><span data-bs-toggle="tooltip" data-bs-placement="bottom" title="SHARE" class="fa fa-share"></span></a>
                         <ul class="dropdown-menu dropdown-menu-top">
-                          <li><a class="dropdown-item ornage_hover"  href="" onclick="call_mail()"><span class="fa fa-envelope"></span> Mail</a></li>
+                          <li><a id="send_mail" class="dropdown-item ornage_hover" data-bs-toggle="modal" data-bs-target="#exampleModal2"><span class="fa fa-envelope"></span> Mail</a></li>
                           <li><a id="whatsapp_modal" class="dropdown-item ornage_hover" href="whatsapp://send?text=Check out this website: [Your URL]" data-action="share/whatsapp/share"><span class="fa fa-whatsapp"></span> Whatsapp</a></li>
                         </ul>
                       </div>
-                    <script>
+                    <!-- <script>
                         function call_mail(){
-                            window.location.href="{% url 'ewaysend_mail' eway_single.id %}"
+                            window.location.href="{% url 'ewaybill_to_mail' eway_single.id %}"
                         }
-                    </script>
+                    </script> -->
                     {% for v in ewayi %}
                         <a href="{% url 'ewayedit' v.id  %}" class=" fa fa-pencil btns px-2 py-2"
                               data-toggle="tooltip" title="EDIT"> </a>&nbsp;
@@ -1215,6 +1215,35 @@ window.onclick = function (event) {
         </div>
       </div>
   
+
+      <div id="modal4">
+        <div class="d-flex justify-content-between mb-5">
+          <h1 class="modal-title fs-5 " id="exampleModalLabel">SHARE PAYMENT RECEIVED VIA EMAIL</h1>
+          <button type="button" class="btn-close bg-light" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+          <form action="{% url 'ewaybill_to_mail' eway_single.id %}" method="post" enctype="multipart/form-data" class="needs-validation"
+          id="share_to_email_form" autocomplete="off">
+              {% csrf_token %}
+  
+              <div class="bg-dark p-3 rounded">
+                <div class="form-group">
+                  <label for="emailIds">Email IDs</label>
+                  <input class="form-control text-dark" type="email" placeholder="user@gmail.com" name="email_ids" id="emailIds" required>
+                </div>
+                <div class="form-group mt-2">
+                  <label for="item_unitname">Message(optional)</label><p class="m-0"></p>
+                  <textarea name="email_message" id="email_message" class="text-dark rounded w-100 p-2" cols=""
+                    rows="3" placeholder="This message will be sent along with Bill details."></textarea>
+                </div>
+              </div>
+              <br>
+              <div class="modal-footer d-flex justify-content-center" style="border-top: 1px solid #ffff;">
+                <input type="submit" id="share_with_email"
+                  class="submitShareEmailBtn rounded-pill text-grey w-50 my-4 mx-3" value="SEND MAIL">
+              </div>
+        </form>
+      </div>
+
         <!-- <div class="modal-footer">
           
         </div> -->
@@ -1395,10 +1424,26 @@ $(document).ready(function () {
         $('#add_comments').on('click',function(){
             $('#modal2').attr('hidden',true)
             $('#modal3').attr('hidden',false)
+            $('#modal4').attr('hidden',true)
         })
         $('#lsit_comments').on('click',function(){
             $('#modal3').attr('hidden',true)
             $('#modal2').attr('hidden',false)
+            $('#modal4').attr('hidden',true)
+        })
+    })
+    $(document).ready(function(){
+      $('#send_mail').on('click',function(){
+        $('#modal2').attr('hidden',true)
+        $('#modal3').attr('hidden',true)
+        $('#modal4').attr('hidden',false)
+      })
+    })
+    $(document).ready(function(){
+        $('#share_to_email_form').on('submit',function(){
+            var s = setInterval(function(){
+                window.location.href=""
+            },1000)
         })
     })
 </script>

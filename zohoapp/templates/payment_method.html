@@ -44,57 +44,97 @@
 
 <div class="table-container bg-dark" style="border-radius: 10px; width: 100%;padding-left: 20px;padding-right: 20px;padding-top: 20px;">
   <div class="heading" >
-    <h1 class="text-center"style="margin-top: 20px;">Payment Made</h1>
+    <h1 style="margin-top: 20px;">All Payment Mades</h1>
   </div>
-  <div class="row mt-3 " style="margin-top: -3rem; margin-left:1rem;" >
-    <div class="col-md-10 form-inline ">
-      <div class="row">
-        
-        <input type="search"  id="searchInput" class="form-control bg-dark" oninput="searchTable()" placeholder="Search Payment Made..." style="margin-top: 25px; width: 30%;border: 2px solid rgb(214, 141, 5);">
-        
-        <div class="btn-group" role="group"  style="margin-top:1.7rem;display:inline-flex;width:4rem;height:2rem;">
-          <button  type="button" class="btn text-white btn-outline-light " style="background-color: rgb(214, 141, 5);border-radius: 5px;" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-            <i class="fa-solid fa-sort"></i>
-          </button>
-          <div class="dropdown-menu">
-            <a class="dropdown-item" href="{% url 'paymentmethod' %}">All</a>
-            <a class="dropdown-item" href="{% url 'view_vendor_name' %}">Name</a>
-            <a class="dropdown-item" href="{% url 'view_paidthrough' %}">Paid Through</a>
-           
+  <div class="row mt-5" style="margin-top: 5rem; margin-left: 1rem;">
+    <div class="col-md-12">
+        <div class="d-flex justify-content-between align-items-center">
+            <!-- Left end of the row -->
+            <div class="d-flex align-items-center">
+                <input type="search" id="searchInput" class="form-control bg-dark" oninput="searchTable()"
+                    placeholder="Search Payment Made..." style=" margin-right: 10px; width: 250px; border: 2px solid rgb(214, 141, 5);">
+                <div class="dropdown" role="group" style=" display: inline-flex; height: 2.3rem;">
+                    <a class="btn text-center px-4 pt-2 btn-outline-warning" id="sortbutton" data-bs-toggle="dropdown"
+                        aria-haspopup="true" aria-expanded="false" role="button" title="sort">
+                        <i class="fas fa-sort m-1"></i>
+                    </a>
+                    <div class="dropdown-menu m-1">
+                        <a class="dropdown-item" href="{% url 'paymentmethod' %}">All</a>
+                        <a class="dropdown-item" href="{% url 'view_vendor_name' %}">Vendor Name</a>
+                        <a class="dropdown-item" href="{% url 'view_paidthrough' %}">Paid Through</a>
+                    </div>
+                </div>
+            </div>
+
+<!-- Right end of the row -->
+<div class="d-flex align-items-center">
+  <div class="input-group" style="margin-right: 10px;">
+      <div class="d-flex">
+          <!-- Excel button -->
+          <div class="dropdown d-flex me-2" role="group">
+              <a class="btn btn-outline-warning text-right px-3 py-2" role="button" href="#"
+                  onclick="exportToExcel()">
+                  <i class="fa-solid fa-file-excel" style="font-size: medium;"></i><span style="font-size: 2vh;">Excel</span>
+              </a>
+              <a style="color: #ccc;" href="#3"> </a>
+          </div>
+<!-- Additional button -->
+          <div class="form-inline me-2">
+            <a class="btn btn-outline-warning text-right px-3 py-2" role="button" href="#">
+              <i class="fa-solid fa-file-import" style="font-size: medium;"></i><span style="font-size: 2vh;">Import Excel</span>
+            </a>
+            <a style="color: #ccc;" href="#3"> </a>
+        </div>
+          <!-- Filter button -->
+          <div class="dropdown d-flex me-2" role="group">
+              <a class="btn text-center px-4 pt-2 btn-outline-warning" id="btnGroupDrop1"
+                  data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false" role="button">
+                  <i class="fa fa-filter mt-1"></i>
+              </a>
+              <div class="dropdown-menu m-1">
+                  <a class="dropdown-item" href="" id="filterAllButton">All</a>
+                  <a class="dropdown-item" href="" id="filterSaveButton">Save</a>
+                  <a class="dropdown-item" href="" id="filterDraftButton">Draft</a>
+              </div>
+          </div>
+
+          
+          <!-- New button -->
+          <div class="form-inline me-2">
+              <a class="btn btn-outline-warning text-right px-3 py-2" role="button"
+                  href="{% url 'paymentadd_method' %}">
+                  <i class="fa fa-plus" style="font-size: medium;"></i><span style="font-size: 2vh;">New</span>
+              </a>
+              <a style="color: #ccc;" href="#3"> </a>
           </div>
           
-        </div>
-        <div class="btn-group" role="group"  style="margin-left: 89%;margin-top:-1.9rem;display:inline-flex;width:4rem">
-          <button id="btnGroupDrop1" type="button" class="btn btn-outline-light" style="background-color: rgb(214, 141, 5);border-radius: 5px;color: white;" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-            <i class="fa fa-filter"></i>
-          </button>
-          <div class="dropdown-menu" aria-labelledby="btnGroupDrop1">
-            <a class="dropdown-item" href="" id="filterAllButton">All</a>
-            <a class="dropdown-item" href="" id="filterSaveButton">Saved</a>
-            <a class="dropdown-item" href="" id="filterDraftButton">Draft</a>
-          </div>
           
-        </div>
-        <div class="col-md-9 form-inline"  style="margin-top: -2rem; margin-left:68rem;"><a style="background-color: rgb(214, 141, 5);border-radius: 5px;color: white;" class="btn btn-outline-light " href="{% url 'paymentadd_method' %}"><i class="fa-solid fa-plus "></i>NEW</a>
-          <a style="color: #ccc;"href="#3"> </a>
-        </div> 
       </div>
+  </div>
+</div>
+
+
+
+
+        </div>
     </div>
-  </div>  
+</div>
+
+
+  
     <div class="table-responsive">
-    <table id="vendorTable" class="table" style="width:100%;  margin-top: 20px;">
+    <table id="vendorTable" class="table" style="width:100%; margin-top: 40px; ">
         <thead>
             <tr>
-                
+              <th class="text-white">Payment Date</th>
+              <th class="text-white">Payment Number</th>
                 <th class="text-white">Vendor</th>
                 <th class="text-white">Email Id</th>
-                <th class="text-white">Reference</th>
-                <th class="text-white">Payment Date</th>
-                <th class="text-white">Paid Through</th>
                 <th class="text-white">Amount Paid</th>
+                <th class="text-white">Status</th>
                 <th class="text-white">Current Balance</th>
                 
-                <th class="text-white">status</th>
+                
 
 
 
@@ -104,16 +144,15 @@
         <tbody>
             {% for p in paymnt %}
                                 <tr id="over">
-                                    
+                                    <td><a href="{% url 'payment_details_view' p.id %}">{{ p.date }}</a></td>
+                                    <td><a href="{% url 'payment_details_view' p.id %}">{{ p.payment }}</a></td>
                                     <td><a href="{% url 'payment_details_view' p.id %}">{{ p.vendor.first_name}}&nbsp;{{ p.vendor.last_name}}</a></td>
                                     <td><a href="{% url 'payment_details_view' p.id %}"> {{ p.vendor.vendor_email }}</a></td>
-                                    <td><a href="{% url 'payment_details_view' p.id %}">{{ p.reference }}</a></td>
-                                    <td><a href="{% url 'payment_details_view' p.id %}">{{ p.date }}</a></td>
-                                    <td><a href="{% url 'payment_details_view' p.id %}">{{ p.cash }}</a></td>  
                                     <td><a href="{% url 'payment_details_view' p.id %}">₹{{ p.balance }}</a></td>
+                                    <td><a href="{% url 'payment_details_view' p.id %}">{{ p.status }}</a></td> 
                                     <td><a href="{% url 'payment_details_view' p.id %}">₹{{ p.total_opening_balance }}</a></td>
                                     
-                                    <td><a href="{% url 'payment_details_view' p.id %}">{{ p.status }}</a></td> 
+                                    
                                     </tr>
                                     {% endfor %}
 
@@ -191,7 +230,7 @@ document.getElementById('filterDraftButton').addEventListener('click', function 
 function showRows(status) {
   for (let i = 0; i < vendorTable.length; i++) {
     const row = vendorTable[i];
-    const rowStatus = row.getElementsByTagName('td')[7].innerText.toLowerCase(); // Assuming status is in the 9th column (index 8)
+    const rowStatus = row.getElementsByTagName('td')[5].innerText.toLowerCase(); // Assuming status is in the 9th column (index 8)
 
     if (status === 'all') {
       row.style.display = '';
@@ -235,7 +274,29 @@ function searchTable() {
     }
 }
 
+// Function to save Excel using XLSX
+function exportToExcel() {
+        var table = document.querySelector('table');
+        var ws = XLSX.utils.table_to_sheet(table);
+        var wb = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(wb, ws, 'Sheet1');
+        XLSX.writeFile(wb, 'report.xlsx');
+    }
 
+    // Function to handle export based on dropdown selection
+    document.getElementById('exportDropdown').addEventListener('change', function () {
+        var selectedValue = this.value;
+        if (selectedValue === 'pdf') {
+            exportToPDF();
+        } else if (selectedValue === 'xls') {
+            exportToExcel();
+        }
+    });
+    const pdfExportLink = document.getElementById('pdf'); // This should be the link for PDF export
+pdfExportLink.addEventListener('click', function (event) {
+    event.preventDefault(); // Prevent the link from navigating
+    exportToPDF();
+});
 
 
     </script>

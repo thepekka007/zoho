@@ -145,7 +145,7 @@
                                     <label style="color: rgb(198, 198, 198);" for="">Bal : <span class="text-light">{{ i.pay_rec_balance }}</span></label>
                                 </div>
                                 <div class="text-end p-0 m-0">
-                                    <label style="color: rgb(198, 198, 198);" for="">Status : <span {% if i.status == 'save' %} style="color: greenyellow;" {% else %} style="color: rgb(255, 210, 63);" {% endif %}>{{ i.status|capfirst }}</span></label>
+                                    <label style="color: rgb(198, 198, 198);" for="">Status : <span {% if i.status == 'save' %} style="color: rgb(255, 255, 255);" {% else %} style="color: rgb(255, 255, 255);" {% endif %}>{{ i.status|capfirst }}</span></label>
                                 </div>
                             </td>
                         </tr>
@@ -167,7 +167,7 @@
                   <div class="dropdown">
                     <a class="btn btn-outline-warning ms-2" type="button" data-bs-toggle="dropdown" aria-expanded="false" ><span data-bs-toggle="tooltip" data-bs-placement="bottom" title="SHARE" class="fa fa-share"></span></a>
                     <ul class="dropdown-menu dropdown-menu-top">
-                      <li><a class="dropdown-item ornage_hover"  href="{% url 'payment_recieved_send_mail_page' pay_data.id %}"><span class="fa fa-envelope"></span> Mail</a></li>
+                      <li><a id="send_mail" class="dropdown-item ornage_hover"  data-bs-toggle="modal" data-bs-target="#exampleModal2"><span class="fa fa-envelope"></span> Mail</a></li>
                       <li><a id="whatsapp_modal" class="dropdown-item ornage_hover" href="whatsapp://send?text=Check out this website: [Your URL]" data-action="share/whatsapp/share"><span class="fa fa-whatsapp"></span> Whatsapp</a></li>
                     </ul>
                   </div>
@@ -618,7 +618,7 @@
           </div>
         </div>
         <div class="p-2">
-          <table style="color: black;" class="table">
+          <!-- <table style="color: black;" class="table">
             <thead class="bg-light">
               <th style="color: black;">#</th>
               <th style="color: black;">DATE</th>
@@ -643,7 +643,7 @@
               </tr>
               {% endfor %}
             </tbody>
-          </table>
+          </table> -->
         </div>
         <br>
         <div class="">
@@ -651,26 +651,26 @@
             <div class="col-sm-12 col-lg-8"></div>
             <div class="col-sm-12 col-lg-4">
               <div class="row">
-                <div class="col-sm-12 col-lg-6">
-                  <label style="font-weight: 600;" for="">Amount :</label>
+                <div class="col-sm-12 col-lg-7">
+                  <label style="font-weight: 600;" class="fs-6" for="">PARTICULARS:</label>
                 </div>
-                <div class="col-sm-12 col-lg-6 text-end">
-                  <label style="font-weight: 600;" class="pe-5" for="">{{ pay_data.pay_rec_amount }}</label>
+                <div class="col-sm-12 col-lg-5 text-end">
+                  <label style="font-weight: 600;" class="pe-5 fs-6" for="">{{ pay_data.pay_rec_amount }}</label>
                 </div>
               </div>
             </div>
             <div class="col-sm-12 col-lg-8"></div>
             <div class="col-sm-12 col-lg-4">
               <div class="row">
-                <div class="col-sm-12 col-lg-6">
-                  <label style="font-weight: 600;" for="">Paid :</label>
+                <div class="col-sm-12 col-lg-7">
+                  <label style="font-weight: 600;" class="fs-6" for="">AMOUNT:</label>
                 </div>
-                <div class="col-sm-12 col-lg-6 text-end">
-                  <label style="font-weight: 600;" class="pe-5" for="">{{ pay_data.pay_rec_paid }}</label>
+                <div class="col-sm-12 col-lg-5 text-end">
+                  <label style="font-weight: 600;" class="pe-5 fs-6" for="">{{ pay_data.pay_rec_paid }}</label>
                 </div>
               </div>
             </div>
-            <div class="col-sm-12 col-lg-8"></div>
+            <!-- <div class="col-sm-12 col-lg-8"></div>
             <div class="col-sm-12 col-lg-4">
               <div class="row">
                 <div style="font-weight: 600;" class="col-sm-12 col-lg-6">
@@ -680,7 +680,7 @@
                   <label style="font-weight: 600;" class="pe-5" for="">{{ pay_data.pay_rec_balance }}</label>
                 </div>
               </div>
-            </div>
+            </div> -->
           </div>
         </div>
         <br><br>
@@ -782,9 +782,75 @@
       </div>
     </div>
 
+
+    <div id="modal4">
+      <div class="d-flex justify-content-between mb-5">
+        <h1 class="modal-title fs-5 " id="exampleModalLabel">SHARE PAYMENT RECEIVED VIA EMAIL</h1>
+        <button type="button" class="btn-close bg-light" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+        <form action="{% url 'payment_recieved_to_mail' pay_data.id %}" method="post" enctype="multipart/form-data" class="needs-validation"
+        id="share_to_email_form" autocomplete="off">
+            {% csrf_token %}
+
+            <div class="bg-dark p-3 rounded">
+              <div class="form-group">
+                <label for="emailIds">Email IDs</label>
+                <input class="form-control text-dark" type="email" placeholder="user@gmail.com" name="email_ids" id="emailIds" required>
+              </div>
+              <div class="form-group mt-2">
+                <label for="item_unitname">Message(optional)</label><p class="m-0"></p>
+                <textarea name="email_message" id="email_message" class="text-dark rounded w-100 p-2" cols=""
+                  rows="3" placeholder="This message will be sent along with Bill details."></textarea>
+              </div>
+            </div>
+            <br>
+            <div class="modal-footer d-flex justify-content-center" style="border-top: 1px solid #ffff;">
+              <input type="submit" id="share_with_email"
+                class="submitShareEmailBtn rounded-pill text-grey w-50 my-4 mx-3" value="SEND MAIL">
+            </div>
+      </form>
+    </div>
+
+    
       <!-- <div class="modal-footer">
         
       </div> -->
+    </div>
+  </div>
+</div>
+
+<!-- Share bill Modal -->
+<div class="modal fade" id="shareBillEmail">
+  <div class="modal-dialog modal-xl">
+    <div class="modal-content" style="background: rgb(32, 35, 37);border-radius: 20px;">
+      <div class="modal-header" style="background: rgb(32, 35, 37);">
+        <h5 class="m-3 text-uppercase" id="shareBillEmailLabel">Share Sales Order Via Email</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
+            aria-hidden="true">&times;</span></button>
+      </div>
+      <div class="modal-body" style="background: rgb(32, 35, 37);">
+        <div class="card p-3 m-3">
+          <form action="{% url 'payment_recieved_to_mail' pay_data.id %}" method="post" class="needs-validation"
+            id="share_to_email_form" autocomplete="off">
+            {% csrf_token %}
+            <div class="form-group">
+              <label for="emailIds">Email IDs</label>
+              <textarea class="form-control text-dark" name="email_ids" id="emailIds" rows="5"
+                placeholder="Multiple emails can be added by separating with a comma(,)." required></textarea>
+            </div>
+            <div class="form-group mt-2">
+              <label for="item_unitname">Message(optional)</label>
+              <textarea name="email_message" id="email_message" class="text-dark form-control" cols=""
+                rows="4" placeholder="This message will be sent along with Bill details."></textarea>
+            </div>
+          </form>
+        </div>
+        <div class="modal-footer d-flex justify-content-center" style="border-top: 1px solid #ffff;">
+          <input type="submit" id="share_with_email"
+            class="submitShareEmailBtn rounded-pill text-grey w-50 my-4 mx-3" value="SEND MAIL">
+        </div>
+      </div>
+
     </div>
   </div>
 </div>
@@ -997,12 +1063,21 @@
       $('#lsit_comments').on('click',function(){
         $('#modal3').attr('hidden',true)
         $('#modal2').attr('hidden',false)
+        $('#modal4').attr('hidden',true)
       })
     })
     $(document).ready(function(){
       $('#attatch_file').on('click',function(){
         $('#modal2').attr('hidden',true)
         $('#modal3').attr('hidden',false)
+        $('#modal4').attr('hidden',true)
+      })
+    })
+    $(document).ready(function(){
+      $('#send_mail').on('click',function(){
+        $('#modal2').attr('hidden',true)
+        $('#modal3').attr('hidden',true)
+        $('#modal4').attr('hidden',false)
       })
     })
 </script>

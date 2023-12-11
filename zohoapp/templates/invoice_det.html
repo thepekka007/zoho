@@ -463,7 +463,7 @@ style="background-color: rgba(124, 124, 123, 0.507);">
         <thead >
             <tr>
                 <th style="color: black;font-weight: bold;">#</th>
-                <th style="width: 30rem;color: black;font-weight: bold;">Product</th>
+                <th style="color: black;font-weight: bold;">Product</th>
                 <!-- <th class="text-right;" style="color: black;font-weight: bold;">Hsn</th> -->
                 <!-- <th class="text-right;" style="color: black;font-weight: bold;">Description</th> -->
                 <th class="text-right;" style="color: black;font-weight: bold;">HSN</th>
@@ -480,17 +480,17 @@ style="background-color: rgba(124, 124, 123, 0.507);">
             {% for item in invoiceitem %}
             <tr  class="text-dark">
                 <td  class="text-dark">{{ forloop.counter }}</td>
-                <td  class="text-dark">{{ item.product }}</td>
+                <td  class="text-dark" style="padding-left: 0px; text-align: center;">{{ item.product }}</td>
                 <!-- <td class="text-right">{{ item.hsn }}</td> -->
                 <!-- <td class="text-right">{{ item.desc }}</td> -->
 
-                <td class="text-right text-dark">{{ item.hsn }}</td>
-                <td class="text-right text-dark">{{ item.quantity }}</td>
-                <td class="text-right text-dark">{{ item.rate|floatformat:1 }}</td>
-                <td class="text-right text-dark">{{ item.discount|floatformat:1 }}</td>
+                <td class="text-right text-dark" style="padding-left: 0px; text-align: center;">{{ item.hsn }}</td>
+                <td class="text-right text-dark" style="padding-left: 0px; text-align: center;">{{ item.quantity }}</td>
+                <td class="text-right text-dark" style="padding-left: 0px; text-align: center;">{{ item.rate|floatformat:1 }}</td>
+                <td class="text-right text-dark" style="padding-left: 0px; text-align: center;">{{ item.discount|floatformat:1 }}</td>
 
-                <td class="text-right  text-dark">{{ item.tax }}</td>
-                <td class="text-right text-dark">{{ item.total|floatformat:1 }}</td>
+                <td class="text-right  text-dark" style="padding-left: 0px; text-align: center;">{{ item.tax }}</td>
+                <td class="text-right text-dark" style="padding-left: 0px; text-align: center;">{{ item.total|floatformat:1 }}</td>
             </tr>
             {% endfor %}
             

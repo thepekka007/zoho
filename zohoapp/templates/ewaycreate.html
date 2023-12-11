@@ -207,6 +207,11 @@
     ::-webkit-scrollbar{
       display: none;
     }
+    .drop_hovers:hover
+   {
+      background-color: rgb(0, 149, 255);
+      color: rgb(255, 255, 255);
+   }
 </style>
 <!-- <section > -->
     <div class="container-fluid" >
@@ -255,11 +260,11 @@
               </div>
               <div class="col-md-6">
                 <div id="custom_dropdowns" class="position-relative">
-                  <div class="position-absolute bg-success p-1 rounded"  style="margin-top: 3rem;width: 100%;">
+                  <div class="position-absolute bg-success p-1 rounded bg-light text-dark  border border-dark"  style="margin-top: 3rem;width: 100%;">
                     <div id="custom-dropdown">
                       <div style="overflow-y: auto;height: 10rem;">
                         {% for i in data %}
-                        <p class="text-light drop_hovers p-2 m-0"
+                        <p class="drop_hovers p-2 m-0"
                         hx-post="{% url 'ewaycreate_get_customer_details' %}"
                         hx-trigger="click delay:0s"
                         hx-target="#ewaycreate_get_customer_details_target"
@@ -297,6 +302,13 @@
                 </div>
               </div>
         
+              <div class="form-group row mt-4">
+                <div class="col-sm-12 col-md-3 col-lg-3 col-form-label"><label>Address Details</label></div>
+                <div class="col-sm-12 col-md-6 col-lg-6">
+                    <input  type="text" class="form-control bg-light text-dark" name="adda" >
+                </div>
+            </div>
+
               <div class="row mt-2" id="cgst_trt_row">
                 <div class="col-md-3">
                   <label for="gst_trt_inp">GST Treatment</label>
@@ -325,12 +337,18 @@
                         <label>Invoice#*</label>
                     </div>
                     <div class="col-sm-12 col-md-3 col-lg-3">
-                        <input type="text" class="form-control text-dark bg-light" {% if eway_id.eway_bill_number %} value="{{ eway_id.eway_bill_number }}" placeholder="{{ eway_id.eway_bill_number }}" {% else %} value="EWB-01" placeholder="EWB-01" {% endif %} id="invoiceno" name="invoiceno"
+                        <input type="text" class="form-control text-dark bg-light" {% if eway_id.eway_bill_number %} value="{{ eway_id.eway_bill_number }}" placeholder="{{ eway_id.eway_bill_number }}"{% endif %} id="invoiceno" name="invoiceno"
                         hx-post="{% url 'check_eway_num_valid' %}"
                         hx-trigger="keyup delay:0s"
                         hx-target="#check_payment_num_valid_target"
                         required
                         >
+                        <!-- <input type="text" class="form-control text-dark bg-light" {% if eway_id.eway_bill_number %} value="{{ eway_id.eway_bill_number }}" placeholder="{{ eway_id.eway_bill_number }}" {% else %} value="EWB-01" placeholder="EWB-01" {% endif %} id="invoiceno" name="invoiceno"
+                        hx-post="{% url 'check_eway_num_valid' %}"
+                        hx-trigger="keyup delay:0s"
+                        hx-target="#check_payment_num_valid_target"
+                        required
+                        > -->
                         <div id="check_payment_num_valid_target"></div>
                     </div>
                     <div class="col-sm-12 col-md-1 col-lg-1 col-form-label">
@@ -363,12 +381,6 @@
                             <option value="Goods">Goods</option>
                             <option value="Services">Services</option>
                         </select>
-                    </div>
-                </div>
-                <div class="form-group row mt-4">
-                    <div class="col-sm-12 col-md-3 col-lg-3 col-form-label"><label>Address Details</label></div>
-                    <div class="col-sm-12 col-md-6 col-lg-6">
-                        <input  type="text" class="form-control bg-light text-dark" name="adda" >
                     </div>
                 </div>
                 <div class="form-group row mt-4">

@@ -478,7 +478,6 @@ urlpatterns = [
     
     path('sales_order', views.sales_order, name='sales_order'),
     path('sales_summery', views.sales_summery, name='sales_summery'),
-    
     path('transaction/<int:pk>', views.transaction, name="transaction"),
     
     path('view_sales_order_all',views.view_sales_order_all,name='view_sales_order_all'),
@@ -787,7 +786,6 @@ urlpatterns = [
     path('add_projectcomment/<int:id>', views.add_projectcomment, name='add_projectcomment'),
     path('delete_projectcomment/<int:cid>', views.delete_projectcomment, name='delete_projectcomment'),
     path('project_summary', views.project_summary, name='project_summary'),
-    
 
     path('projfile_download/<int:aid>', views.projfile_download, name='projfile_download'),
     path('projdeletefile/<int:aid>', views.projdeletefile, name='projdeletefile'),
@@ -1061,17 +1059,99 @@ urlpatterns = [
     path('convert_to_recinvoice_frm_salesorder/<int:pk>',views.convert_to_recinvoice_frm_salesorder,name='convert_to_recinvoice_frm_salesorder'),
     
     path('convert_to_reccinvoice/<int:pk>',views.convert_to_reccinvoice,name='convert_to_reccinvoice'),
+    path('item_dropdown_estimate',views.item_dropdown_estimate,name='item_dropdown_estimate'),
 
+    # ---------Bank Holders & Loan account ------------shemeem------------------------------------------------------
+    path('bank_holders',views.bankHolders, name = 'bankHolders'),
+    path('add_bank_holder',views.addBankHolder, name='addBankHolder'),
+    path('new_bank_holder',views.newBankHolder, name='newBankHolder'),
+    path('get_bank_details',views.getBankDetails, name='getBankDetails'),
+    path('get_all_banks',views.getAllBanks, name='getAllBanks'),
+    path('bank_holders_active',views.bankHoldersActive, name='bankHoldersActive'),
+    path('bank_holders_inactive',views.bankHoldersInactive, name='bankHoldersInactive'),
+    path('bank_holders_sortby_name',views.bankHoldersSortByName, name='bankHoldersSortByName'),
+    path('bank_holders_sortby_acc_num',views.bankHoldersSortByAccNum, name='bankHoldersSortByAccNum'),
+    path('bank_holder_change_inactive/<int:id>',views.bankHolderStatusInactive, name='bankHolderStatusInactive'),
+    path('bank_holder_change_active/<int:id>',views.bankHolderStatusActive, name='bankHolderStatusActive'),
+    path('delete_bank_holder/<int:id>',views.deleteBankHolder, name='deleteBankHolder'),
+    path('edit_bank_holder/<int:id>',views.editBankHolder, name='editBankHolder'),
+    path('update_bank_holder/<int:id>',views.updateBankHolder, name='updateBankHolder'),
+    path('view_bank_holder/<int:id>',views.viewBankHolder, name='viewBankHolder'),
+    path('holder_name_asc/<int:id>',views.holderNameAsc, name='holderNameAsc'),
+    path('holder_name_desc/<int:id>',views.holderNameDesc, name='holderNameDesc'),
 
-    #==========================TINTO MT godown details and project details ==================================
+    # Loan Account urls
+    path('loan_accounts',views.loanAccounts,name='loanAccounts'),
+    path('add_loan_account',views.addLoanAccount,name='addLoanAccount'),
+    path('get_holder_details',views.getHolderDetails, name='getHolderDetails'),
+    path('get_all_bank_holders',views.getAllBankHolders, name='getAllBankHolders'),
+    path('create_loan_account',views.createLoanAccount, name='createLoanAccount'),
+    path('view_loan_account/<int:id>',views.viewLoanAccount, name= 'viewLoanAccount'),
+    path('delete_loan_account/<int:id>',views.deleteLoanAccount, name='deleteLoanAccount'),
+    path('edit_loan_account/<int:id>',views.editLoanAccount, name='editLoanAccount'),
+    path('update_loan_account/<int:id>',views.updateLoanAccount,name='updateLoanAccount'),
+    path('loan_account_active',views.loanAccountActive, name='loanAccountActive'),
+    path('loan_account_inactive',views.loanAccountInactive, name='loanAccountInactive'),
+    path('loan_account_sortby_name',views.loanAccountSortByName, name='loanAccountSortByName'),
+    path('loan_account_sortby_amount',views.loanAccountSortByAmount, name='loanAccountSortByAmount'),
+    path('loan_account_change_inactive/<int:id>',views.loanAccountStatusInactive, name='loanAccountStatusInactive'),
+    path('loan_account_change_active/<int:id>',views.loanAccountStatusActive, name='loanAccountStatusActive'),
+    path('loan_account_name_asc/<int:id>',views.loanAccountNameAsc, name='loanAccountNameAsc'),
+    path('loan_account_name_desc/<int:id>',views.loanAccountNameDesc, name='loanAccountNameDesc'),
+    path('edit_loan_account_transaction/<int:id>',views.editLoanAccountTransaction, name='editLoanAccountTransaction'),
+    path('update_loan_account_transaction/<int:id>',views.updateLoanAccountTransaction, name='updateLoanAccountTransaction'),
+    path('delete_loan_account_transaction/<int:id>',views.deleteLoanAccountTransaction, name='deleteLoanAccountTransaction'),
+    path('make_emi_payment/<int:id>',views.makeEmiPayment, name='makeEmiPayment'),
+    path('get_additional_loan/<int:id>',views.getAdditionalLoan, name='getAdditionalLoan'),
+    path('transactionsInBetween/<int:id>',views.transactionsInBetween, name='transactionsInBetween'),
+    path('share_loan_account_statement/<int:id>',views.shareLoanAccountStatementToEmail, name='shareLoanAccountStatementToEmail'),
+    path('loan_account_statement_pdf/<int:id>',views.loanAccountStatementPdf,name='loanAccountStatementPdf'),
+
+# ---------------------------------------------------------end-----------------------------------------------------
+
+    path('bank_holders_sortby_bank_name',views.bankHoldersSortByBankName, name='bankHoldersSortByBankName'),
+    path('check_holder_name',views.checkHolderName, name='checkHolderName'),
     
+    #................................  URls START............ Godown details & project details & GSTR9...... TINTO MT .......( start )......................
+
     path('godown_details', views.godown_details, name='godown_details'),
     path('shareGodownDetailsToEmail', views.shareGodownDetailsToEmail, name='shareGodownDetailsToEmail'),
     path('project_details', views.project_details, name='project_details'),
     path('GSTR_9page', views.GSTR_9page, name='GSTR_9page'),
     path('shareGSTR9ToEmail', views.shareGSTR9ToEmail, name='shareGSTR9ToEmail'),
     path('GSTR9pdfs', views.GSTR9pdfs, name='GSTR9pdfs'),
+#................................  Views END ............ Godown details & project details & GSTR9...... TINTO MT .......( end )......................
+
+    path('import_employee_loan_details',views.import_employee_loan_details,name='import_employee_loan_details'), 
+    path('import_employee_details',views.import_employee_details,name='import_employee_details'),
+    path('share_loan_email/<int:id>',views.share_loan_email,name='share_loan_email'), 
+    path('create_loan_duration',views.create_loan_duration,name='create_loan_duration'), 
+
+    path('loan_duration',views.loan_duration,name='loan_duration'), 
+
     
+    path('repayment_view/<int:id>', views.repayment_view, name='repayment_view'),
+    path('add_repayment/<int:id>', views.add_repayment, name='add_repayment'),
+    path('additional_loan_view/<int:id>', views.additional_loan_view, name='additional_loan_view'), 
+    path('add_additional_loan/<int:id>', views.add_additional_loan, name='add_additional_loan'), 
+    path('delete_repayment/<int:id>', views.delete_repayment, name='delete_repayment'), 
+    path('edit_repayment_view/<int:id>', views.edit_repayment_view, name='edit_repayment_view'), 
+    path('edit_repayment/<int:id>', views.edit_repayment, name='edit_repayment'), 
+    path('edit_additional_loan_view/<int:id>', views.edit_additional_loan_view, name='edit_additional_loan_view'), 
+    path('edit_additional_loan/<int:id>', views.edit_additional_loan, name='edit_additional_loan'),  
+    
+    path('purchaseOrderDetailsToEmail',views.purchaseOrderDetailsToEmail,name='purchaseOrderDetailsToEmail'),
+    path('JournalReportToEmail',views.JournalReportToEmail,name='JournalReportToEmail'),
+    
+    #==============================================  ASHIKH VU (start) ==============================================
+    
+    path('payment_recieved_to_mail/<int:pk>',views.payment_recieved_to_mail,name='payment_recieved_to_mail'),
+    path('ewaybill_to_mail/<int:pk>',views.ewaybill_to_mail,name='ewaybill_to_mail'),
+
+    #==============================================  ASHIKH VU (end) ================================================
+    
+    path('shareEstimateToEmail/<int:pk>',views.shareEstimateToEmail,name='shareEstimateToEmail'),
+    path('shareExpenseToEmail/<int:pk>',views.shareExpenseToEmail,name='shareExpenseToEmail'),
     
     re_path(r'^static/(?P<path>.*)$', serve,{'document_root': settings.STATIC_ROOT}),
     

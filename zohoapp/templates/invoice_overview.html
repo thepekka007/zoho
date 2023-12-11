@@ -61,7 +61,7 @@
         height: 2.5vw;
     }
 
-    #div-to-pdf .p-info label,
+    #div-to-pdf label,
     #div-to-pdf .bank-div label {
         color: #ffffff;
         font-size: .8rem;
@@ -82,12 +82,24 @@
     }
 
 
-    #div-to-pdf .p-info .bold,
+    #div-to-pdf  .bold,
     #div-to-pdf .bank-div .bold {
         font-size: 1rem;
         color: #ffffff;
         /* font-weight: bold; */
     }
+
+
+   .p-info
+    {
+        font-size: 1rem;
+        color: #000000;
+        /* font-weight: bold; */
+    }
+
+
+
+
 
     .modal {
         z-index: 9999;
@@ -443,7 +455,7 @@
                             <thead >
                                 <tr>
                                     <th style="color: black;font-weight: bold;">#</th>
-                                    <th style="width: 10rem;color: black;font-weight: bold;">Product</th>
+                                    <th style="color: black;font-weight: bold;">Product</th>
                                     <!-- <th class="text-right;" style="color: black;font-weight: bold;">Hsn</th> -->
                                     <!-- <th class="text-right;" style="color: black;font-weight: bold;">Description</th> -->
                                     <th class="text-right;" style="color: black;font-weight: bold;">HSN</th>
@@ -459,19 +471,19 @@
                             <tbody>
                                 {% for item in invoiceitem %}
                                 <tr>
-                                    <td style="color: black;font-weight: bold;">{{ forloop.counter }}</td>
-                                    <td style="color: black;font-weight: bold;">{{ item.product }}</td>
+                                    <td style="color: black;font-weight: bold;text-align: center;">{{ forloop.counter }}</td>
+                                    <td style="color: black;font-weight: bold;text-align: center;">{{ item.product }}</td>
                                     <!-- <td class="text-right">{{ item.hsn }}</td> -->
                                     <!-- <td class="text-right">{{ item.desc }}</td> -->
 
 
-                                    <td class="text-right" style="color: black;font-weight: bold;">{{ item.hsn }}</td>
-                                    <td class="text-right" style="color: black;font-weight: bold;">{{ item.quantity }}</td>
-                                    <td class="text-right" style="color: black;font-weight: bold;">{{ item.rate|floatformat:1 }}</td>
-                                    <td class="text-right" style="color: black;font-weight: bold;">{{ item.discount|floatformat:1 }}</td>
+                                    <td class="text-right" style="color: black;font-weight: bold;text-align: center;">{{ item.hsn }}</td>
+                                    <td class="text-right" style="color: black;font-weight: bold;text-align: center;">{{ item.quantity }}</td>
+                                    <td class="text-right" style="color: black;font-weight: bold;text-align: center;">{{ item.rate|floatformat:1 }}</td>
+                                    <td class="text-right" style="color: black;font-weight: bold;text-align: center;">{{ item.discount|floatformat:1 }}</td>
                     
-                                    <td class="text-right" style="color: black;font-weight: bold;">{{ item.tax }}</td>
-                                    <td class="text-right" style="color: black;font-weight: bold;">{{ item.total|floatformat:1 }}</td>
+                                    <td class="text-right" style="color: black;font-weight: bold;text-align: center;">{{ item.tax }}</td>
+                                    <td class="text-right" style="color: black;font-weight: bold;text-align: center;">{{ item.total|floatformat:1 }}</td>
                                 </tr>
                                 {% endfor %}
                                 
@@ -562,8 +574,8 @@
                                     </div>
                                 </div>
                     
-                            </div>    <div class="p-info col-6 my-2" style="height: auto;">
-                                <div class="card" style="background-color: rgb(110, 61, 46); padding:0.9rem;">       
+                            </div>    <div class="p-info col-6 my-2" style="">
+                                <div class="card" style="height: 50vh; background-color: rgb(110, 61, 46); padding:0.9rem;">       
                                     {% for customer in customers %}
                                     <div class="row">
                                         
@@ -576,7 +588,7 @@
 
                                     <div class="row my-2"><h4>Invoice Details</h4></div>
                                     
-                                    <div class="row">
+                                    <div class="row" >
                                         
                                         <div class="col-6"><label for="">Invoice Date:</label></div>
                                         <div class="col-6">

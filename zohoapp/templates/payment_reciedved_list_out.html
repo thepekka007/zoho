@@ -37,6 +37,20 @@
     margin: 2px auto;
     z-index: 1 !important;
   }
+    .btn{
+        color: rgb(218, 164, 48);
+        outline-color: azure;
+        border: 2px solid rgb(25, 91, 145);
+    }
+    .btn:hover{
+        color: darkslategray;
+        background-color: lightblue;
+        outline: none;
+        
+    }
+    .text_hover_orange:hover{
+      color: orange;
+    }
 
 </style>
 
@@ -73,28 +87,31 @@
             </div>
         </div>
         <div class="col-sm-12 col-lg-4" style="z-index: 1;">
-            <input type="text" id="search" class="form-control bg-light text-dark" placeholder="Search.." autocomplete="off">        
+            <div class="d-flex">
+              <input type="text" id="search" class="form-control bg-light text-dark" placeholder="Search.." autocomplete="off"> 
+              <div class="dropdown">
+                  <a style="margin-inline-start: 6px;height: 100%;" class="btn text-center btn-outline-light" id="sortbutton" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false" role="button" >
+                      <i  class="fas fa-sort p-1"></i>
+                  </a>
+                  <div class="dropdown-menu m-1">
+                      <a class="dropdown-item text_hover_orange" href="">All</a>
+                      <a class="dropdown-item text_hover_orange" onclick="sortTableName()">Customer Name</a>
+                      <a class="dropdown-item text_hover_orange" onclick="sortTableTotal()">Total</a>
+                  </div>
+              </div>    
+            </div>   
         </div>
         <div class="col-sm-12 col-lg-8 ">
-           <div class="d-lg-flex d-sm-none justify-content-end">
+           <div class="d-lg-flex d-sm-block justify-content-end">
             <a style="height: 100%;" class="btn text-center btn-outline-light" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false" role="button" >
                 <i class="fa fa-filter p-1"></i>
             </a>
             <div class="dropdown-menu m-1">
-                <a class="dropdown-item" onclick="all_saved_and_draft()">All</a>
-                <a class="dropdown-item" onclick="select_draft()">Draft</a>
-                <a class="dropdown-item" onclick="select_save()">Saved</a>
+                <a class="dropdown-item text_hover_orange" onclick="all_saved_and_draft()">All</a>
+                <a class="dropdown-item text_hover_orange" onclick="select_draft()">Draft</a>
+                <a class="dropdown-item text_hover_orange" onclick="select_save()">Saved</a>
             </div>
-            <div class="dropdown">
-                <a style="margin-inline-start: 6px;height: 100%;" class="btn text-center btn-outline-light" id="sortbutton" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false" role="button" >
-                    <i  class="fas fa-sort p-1"></i>
-                </a>
-                <div class="dropdown-menu m-1">
-                    <a class="dropdown-item" href="">All</a>
-                    <a class="dropdown-item" onclick="sortTableName()">Customer Name</a>
-                    <a class="dropdown-item" onclick="sortTableTotal()">Total</a>
-                </div>
-            </div>
+            
             <a style="margin-inline-start: 6px;height: 100%;" onclick="reduce_dash()" data-bs-toggle="modal" data-bs-target="#exampleModal" class="btn btn-outline-light">
                 <i class="fa fa-file-excel-o p-1"></i><span class="fs-6">Import</span>
             </a>
@@ -130,7 +147,7 @@
                   <td style="text-align: center;">{{ i.customer_name }}</td>
                   <td style="text-align: center;">{{ i.customer_mail }}</td>
                   <td style="text-align: center;">{{ i.pay_rec_paid }}</td>
-                  <td style="text-align: center;" {% if i.status == 'save' %}class="tg export_hide"{% else %}class="to export_hide"{% endif %}>{{ i.status|capfirst }}</td>
+                  <td style="text-align: center;" {% if i.status == 'save' %}class=" export_hide"{% else %}class=" export_hide"{% endif %}>{{ i.status|capfirst }}</td>
                   <td style="text-align: center;">{{ i.pay_rec_balance }}</td>
                 </tr>
               {% endfor %}

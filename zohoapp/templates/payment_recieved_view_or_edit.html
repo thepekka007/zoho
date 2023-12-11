@@ -134,7 +134,8 @@
    }
    .drop_hovers:hover
    {
-      background-color: rgb(5, 98, 0);
+      background-color: rgb(0, 149, 255);
+      color: rgb(255, 255, 255);
    }
    ::-webkit-scrollbar{
     display: none;
@@ -173,11 +174,11 @@
       </div>
       <div class="col-md-7 d-flex">
         <div id="custom_dropdowns" class="position-relative">
-          <div class="position-absolute bg-success p-1 rounded"  style="margin-top: 3rem;">
+          <div class="position-absolute bg-success p-1 rounded bg-light text-dark  border border-dark"  style="margin-top: 3rem;">
             <div id="custom-dropdown">
               <div style="overflow-y: auto;height: 10rem;">
                 {% for i in customers %}
-                <p class="text-light drop_hovers p-2 m-0"
+                <p class="drop_hovers p-2 m-0"
                 hx-post="{% url 'get_customer_details_for_pay_rec' %}"
                 hx-trigger="click delay:0s"
                 hx-target="#get_customer_details_target"
@@ -205,6 +206,7 @@
       </div>
     </div>
 
+    {% if  cust.Address1 and cust.Address1 != ',,,' %}
     <div class="row mt-2">
       <div class="col-md-3">
         <label for="prof_name" >Billing Address</label>
@@ -215,6 +217,7 @@
         <label id="order_label" style="display: none;"></label>
       </div>
     </div>
+    {% endif %}
 
     {% if pay_data.customer_gst_treatment %}
     <div class="row mt-2">
@@ -349,21 +352,36 @@
               <th class="text-right">Invoice Amount</th>
               <th class="text-right">Payment</th>
               <th class="text-right">Balance</th>
-              <!-- <th></th> -->
+              <th hidden></th>
             </tr>
           </thead>
           <tbody id="item_table_body">
+            {% if cust.OpeningBalance or cust.OpeningBalance != '0' %}
+            <tr>
+              <td>1</td>
+              <td class="text-center">-</td>
+              <td class="text-center">-</td>
+              <td>Open .Bal.</td>
+              <td class="text-center">-</td>
+              <td class="text-center">-</td>
+              <td class="text-center">-</td>
+              <td>{{ cust.OpeningBalance }}</td>
+            </tr>
+            {% endif %}
             {% for i in all_invoice %}
-            <tr id="row1">
-              <td>{{ forloop.counter }}</td>
-              <td style="width: 15%;" class='text-right'>{{ i.inv_date|date:'Y-m-d' }}{{ i.retainer_invoice_date|date:'Y-m-d' }}{{ i.start|date:'Y-m-d' }}{{ i.creditnote_date|date:'Y-m-d' }}</td>
-              <td style="width: 17%;" class='text-right'>{{ i.due_date|date:'Y-m-d' }}{{ i.end|date:'Y-m-d' }}{% if i.retainer_invoice_number or i.credit_note %}---- NILL ----{% endif %}</td>
-              <td style="width: 15%;" class='text-right'>{% if i.invoice_no %}INVOICE{% elif i.retainer_invoice_number %}RETAINER{% elif i.reinvoiceno %}RECCURING{% elif i.credit_note %}CREDIT NOTE{% endif %}</td>
-              <td style="width: 10%;" class='text-right'>{{ i.invoice_no }}{{ i.retainer_invoice_number }}{{ i.reinvoiceno }}{{ i.invoice_number }}</td>
-              <td style="width: 22%;" class='text-right total_amount'>{{ i.grandtotal }}{{ i.total_amount }}{% if i.reinvoiceno %}{{ i.total }}{% endif %}{% if i.credit_note %}{{ i.subtotal }}{% endif %}</td>
-              <td style="width: 22%;" class='text-right total_payment'>{{ i.paid_amount }}{% if i.total_amount and i.balance %}{{ i.total_amount|sub_int:i.balance }}{% endif %}{{ i.paid }}{% if i.credit_note %}0{% endif %}</td>
-              <td style="width: 22%;" class='text-right total_balance'>{% if i.balance %}{{ i.balance }}{% else %}0{% endif %}</td>
-              <!-- <td></td> -->
+              <tr id="row1">
+                <td>{% if cust.OpeningBalance or cust.OpeningBalance != '0' %}{{ forloop.counter|add:1 }}{% else %}{{ forloop.counter }}{% endif %}</td>
+                <td style="width: 13%;" class='text-right'><input readonly name="date[]" type="text" class="form-control text-dark" value="{% if i.date %}{{ i.date|date:'Y-m-d' }}{% else %}---- NILL ----{% endif %}"></td>
+                <td style="width: 13%;" class='text-right'><input readonly name="due_date[]" type="text" class="form-control text-dark" value="{% if i.due_date %}{{ i.due_date|date:'Y-m-d' }}{% else %}---- NILL ----{% endif %}"></td>
+                <td style="width: 13%;" class='text-right'><input readonly name="inv_type[]" type="text" class="form-control text-dark" value="{{ i.invoice_type }}"></td>
+                <td style="width: 13%;" class='text-right'><input readonly name="inv_no[]" type="text" class="form-control text-dark" value="{{ i.invoice_number }}"></td>
+                <td style="width: 15%;" class='text-right'><input readonly name="inv_amount[]" type="text" class="total_amount form-control text-dark" value="{{ i.invoice_amount }}"></td>
+                <td style="width: 15%;" class='text-right'><input  name="payment_amount[]" type="number" class="total_payment form-control text-dark" min="0" value="{{ i.paid }}"></td>
+                <td style="width: 17%;" class='text-right'><input readonly name="balance[]" type="number" class="total_balance form-control text-dark" value="{{ i.balance }}" readonly></td>
+                <td hidden><input type="text" name="invoice_id[]" value="{{ i.invoice_id }}"></td>
+                <!-- <td style="width: 22%;" class='text-right total_amount'>{{ i.grandtotal }}{{ i.total_amount }}{% if i.reinvoiceno %}{{ i.total }}{% endif %}{% if i.credit_note %}{{ i.subtotal }}{% endif %}</td>
+                <td style="width: 22%;" class='text-right total_payment'>{{ i.paid_amount }}{% if i.total_amount and i.balance %}{{ i.total_amount|sub_int:i.balance }}{% endif %}{{ i.paid }}{% if i.credit_note %}0{% endif %}</td> -->
+             
             </tr>
             {% endfor %}
           </tbody>
@@ -399,9 +417,9 @@
 </div>
 
     <div class="row mt-5 mb-3">
-      <input style="width: 150px;margin-right: 1vh;" type="submit" class="btn btn-outline-warning p-2 text-" value="Draft" name="Draft">
-      <input style="width: 150px;margin-right: 1vh;" type="submit" class="btn btn-outline-success p-2 text-" value="Update" name="Save">
-      <a style="width: 150px;"  type="reset" value="Cancel" class="btn btn-outline-danger p-2 text-" href="">Cancel</a>
+      <input style="width: 150px;margin-right: 1vh;" type="submit" class="btn btn-warning text-dark p-2 text-" value="Draft" name="Draft">
+      <input style="width: 150px;margin-right: 1vh;" type="submit" class="btn btn-warning text-dark p-2 text-" value="Update" name="Save">
+      <a style="width: 150px;"  type="reset" value="Cancel" class="btn btn-warning text-dark p-2 text-" href="">Cancel</a>
     </div>
   </form>
   
@@ -2847,5 +2865,42 @@ function itemfunction(id_str){
     $('#amount_').val(total_amount.toFixed(2))
     $('#payment_').val((total_amount-total_balance).toFixed(2))
   })
+  function calculate_part()
+  {
+    var table = $('#item_table')
+    var total_balance = 0
+    table.find('tbody tr .total_balance').each(function(){
+      total_balance += parseFloat($(this).val())
+    })
+    $('#balance_').val(total_balance.toFixed(2))
+
+    var total_amount = 0
+    table.find('tbody tr .total_amount').each(function(){
+      total_amount += parseFloat($(this).val())
+    })
+    $('#amount_').val(total_amount.toFixed(2))
+    $('#payment_').val((total_amount-total_balance).toFixed(2))
+  }
+  $(document).ready(function(){
+    calculate_part()
+  })
+  $(document).ready(function() {
+    // Bind the change event to the input fields with the 'middle' class
+    $('.total_payment').on('keyup change',function() {
+        // Find the corresponding row
+        var row = $(this).closest('tr');
+
+        // Get the values from upper and under columns
+        var upperValue = parseFloat(row.find('.total_amount').val()) || 0;
+        var underValue = parseFloat(row.find('.total_payment').val()) || 0;
+
+        // Calculate the middle value
+        var middleValue = upperValue - underValue;
+
+        // Update the middle column with the calculated value
+        row.find('.total_balance').val(middleValue);
+        calculate_part()
+    });
+});
 </script>
 {% endblock %}

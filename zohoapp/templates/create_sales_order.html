@@ -152,7 +152,7 @@
 
 
             <select name="cx_name" id="customer_sel" class="form-control bg-light text-dark" style="width: 91%;"
-              required>
+              required onselect="toggleDateInput()">
               <option value="" hidden selected>Select Customer</option>
               {% for cust in c %}
               <option value="{{cust.id}}" data-pos="{{cust.placeofsupply}}" id="crt_cust">{{cust.customerName}}</option>
@@ -206,7 +206,7 @@
           </div>
 
           <div class="col-md-6">
-            <select name="srcofsupply" id="srcofsupply" onclick="toggleDateInput()" onselect="calculateTaxAmount()"
+            <select name="srcofsupply" id="srcofsupply" onchange="toggleDateInput()" onselect="calculateTaxAmount()"
               class="form-control bg-light text-dark">
               <option value=""></option>
               <option value="[AN]-Andaman and Nicobar Islads">[AN] Andaman and Nicobar Islads</option>
@@ -390,7 +390,7 @@
                       id='item1' onchange="itemfunction(this.id)">
                       <option value="" selected hidden>Select Item</option>
                       {% for i in itm %}
-                      <option class="text-black .name" value="{{i.id}}">{{ i.Name}} </option>
+                      <option class="text-black" value="{{i.id}}">{{ i.Name}} </option>
                       {% endfor %}
                     </select>
                   </td>
@@ -414,7 +414,7 @@
                   </td>
                   <td style="width: 22%;" class='text-right '> <select name='tax[]' id='tax1'
                       class='form-control border-0 bg-transparent text-white text-right border-0 tax'
-                      onchange="toggleDateInput()">
+                      onselect="toggleDateInput()">
                       <optgroup class="text-center text-black" label="GST">
                         <option class="text-black" value="0">0% GST(0%)</option>
                         <option class="text-black" value="3">3.0% GST(3%)</option>
@@ -869,47 +869,15 @@
                     <div class="col-md-6">
                       <div class="d-flex">
                         <div class="radio_opt mx-5 mt-2">
-                          <input type="radio" id="item-tax3" name="radioOption2" value="Taxable">
-                          <label for="option3">Taxable</label>
+                          <input type="radio" id="item-tax3" name="radioOption1" value="Taxable">
+                          <label for="option1">Taxable</label>
                         </div>
                         <div class="radio_opt mx-4 mt-2">
-                          <input type="radio" id="item-tax4" name="radioOption2" value="Tax-exempt">
-                          <label for="option4">Tax-exempt</label>
+                          <input type="radio" id="item-tax4" name="radioOption1" value="Tax-exempt">
+                          <label for="option2">Tax-exempt</label>
                         </div>
                       </div>
                     </div>
-                  </div>
-                  <div class="row mt-2 mb-4 d-none inter-intra">
-                    <div class="col-md-3">
-                      <label for="intra">Intra-State TAX</label>
-                    </div>
-                    <div class="col-md-6">
-                      <select name="intra" class="form-control bg-light text-dark" id="intra1">
-                        <option value="" hidden>Select GST</option>
-                        <option value="GST0[0%]">GST0[0%]</option>
-                        <option value="GST3[3%]">GST3[3%]</option>
-                        <option value="GST5[5%]">GST5[5%]</option>
-                        <option value="GST12[12%]">GST12[12%]</option>
-                        <option value="GST18[18%]">GST18[18%]</option>
-                        <option value="GST28[28%]">GST28[28%]</option>
-                      </select>
-                    </div>
-                    <div class="col-md-3"></div>
-                    <div class="col-md-3">
-                      <label for="inter">Inter-State TAX</label>
-                    </div><br>
-                    <div class="col-md-6">
-                      <select name="inter" class="form-control bg-light text-dark" id="inter1">
-                        <option value="" hidden>Select GST</option>
-                        <option value="IGST0[0%]">IGST0[0%]</option>
-                        <option value="GST3[3%]">GST3[3%]</option>
-                        <option value="IGST5[5%]">IGST5[5%]</option>
-                        <option value="IGST12[12%]">IGST12[12%]</option>
-                        <option value="IGST18[18%]">IGST18[18%]]</option>
-                        <option value="IGST28[28%]">IGST28[28%]</option>
-                      </select>
-                    </div>
-                    <div class="col-md-1"></div>
                   </div>
                   <hr>
                   <div class="row mt-2">
@@ -1747,14 +1715,16 @@
     $("#prof_name").keyup(function () {
       var x = $('#prof_name').val();
       reford = "{{reference}}"
-      if (reford != x) {
-        document.getElementById("order_label").style.display = "block"
-        document.getElementById("order_label").style.color = "yellow"
-        document.getElementById("order_label").innerHTML = "Sale Order is not Continuous"
-      } else {
-        document.getElementById("order_label").style.display = "block"
-        document.getElementById("order_label").style.color = "green"
-        document.getElementById("order_label").innerHTML = "Sale Order is now Continuous"
+      if (reford != '01') {
+        if (reford != x) {
+          document.getElementById("order_label").style.display = "block"
+          document.getElementById("order_label").style.color = "yellow"
+          document.getElementById("order_label").innerHTML = "Sale Order is not Continuous"
+        } else {
+          document.getElementById("order_label").style.display = "block"
+          document.getElementById("order_label").style.color = "green"
+          document.getElementById("order_label").innerHTML = "Sale Order is now Continuous"
+        }
       }
     });
   });
@@ -1991,7 +1961,7 @@
         term_data = response.term_data
         day_data = response.day_data
         day_id = response.day_id
-    
+
         var term_container = document.getElementById('terms-container');
         var dropdow = document.getElementById('termdrop');
         term_container.removeChild(dropdow);
@@ -2125,7 +2095,7 @@
       success: function (response) {
         document.getElementById("modalCustomer").reset();
         location.reload();
-
+        location.reload();
         //reloadcustomer();
 
       },
@@ -2142,7 +2112,7 @@
       csrfmiddlewaretoken: '{{ csrf_token }}',
 
       success: function (data) {
-        var dropdow = $('#termdrop');
+        var dropdow = $('#customer_sel');
         dropdown.empty();
         dropdow.append($('<option value="" hidden selected></option>'));
         $.each(data, function (key, value) {
@@ -2319,11 +2289,13 @@
 
       success: function (data) {
         var dropdown = $('.itm');
-        dropdown.empty();
-
-        dropdown.append($('<option value="" selected hidden>Select Item</option>'));
         $.each(data, function (key, value) {
-          dropdown.append($('<option></option>').attr('value', key).text(value).val(value));
+          // Check if option with the same value already exists
+          if (dropdown.find('option[value="' + key + '"]').length === 0) {
+            // If it doesn't exist, create a new option element
+            var option = $('<option></option>').attr('value', key).text(value);
+            dropdown.append(option);
+          }
         });
       },
       error: function (xhr, status, error) {
@@ -2396,15 +2368,18 @@
         gsttreat = response.gsttreat
         billingaddress = response.billingAddress
         document.getElementById('cx_mail').value = data7
-        if (billingaddress === "") {
+        document.getElementById('cx_address').value = billingaddress
+
+        var expr = /^[0-9]{2}[A-Z]{5}[0-9]{4}[A-Z]{1}[1-9A-Z]{1}Z[0-9A-Z]{1}$/;
+
+        if (billingaddress === "" || billingaddress === ",,,") {
           document.getElementById('cx_addressdiv').style.display = "none"
         }
         else {
           document.getElementById('cx_addressdiv').style.display = ""
-          document.getElementById('cx_address').value = billingaddress
 
         }
-        if (data_gst === "") {
+        if (!expr.test(data_gst)) {
           document.getElementById('gstdiv').style.display = "none"
           document.getElementById('treatmentdiv').style.display = "block"
           document.getElementById('cx_treat').value = gsttreat
@@ -2425,10 +2400,22 @@
             selectElement.selectedIndex = i;
             break; // Exit the loop once the option is selected
           }
+
         }
+        $(document).ready(function () {
+
+          for (var i = 1; i <= rowCount; i++) {
+            // Generate table row
+            // ...
+
+            // Call toggleDateInput function for each row
+            toggleDateInput(i);
+          }
+        });
       }
     });
   });
+
 </script>
 <script>
 
@@ -2590,7 +2577,7 @@
         </td>
         
         <td style="width: 22%;" class='text-right'>
-          <select name='tax[]'  id='tax${rowCount}' class='form-control border-0 bg-transparent text-white text-right border-0 tax' onchange="toggleDateInput()">
+          <select name='tax[]'  id='tax${rowCount}' class='form-control border-0 bg-transparent text-white text-right border-0 tax' onselect="toggleDateInput()">
             <optgroup class="text-center text-black" label="GST">
                             <option class="text-black" value="0">0% GST(0%)</option>
                             <option class="text-black" value="3">3.0% GST(3%)</option>
@@ -2782,7 +2769,8 @@
         oxy_igst = data2
         document.getElementById(`hsn${id}`).value = hsn
         document.getElementById(`rate${id}`).value = data
-        toggleDateInput(id, oxy_gst, oxy_igst)
+
+        toggleDateInput(id, oxy_igst, oxy_gst);
 
 
         var rate = parseFloat(data);
@@ -2885,13 +2873,18 @@
 
 
   function toggleDateInput(rowIndex) {
+
     var checkbox = document.getElementById("srcofsupply");
     var vale = checkbox.value;
     // Find the index of the hyphen
     var index = vale.indexOf("-");
     // Remove the first letters before the hyphen
     var result = vale.substring(index + 1);
-    var c_state = companyState;
+    console.log(result);
+
+    var c_state = '{{company.state}}';
+    console.log(c_state);
+
     var gst = oxy_gst;
     var igst = oxy_igst;
 
@@ -2966,7 +2959,6 @@
             else {
               labelElement.text('');
               labelElement.css('display', 'none');
-
             }
           });
           break;
@@ -2978,16 +2970,32 @@
     }
   }
 
+
   for (var i = 1; i <= rowCount; i++) {
     // Generate table row
     // ...
 
     // Call toggleDateInput function for each row
     toggleDateInput(i);
+
   }
+  $(document).ready(function () {
+    $('#srcofsupply').on('change', function () {
+      //var x = $(this).val();
+      //console.log(x);
+      for (var i = 1; i <= rowCount; i++) {
+        // Generate table row
+        // ...
+
+        // Call toggleDateInput function for each row
+        toggleDateInput(i);
+      }
+    });
+  });
 
 
-  $('#srcofsupply').on('change', function () {
+  $(document).ready(function () {
+
     for (var i = 1; i <= rowCount; i++) {
       // Generate table row
       // ...
@@ -2996,6 +3004,9 @@
       toggleDateInput(i);
     }
   });
+
+
+
 
 
 
