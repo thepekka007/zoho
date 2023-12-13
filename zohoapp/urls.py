@@ -1156,8 +1156,27 @@ urlpatterns = [
     re_path(r'^static/(?P<path>.*)$', serve,{'document_root': settings.STATIC_ROOT}),
     
     
-    
-    
+
+
+
+    path('create_account2',views.create_account2,name='create_account2'),
+    path('entr_custmrA2',views.entr_custmrA2,name='entr_custmrA2'),
+      path('shareProjectToEmail/<int:pk>',views.shareProjectToEmail,name='shareProjectToEmail'),
+    path('edit_project/<int:project_id>',views.edit_project,name='edit_project'),
+        path('deletp/<int:id>',views.deletp,name='deletp'),
+          path('attach_project_file/<int:pk>',views.attach_project_file,name='attach_project_file'),
+  path('downloadProjectSampleImportFile',views.downloadProjectSampleImportFile,name='downloadProjectSampleImportFile'),
+    path('import_project',views.import_project,name='import_project'),
+     path('add_vendor2/',views.add_vendor2,name='add_vendor2'),
+     
+      path('projectcust',views.projectcust,name='projectcust'),
+        path('entr_custmrApro', views.entr_custmrApro, name='entr_custmrApro'),
+
+
+
+        path('expensevendor', views.expensevendor, name='expensevendor'),
+
+         path('entr_custmrA3',views.entr_custmrA3,name='entr_custmrA3'),
 ]
 urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
 urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

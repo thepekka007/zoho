@@ -3,7 +3,27 @@
 {% load static %}
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
 <style>
-  
+  .modal{
+      z-index: 9999;
+      overflow: scroll;
+    }
+    
+    @media (max-width: 768px) {
+        .flowchart {
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .flowchart-item {
+            width: 120px;
+        }
+        .flowchart-connector {
+            height: 50px;
+            width: 2px; 
+            margin-left: 0%; 
+            transform: translateX(-50%);
+        }
+    }
   #over:hover{
         background-color: rgba(110, 110, 110, 0.616);
         
@@ -93,47 +113,53 @@
       </a>
       <div class="dropdown-menu ">
         <a class="dropdown-item" href="">All</a>
-        <a class="dropdown-item" href="javascript:sortTable(0)">Project Name </a>
-        <a class="dropdown-item" href="javascript:sortTable(1)">Customer Name </a>
+        <a class="dropdown-item" href="javascript:sortTable(0)">Date </a>
+        <a class="dropdown-item" href="javascript:sortTable(3)">Project Name </a>
+   
       </div>
         </div>
         <div class="right">
-          
-          <a class="btn text-center px-3" href="" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false"
-          role="button"><i class="fa fa-filter mx-3"></i>
-          </a>
-          <div class="dropdown-menu" id="filterMenu">
-              <a class="dropdown-item" href="#" style="color:rgb(218, 164, 48) ;" data-value="All">All</a>
-              <a class="dropdown-item" href="#" style="color:rgb(218, 164, 48) ;" data-value="Billed">Billed</a>
-              <a class="dropdown-item" href="#" style="color:rgb(218, 164, 48) ;" data-value="Not Billed">Not Billed</a>
-          </div>
+        
+                <!-- <a class="btn text-center px-3" href="" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false"
+                role="button"><i class="fa fa-filter mx-3"></i>
+                </a> -->
+                <select class="btn text-center px-3" id="actionFilter"> 
+
+                    <option value="all">All</option>
+                    <option value="Billable">Billable</option>
+                    <option value="Non Billable">Non-Billable</option>
+                </select>
+            
+
+          <button  id="export" class="btn btn-outline-warning  px-3 py-2" onclick="export_excel2()">Export</button>
+          <a  style="color: white; height:35px;" id="importBtn" data-toggle="modal" data-target="#import_modal" class="btn btn-outline-warning text-warning mr-1 pt-2" >Import</a>
+
           <a class="btn btn-outline-primary" href="{% url 'proj' %}"><i class="fa fa-plus"></i>NEW</a>
         </div>
 
     </div>
-      <!-- <div class="row mt-5">
-        <div class="col-md-3">
-          <input type="text" id="vendorSearchInput" class="form-control bg-light text-dark" placeholder="Search Projects...">
-        </div>
-        
-        <div class="col-md-6 form-inline" style="margin-left: 56rem; margin-top: -2rem;">
-          <a class="btn text-center px-3 " data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false"
-                        role="button"><i class="fa fa-filter mx-3"></i>
-                        </a>
-                        <div class="dropdown-menu ">
-                            <a class="dropdown-item" href="" style="color:rgb(218, 164, 48) ;">All</a>
-                            <a class="dropdown-item" href="#" style="color:rgb(218, 164, 48) ;" id="sortCustomer">Customer</a>
-                            <a class="dropdown-item" href="#" style="color:rgb(218, 164, 48) ;" id="sortProject">Project</a>
 
-                        </div>&nbsp;&nbsp;&nbsp;
-                        <a style="font-family: Cambria, Cochin, Georgia, Times, 'Times New Roman', serif;" class="btn btn-warning mr-2" href="{% url 'proj' %}">
-                           New
-                        </a>
-        </div>
-      </div> -->
+      <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
       
-    
-        
+      <script>
+          $(document).ready(function () {
+              // Add change event listener to the filter dropdown
+              $('#actionFilter').change(function () {
+                  var selectedAction = $(this).val();
+      
+                  // Show all rows initially
+                  $('#mytable tbody tr').show();
+      
+                  // Hide rows that do not match the selected action
+                  if (selectedAction !== 'all') {
+                      $('#mytable tbody tr').filter(function () {
+                          return $(this).find('td:last-child').text() !== selectedAction;
+                      }).hide();
+                  }
+              });
+          });
+      </script>
+
               <table class="table text-white" id="mytable">
                 <thead>
                   <tr>
@@ -155,8 +181,8 @@
                     <td>{{v.c_name.Fname}}&nbsp;    {{v.c_name.Lname}}</td>
                     <td>{{v.name}}</td>
                     <td>{{v.billing}}</td>
-                    <td>{{v.rate}}<td>
-                    <td>{{v.status}}</td>
+                    <!-- <td>{{v.rate}}<td> -->
+                    <td>{{v.action}}</td>
                    
                     <!-- <td>
                       <a style="font-family: Cambria, Cochin, Georgia, Times, 'Times New Roman', serif;" class="toggleButton btn btn-warning mr-2" href="#" id="actselect" data-project-id="{{ v.id }}">{{ v.active|yesno:"Active,Inactive" }}</a>
@@ -168,7 +194,47 @@
                 </tbody>
               </table>
               
-            
+        
+<div class="modal fade" id="import_modal">
+    <div class="modal-dialog modal-xl">
+      <div class="modal-content" style="background: rgb(32, 35, 37);border-radius: 20px;">
+        <div class="modal-header " style="background: rgb(32, 35, 37);">
+          <h1 class="text-light">Import Project</h1>
+        </div>
+        <div class="modal-body" style="background: rgb(32, 35, 37);">
+          <div class="card p-3 m-3">        
+            <div class="row">
+              <div class="col-md-12 col-lg-12 col-sm-12">
+                <h5 class="text-danger">IMPORTANT:</h5>
+                <p class="text-light">File should have  sheet named 'Sheet1' and column name & order should be in the given format(Uppercase)</p><br>
+      
+                <p class="text-light">Billing method should be <br>
+                    Based on project hours<br>
+                    Fixed cost for project<br>
+
+                </p><br>
+                <p class="text-light">Action should be given in one of the following format <br>
+                    Billable  <br>
+                    Non Billable
+                </p><br>
+               
+
+              </div>
+            </div>
+          </div>
+          <a href="{% url 'downloadProjectSampleImportFile' %}" class="text-primary" style="font-size:medium;">Download Sample File here</a> <br>
+  
+          <form action="{% url 'import_project' %}" method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+            <h6 class="text-light">File</h6>
+            <input type="file" name="excel_file" class="form-control text-dark" style="width: 50%;"><br>
+            <button class="btn btn-outline-warning mt-3">IMPORT</button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+      
       
 
         
@@ -307,4 +373,19 @@
 });
 </script>
 
+<script type="text/javascript" src="https://unpkg.com/xlsx@0.15.1/dist/xlsx.full.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.16.9/xlsx.full.min.js"></script>
+
+<script>
+    function export_excel2()
+    {
+        const Table = document.getElementById("mytable");
+  const ws = XLSX.utils.table_to_sheet(Table);
+  ws['!cols'] = [{ wch: 15 },{ wch: 15 },{ wch: 15 },{ wch: 15 },{ wch: 15 },{ wch: 15 }];
+  ws['!rows'] = [{ hpt: 30 }];
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, "Sheet1");
+  XLSX.writeFile(wb, "project_list.xlsx"); 
+    }
+</script>
 {% endblock %}

@@ -791,7 +791,9 @@ class project1(models.Model):
     start=models.DateField(max_length=255,null=True,blank=True)
     end=models.DateField(max_length=255,null=True,blank=True)
     mode=models.CharField(max_length=200,default='Active')
-    
+    action=models.CharField(max_length=200,null=True,blank=True)
+    attachment= models.FileField(upload_to='attachment/', blank=True, null=True)
+    project_code = models.IntegerField(null=True,blank=True) 
     
 class task(models.Model):
     user=models.ForeignKey(User,on_delete=models.CASCADE,null=True,blank=True)
@@ -1055,6 +1057,7 @@ class ExpenseE(models.Model):
     cgst=models.IntegerField(blank=True,null=True)
     sgst=models.IntegerField(blank=True,null=True)
     reference_number=models.IntegerField(blank=True,null=True)
+    expense_number=models.IntegerField(blank=True,null=True)
     
     
 class AttachE(models.Model):

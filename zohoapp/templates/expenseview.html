@@ -335,8 +335,8 @@
                                 {%for expense in expenses%}
                                 <tr>
                                   <td>
-                                    <a class="text-white"  href="{% url 'expense_details' expense.id %}"><b>{{expense.expense_account}}</b> <span class="d-flex justify-content-end text-warning align-items-start" > {{expense.amount}}</span> <br>
-                                        <span class="d-flex  align-items-start text-warning"> {{expense.status}}</span> <span class="d-flex justify-content-end align-items-start"> {{expense.date}}</span>
+                                    <a class="text-white"  href="{% url 'expense_details' expense.id %}"><b>{{expense.date}}</b> <span class="d-flex justify-content-end text-warning align-items-start" > {{expense.amount}}</span> <br>
+                                        <span class="d-flex  align-items-start text-warning"> {{expense.expense_account}}</span> <span class="d-flex justify-content-end align-items-start"> {{expense.status}}</span>
                                     </a> 
                                 </td>
                                 </tr>
@@ -469,13 +469,15 @@
                     <div class="text-center" style="background-color: #8b3131;">
                         <h2 class="text-uppercase text-white pt-3">Expense Details</h2>
                         <span style="color: rgb(247, 243, 243);" class="pb-3">( {{expense.status}} ) </span>
+                        <span style="color: rgb(247, 243, 243);" class="pb-3">{{expense.date}} </span>
+                       
                     </div>
                     <div class="extra-info mt-5">
                         <div class="row">
                             <div class="col-6">
                                 <div class="p-1" style="width: 100%;height:2rem;border-radius: 15px;text-align: center;background-color: #8b3131;">
 
-                                <h4  style="color: rgb(236, 233, 233); border-bottom: 1px solid #ccc; padding-bottom: 10px;"><b>{{expense.expense_account}}</b></h4>
+                                <h4  style="color: rgb(236, 233, 233); border-bottom: 1px solid #ccc; padding-bottom: 10px;"><b>Company Details</b></h4>
                                 </div>
                                 <p class="address p-2" style="color: black;">
                                     {{company.company_name}}<br>
@@ -484,6 +486,7 @@
                                     {{company.pincode}}<br>
                                 </p>
                             </div>
+                            
                         </div>
                     </div>
                 
@@ -495,7 +498,7 @@
                                     Bill To
                                 </h4>
                             </div>
-                                <h6 class="text-capitalize mt-2" style="color: black;">{{expense.vendor.first_name}}</h6>
+                                <h6 class="text-capitalize mt-2" style="color: black;">&nbsp;&nbsp; {{expense.vendor_name}}</h6>
                                 <p class="address p-2">
                                     {{expense.vendor.vendor_email}}<br>
                                     {{expense.vendor.bcity}}<br>
@@ -512,13 +515,30 @@
 
                                 <h4 class="text-white" style="font-weight: 700; border-bottom: 1px solid #ccc; padding-bottom: 10px;">Deliver To</h4>
                             </div>
-                                <h6 class="text-capitalize mt-2" style="color: black;">{{expense.customer_name.customerName}}</h6>
+                                <h6 class="text-capitalize mt-2" style="color: black;">&nbsp;&nbsp;{{expense.customer_name.customerName}}</h6>
                                 <p class="address p-2">
                                     {{expense.customer_name.customerEmail}}<br>
                                     {{expense.customer_name.city}}<br>
                                     {{expense.customer_name.state}}<br>
                                     {{expense.customer_name.zipcode}}<br>
                                 </p>
+                                
+                            </div>
+                            
+                        </div>
+                    </section>
+                     <section class="store-user mt-1">
+                        <div class="row">
+                            <div class="col-5">
+                              
+                                <!-- <h6 class="text-capitalize mt-2" style="color: black;">&nbsp;&nbsp;</h6> -->
+                                <p class="address p-2">
+                                    <b>Account:</b> {{expense.expense_account}}<br>
+                                    <b>Date:</b> {{expense.date}}<br>
+                                    <b>Tax:</b> {{expense.tax}}<br>
+                                    <b>Amount:</b> {{expense.amount}}<br>
+                                </p>
+                               
                             </div>
                             
                         </div>
@@ -526,54 +546,103 @@
                 </div>
  <!-- ........................................... Template 2  ..........................................  -->
  <div id="whatToPrint2" class="print-only page tabcontent p-1 m-3 printTemplates" style="display: none; background-color: rgb(255, 221, 176)">
-    <div class="text-center " style="background-color:#8b3131;height: 6rem;border-radius: 25px;">
-        <h2 class="text-uppercase text-light pt-4" >Expense Details</h2>
-     <span style="color: rgb(223, 221, 217);">( {{expense.status}} ) </span>
+    <div id="template3" class="template3">
+        <div class="my-5 page" size="A4" style="background-color: rgb(255, 221, 176);">
+          <div class="p-5" id="selected-area3">
+            <div class="text-center" style="background-color: #8b3131;">
+                <h2 class="text-uppercase text-white pt-3">Expense Details</h2>
+                <span style="color: rgb(247, 243, 243);" class="pb-3">( {{expense.status}} ) </span>
+                <span style="color: rgb(247, 243, 243);" class="pb-3">{{expense.date}} </span>
+               
+            </div>
+            <section class="store-user mt-5">
+                <div class="col-12">
+                  <div class="row bb pb-3">
+                    <div class="col-7">
+                      <p>Company Details,</p>
+                      <p class="address ">    {{company.company_name}}<br>
+                      {{company.company_email}}<br>
+                      {{company.state}}<br>
+                      {{company.pincode}}<br>
+                      </p>
+  
+                    </div>
+                
+              </section>
+            <section class="store-user mt-5">
+              <div class="col-12">
+                <div class="row bb pb-3">
+                  <div class="col-7">
+                    <p>Bill To,</p>
+                    <h5>{{expense.vendor_name}}</h5>
+                    <p class="address "> {{expense.vendor.vendor_email}}<br>
+                        {{expense.vendor.bcity}}<br>
+                        {{expense.vendor.bstate}}<br>
+                    </p>
+
+                  </div>
+                  <div class="col-5">
+                    <p>Deliver To,  </p>
+                    <h5>{{expense.customer_name.customerName}}</h5>
+                    <p class="address col-9" style="margin-left: 0px;">
+                        {{expense.customer_name.customerEmail}} </p><br>
+                    <p class="address col-9"> {{expense.customer_name.city}}</p><br>
+                    <p class="address col-9">  {{expense.customer_name.state}}</p>
+                   
+                    <p>{{expense.customer_name.zipcode}}</p>
+                </p>
+
+                  </div>
+                </div>
+                <div class="row extra-info pt-3">
+                  <div class="col-7">
+                    <p>Date:{{expense.date}}
+                  
+                  </div>
+
+                </div>
+              </div>
+            </section>
+
+            <section class="product-area mt-4">
+              <table class=" table table-hover table-bordered " id="table1">
+                <thead>
+                  <tr>
+                    <!-- <td style="text-align: center; font-weight:bold; color:black ">Items</td> -->
+                    <!-- <td style="font-weight:bold; color:black">HSN</td> -->
+                    <!-- <td style="font-weight:bold; color:black">Quantity</td> -->
+                    <!-- <td style="font-weight:bold; color:black">Price</td> -->
+                    <td style="font-weight:bold; color:black">Expense Acoount</td>
+                    <td style="font-weight:bold; color:black">Tax </td>
+                    <td style="font-weight:bold; color:black">Amount</td>
+
+                  </tr>
+                </thead>
+                <tbody>
+
+                  
+                  <tr>
+                    <td style="color:black; text-align: center;"> {{expense.expense_account}}</td>
+                    <td style="color:black">{{expense.tax}}</td>
+                    <td style="color:black">{{expense.amount}}</td>
+        
+
+                  </tr>
+
+                </tbody>
+              </table><br><br>
+            </section>
+
+           
+            <!-- Cart BG -->
+            <img src="cart.jpg" class="img-fluid cart-bg" alt="">
+
+      
+          </div>
+        </div>
+      </div>
 
     </div>
-
-    <div class="extra-info mt-3">
-        <div class="row ps-3">
-            <div class="col-6">
-                <h3 class="text-uppercase" style="color: black; border-bottom: 1px solid #ccc; padding-bottom: 10px;"><b>{{expense.expense_account}}</b></h3>
-                <p class="address p-2" style="color: black;">
-                    {{company.company_name}}<br>
-                    {{company.company_email}}<br>
-                    {{company.state}}<br>
-                    {{company.pincode}}<br>
-                </p>
-            </div>
-        </div>
-    </div>
-
-    <section class="store-user mt-3">
-        <div class="row ps-3">
-            <div class="col-6">
-                <h4 style="font-weight: 700; border-bottom: 1px solid #ccc; padding-bottom: 10px;">Bill To</h4>
-                <h6 class="text-capitalize" style="color: black;">{{expense.vendor.first_name}}</h6>
-                <p class="address p-2">
-                    {{expense.vendor.vendor_email}}<br>
-                    {{expense.vendor.bcity}}<br>
-                    {{expense.vendor.bstate}}<br>
-                </p>
-            </div>
-        </div>
-    </section>
-
-    <section class="store-user mt-3">
-        <div class="row ps-3">
-            <div class="col-6">
-                <h4 style="font-weight: 700; border-bottom: 1px solid #ccc; padding-bottom: 10px;">Deliver To</h4>
-                <h6 class="text-capitalize" style="color: black;">{{expense.customer_name.customerName}}</h6>
-                <p class="address p-2">
-                    {{expense.customer_name.customerEmail}}<br>
-                    {{expense.customer_name.city}}<br>
-                    {{expense.customer_name.state}}<br>
-                    {{expense.customer_name.zipcode}}<br>
-                </p>
-            </div>
-        </div>
-    </section>
  </div>
  
  <!-- ....................................................... Template 3..................................... -->
@@ -995,7 +1064,7 @@
                 <div class="modal-dialog modal-xl">
                   <div class="modal-content" style="background: rgb(32, 35, 37);border-radius: 20px;">
                     <div class="modal-header" style="background: rgb(32, 35, 37);">
-                      <h5 class="m-3 text-uppercase" id="shareBillEmailLabel">Share Sales Order Via Email</h5>
+                      <h5 class="m-3 text-uppercase" id="shareBillEmailLabel">Share Expense Details</h5>
                       <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
                           aria-hidden="true">&times;</span></button>
                     </div>
@@ -1696,18 +1765,20 @@ function updateDetails(data) {
 </script>
 <script>
     function printSection(sectionId) {
-        var printContents = document.getElementById(sectionId).innerHTML;
-        printContents.innerHTML='';
+    var printContents = document.getElementById(sectionId).innerHTML;
 
+    // Set the text color to black
+    printContents = '<div style="color: black;">' + printContents + '</div>';
+    
+    var originalContents = document.body.innerHTML;
 
-        var originalContents = document.body.innerHTML;
-    
-        document.body.innerHTML = printContents;
-    
-        window.print();
-    
-        document.body.innerHTML = originalContents;
-    }
+    document.body.innerHTML = printContents;
+
+    window.print();
+
+    document.body.innerHTML = originalContents;
+}
+
     </script>
 
 

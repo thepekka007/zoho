@@ -246,9 +246,9 @@
             <thead>
                 <tr>
                             <th>DATE</th>
-                            <th>EXPENCE NUMBER</th>
-                            <th>EXPENCE ACCOUNT</th>
-                            <th>EXPENCE TYPE</th>
+                            <th>EXPENSE NUMBER</th>
+                            <th>EXPENSE ACCOUNT</th>
+                            <th>EXPENSE TYPE</th>
                             <th>PAYMENT METHOD</th>
                             <th>AMOUNT</th>
                             <th>STATUS</th>
@@ -258,7 +258,7 @@
                 {% for expense in expenses %}
                 <tr style="cursor: pointer;">
                     <td><a href="{% url 'expense_details' expense.id %}" style="color: white;">{{ expense.date }}</a></td>
-                    <td><a href="{% url 'expense_details' expense.id %}" style="color: white;">{{ expense.vendor_name }}</a></td>
+                    <td><a href="{% url 'expense_details' expense.id %}" style="color: white;">{{ expense.expense_number }}</a></td>
                     <td><a href="{% url 'expense_details' expense.id %}" style="color: white;">{{ expense.expense_account }}</a></td>
                     <td><a href="{% url 'expense_details' expense.id %}" style="color: white;">{{ expense.expense_type }}</a></td>
                     <td><a href="{% url 'expense_details' expense.id %}" style="color: white;">{{ expense.paid }}</a></td>
