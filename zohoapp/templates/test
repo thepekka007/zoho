@@ -7,6 +7,7 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
 <script src="https://unpkg.com/@popperjs/core@2/dist/umd/popper.js"></script>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.3.0/font/bootstrap-icons.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" integrity="sha384-B4gt1jrGC7Jh4AgTPSdUtOBvfO8sh+WyCu1O3u4UBqBpVlQ9xIltcXn2uPkPQska" crossorigin="anonymous">
 
 <!-- <script src="https://cdn.jsdelivr.net/npm/popper.js@1.12.9/dist/umd/popper.min.js"
     integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q"
@@ -278,32 +279,106 @@
                 <div>
                     <div class="row p-1">
                         <div class="col-md-10">
-                            <h6 class="mb-1 text-uppercase text-left">All Expenses</h6>
+                            <h6 class="mb-1 text-uppercase text-left">All Projects</h6>
                         </div>
                     </div>
                     <div class="row">
                         <div class="col-md-2 mt-2 mx-1"></div>
-                        <div class="col-md-2 mt-2 mx-1">
+                        <!-- <div class="col-md-2 mt-2 mx-1">
                             <a id="sort-button" class="btn text-center btn-outline-warning text-warning fa fa-sort px-3" data-bs-toggle="dropdown" role="button"></a>&nbsp;&nbsp;&nbsp;
                             <div class="dropdown-menu " >
-                                <a class="dropdown-item" href="{% url 'expense_details' expense.id %}">All</a>
-                                <a class="dropdown-item" href="{% url 'exp_view_sort_by_account' expense.id %}">Expense A/C</a>
-                                <a class="dropdown-item" href="{% url 'exp_view_sort_by_amount' expense.id %}">Amount</a>
+                                <a class="dropdown-item" href="">All</a>
+                                <a class="dropdown-item" href="javascript:sortTable(1)">Date </a>
+                                <a class="dropdown-item" href="javascript:sortTable(3)">Project Name </a>
+                           
                             </div>
-                        </div>
-                        <div class="col-md-2  mt-2 mx-1">
-                            <a class="btn text-center btn-outline-warning text-warning  px-3 fa fa-filter" data-bs-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
-                            </a>
-                            <div class="dropdown-menu " >
-                                <a class="dropdown-item" href="{% url 'expense_details' expense.id %}">All</a>
-                                <a class="dropdown-item" href="{% url 'filter_expense_view_draft' expense.id %}">Draft</a>
-                                <a class="dropdown-item" href="{% url 'filter_expense_view_save' expense.id %}">Save</a>
-                            </div>
-                         <!-- </div> -->
+                        </div> -->
+                        <!-- Add this script after your HTML code -->
+<script>
+    function sortTable(columnIndex) {
+        var table, rows, switching, i, x, y, shouldSwitch;
+        table = document.querySelector('.table.customer-table');
+        switching = true;
 
+        while (switching) {
+            switching = false;
+            rows = table.rows;
+
+            for (i = 1; i < rows.length - 1; i++) {
+                shouldSwitch = false;
+                x = rows[i].getElementsByTagName('td')[0].innerText.toLowerCase();
+                y = rows[i + 1].getElementsByTagName('td')[0].innerText.toLowerCase();
+
+                if (x > y) {
+                    shouldSwitch = true;
+                    break;
+                }
+            }
+
+            if (shouldSwitch) {
+                rows[i].parentNode.insertBefore(rows[i + 1], rows[i]);
+                switching = true;
+            }
+        }
+    }
+</script>
+
+                        <script type="text/javascript" src="https://unpkg.com/xlsx@0.15.1/dist/xlsx.full.min.js"></script>
+                        <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.16.9/xlsx.full.min.js"></script>
+                        <script>
+                            function filterProjects() {
+                                var actionFilter = document.getElementById('actionFilter');
+                                var selectedAction = actionFilter.options[actionFilter.selectedIndex].value;
+                        
+                                var projects = document.querySelectorAll('.table.customer-table tbody tr');
+                        
+                                projects.forEach(function (project) {
+                                    var action = project.querySelector('.text-white').getAttribute('data-action');
+                        
+                                    if (selectedAction === 'all' || action === selectedAction) {
+                                        project.style.display = 'table-row';
+                                    } else {
+                                        project.style.display = 'none';
+                                    }
+                                });
+                            }
+                        </script>
+                        <div class="col-md-3   ">
+                            <div>
+                                <label for="actionFilter"></label>
+                                <select id="actionFilter" onchange="filterProjects()" style="background-color: #213b52; color: #ccc; width: 100%;">
+                                    <option value="all"><i class="fas fa-filter"></i> All</option>
+                                    <option value="Billable"><i class="fas fa-dollar-sign"></i> Billable</option>
+                                    <option value="Non Billable"><i class="fas fa-times"></i> Non-Billable</option>
+                                </select>
+                            </div>
+                                <br>
+                          
+                   
+                         <!-- </div> -->
+                         <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+      
+                         <script>
+                             $(document).ready(function () {
+                                 // Add change event listener to the filter dropdown
+                                 $('#actionFilter').change(function () {
+                                     var selectedAction = $(this).val();
+                         
+                                     // Show all rows initially
+                                     $('#mytable tbody tr').show();
+                         
+                                     // Hide rows that do not match the selected action
+                                     if (selectedAction !== 'all') {
+                                         $('#mytable tbody tr').filter(function () {
+                                             return $(this).find('td:last-child').text() !== selectedAction;
+                                         }).hide();
+                                     }
+                                 });
+                             });
+                         </script>
                         </div>
-                        <div class="col-md-2 mr-4 mt-2">
-                            <a href="{% url 'save_expense' %}" class="btn btn-outline-warning text-warning fa fa-plus  pt-2"
+                        <div class="col-md-2 mr-2 mt-4">
+                            <a href="{% url 'proj' %}" class="btn btn-outline-warning text-warning fa fa-plus  pt-2"
                                 role="button">
                             </a>
                         </div>
@@ -332,11 +407,11 @@
                         <div id="customer-container"  class="row mt-2 bills">
                             <table class="table customer-table" style="border:1px solid black;">
                               <tbody>
-                                {%for expense in expenses%}
+                                {%for i in proje %}
                                 <tr>
                                   <td>
-                                    <a class="text-white"  href="{% url 'expense_details' expense.id %}"><b>{{expense.date}}</b> <span class="d-flex justify-content-end text-warning align-items-start" > {{expense.amount}}</span> <br>
-                                        <span class="d-flex  align-items-start text-warning"> {{expense.expense_account}}</span> <span class="d-flex justify-content-end align-items-start"> {{expense.status}}</span>
+                                    <a class="text-white" data-action="{{ i.action }}"  href="{% url 'overview' i.id %}"><b>{{i.start}}</b> <span class="d-flex justify-content-end text-warning align-items-start" > {{i.name}}</span> <br>
+                                        <span class="d-flex  align-items-start text-warning"> {{i.end}}</span> <span class="d-flex justify-content-end align-items-start"> {{i.action}}</span>
                                     </a> 
                                 </td>
                                 </tr>
@@ -354,12 +429,14 @@
         <div  style="border-bottom: 0.5px solid; color: rgb(90, 89, 94);">
             <div >
                 <div >
-                    <h3 class="mb-0 mb-3 text-light" id="prof_name">{{expense.expense_account}}</h3>
+                    <h3 class="mb-0 mb-3 text-light" id="prof_name">{{project.name}}</h3>
                 </div>
              <div class="row">
                 <div class="col-md-4 col-lg-4 col-sm-6">
+                    {% if project.action == 'Billable' %}
                     <a class=" mx-2 btn  text-dark px-2 py-2" style="background-color: rgb(238, 236, 235);" onclick="show_template()" role="button"><i
                             class="fa fa-file-word "></i> Template</a>
+                        {% endif %}
                     <a class="btn  text-white px-2 py-2" style="background-color: chocolate;" onclick="show_overview()" role="button"><i class="fa fa-eye"></i>
                         Overview</a>
                 </div>
@@ -367,19 +444,8 @@
                 <div class="d-flex" style="float: right; margin-right: 25px;">
                     
                     <div class="mx-1">
-                        <!-- <div class="dropdown" title="share">
-                            <a href=" " class="btn btn-outline-warning py-2 fas fa-share-alt dropdown-toggle  text-warning"  
-                                data-bs-toggle="dropdown" id="attachmentDropdown" aria-haspopup="true" aria-expanded="false"> 
-                            </a>
-
-                            <div class="dropdown-menu" aria-labelledby="attachmentDropdown">
-                                <a class="dropdown-item" style="cursor: pointer;text-align: center;" data-toggle="modal"
-                                 data-target="" href=" " ><center>{% post_to_whatsapp object_or_url "<b>WhatsApp</b>" %}</center></a>
-                                <a class="dropdown-item" style="cursor: pointer;" data-toggle="modal"
-                                data-target=""><center>{% send_email object.title "New: {{object.title}}. Check it out!" object_or_url "<b>Email</b>" %}</center></a>
-                                        
-                            </div>
-                        </div> -->
+                        <a href="{% url 'edit_project' project.id %}" class=" fa fa-pencil btn btn-outline-warning text-warning  py-2"
+                        data-toggle="tooltip" title="EDIT"> </a>
                         <a class="text-dark" data-toggle="dropdown">
                             <button class="btn btn-outline-warning py-2" title="Share"><i class="fas fa-share"></i></button>
                           </a>
@@ -389,45 +455,18 @@
                           </div>
                     </div>
                     <div class="m-0">
-                        <!-- <a href="" class=" far fa-comment-alt btn btn-outline-warning text-warning px-2 py-2" title="COMMENTS"
-                            data-toggle="modal" data-target="#cmnts"> </a> -->
-                            <div class="dropdown" title="comments" >
-                                <a href=" " class="btn  btn-outline-warning py-2  fas fa-comment-dots dropdown-toggle text-warning "  
-                                    data-bs-toggle="dropdown" id="attachmentDropdown" aria-haspopup="true" aria-expanded="false"> 
-                                </a>
-    
-                                <div class="dropdown-menu" aria-labelledby="attachmentDropdown">
-                                    <a class="dropdown-item" style="cursor: pointer;" data-toggle="modal"
-                                     data-target="#cmnts"><i class="fa-solid fa fa-plus"></i>Add</a>
-                                    <a class="dropdown-item" style="cursor: pointer;" data-toggle="modal"
-                                    data-target="#cmt_list"><i class="fas fa-list"></i>&nbsp;View List</a>
-                                            
-                                </div>
-                            </div>
                     </div>
-
-                    <div class="mx-1" >
-                        {% if expense.status == 'draft' %}
-                        <a href="{% url 'expense_status_edit' expense.id %}" class="btn btn-outline-warning py-2  text-warning 
-                         " title="save this draft" ><i class="fas fa-save"></i></a>
-                        {% endif %}
+                    <div class="mx-1">
+                        <a href="{% url 'deletp' project.id %}" class="delete fa fa-trash btn btn-outline-warning text-warning px-2 py-2"
+                         data-toggle="tooltip" title="DELETE" onclick="return confirm('Do you want to Delete this project?');"> </a>
                     </div>
 
                     <div class="mx-1">
-                        
 
-                        
-                        <a href="{% url 'edit_expensee' expense.id %}" class=" fa fa-pencil btn btn-outline-warning text-warning  py-2"
-                              data-toggle="tooltip" title="EDIT"> </a>
-                        
-                        <a href="{% url 'delet' expense.id %} " class="delete fa fa-trash btn btn-outline-warning text-warning px-2 py-2"
-                         data-toggle="tooltip" title="DELETE" onclick="return confirm('Do you want to Delete this creditnote?');"> </a>
-                    </div>
-
-                    <div class="mx-1">
-                   
                         <a href=" " class="fa fa-file-pdf btn btn-outline-warning text-warning toPDF  py-2" id="toPDF"
                         data-toggle="tooltip" title="PDF"></a>
+                        
+             
 
                         <a href="" class=" fa fa-print btn btn-outline-warning text-warning  py-2"   data-toggle="tooltip"
                             title="PRINT" id="templatePrintButton"  onclick="printSection('whatToPrint')"> </a>     
@@ -441,8 +480,8 @@
                             <div class="dropdown-menu" aria-labelledby="attachmentDropdown">
                                 <a class="dropdown-item" style="cursor: pointer;" data-toggle="modal"
                                     data-target="#files"><i class="fa fa-paperclip"></i> Attach File</a>
-                                {% if expense.attachment != "" %}
-                                <a class="dropdown-item" href="{{expense.attachment.url}}"><i
+                                {% if project.attachment != "" %}
+                                <a class="dropdown-item" href="{{project.attachment.url}}"><i
                                         class="fa fa-download"></i> Download File</a>
                                 {% endif %}
                             </div>
@@ -460,16 +499,19 @@
 
             <div id="template_div" style="display: none;">
                 <div id="templateToggle" class="templateToggleSegment mt-3 mb-0 w-100 d-flex justify-content-center">
-                    <button id="toggleTemplate1" onclick="toggleTemplate('whatToPrint','toggleTemplate1')" class="btn btn-outline-warning btn-sm m-2 active templateToggleButtons">1</button>
+                    <button id="toggleTemplate1" onclick="toggleTemplate('whatToPrint1','toggleTemplate1')" class="btn btn-outline-warning btn-sm m-2 active templateToggleButtons">1</button>
                     <button id="toggleTemplate2" onclick="toggleTemplate('whatToPrint2','toggleTemplate2')" class="btn btn-outline-warning btn-sm m-2 templateToggleButtons">2</button>
                     <button id="toggleTemplate3" onclick="toggleTemplate('whatToPrint3','toggleTemplate3')" class="btn btn-outline-warning btn-sm m-2 templateToggleButtons">3</button>
                 </div>
   <!-- ...........................................  Template 1 ............................... -->
-                <div id="whatToPrint" class="print-only page tabcontent m-3 printTemplates" style="display: block; background-color: rgb(255, 221, 176)">
-                    <div class="text-center" style="background-color: #8b3131;">
-                        <h2 class="text-uppercase text-white pt-3">Expense Details</h2>
-                        <span style="color: rgb(247, 243, 243);" class="pb-3">( {{expense.status}} ) </span>
-                        <span style="color: rgb(247, 243, 243);" class="pb-3">{{expense.date}} </span>
+                
+  
+  
+  <div id="whatToPrint1" class="print-only page tabcontent m-3 printTemplates " style="display: block; background-color: rgb(255, 221, 176)">
+                    <div class="text-center container-to-print" style="background-color: #8b3131;">
+                        <h2 class="text-uppercase text-white pt-3">Project Details</h2>
+                        <span style="color: rgb(247, 243, 243);" class="pb-3">( {{project.action}} ) </span>
+                        <span style="color: rgb(247, 243, 243);" class="pb-3"></span>
                        
                     </div>
                     <div class="extra-info mt-5">
@@ -495,14 +537,16 @@
                             <div class="col-6">
                                 <div class="p-1" style="width: 100%;height:2rem;border-radius: 15px;text-align: center;background-color: #8b3131;">
                                 <h4 class="text-white" style="font-weight: 700; border-bottom: 1px solid #ccc; padding-bottom: 10px;">
-                                    Bill To
+                                    Project  Details
                                 </h4>
                             </div>
-                                <h6 class="text-capitalize mt-2" style="color: black;">&nbsp;&nbsp; {{expense.vendor_name}}</h6>
+                                <h6 class="text-capitalize mt-2" style="color: black;">&nbsp;&nbsp; {{project.name}}</h6>
                                 <p class="address p-2">
-                                    {{expense.vendor.vendor_email}}<br>
-                                    {{expense.vendor.bcity}}<br>
-                                    {{expense.vendor.bstate}}<br>
+                                    start: {{project.start}}<br>
+                                    Due:    &nbsp;{{project.end}}<br>
+                                    {{project.billing}}<br>
+                                    Amount:    &nbsp;{{project.rateperhour}}<br>
+                                    Note:    &nbsp;{{project.desc}}<br>
                                 </p>
                             </div>
                         </div>
@@ -513,36 +557,21 @@
                             <div class="col-6">
                                 <div class="p-1" style="width: 100%;height:2rem;border-radius: 15px;text-align: center;background-color: #8b3131;">
 
-                                <h4 class="text-white" style="font-weight: 700; border-bottom: 1px solid #ccc; padding-bottom: 10px;">Deliver To</h4>
+                                <h4 class="text-white" style="font-weight: 700; border-bottom: 1px solid #ccc; padding-bottom: 10px;">Customer Details</h4>
                             </div>
-                                <h6 class="text-capitalize mt-2" style="color: black;">&nbsp;&nbsp;{{expense.customer_name.customerName}}</h6>
+                                <h6 class="text-capitalize mt-2" style="color: black;">&nbsp;&nbsp;{{project.c_name.customerName}}</h6>
                                 <p class="address p-2">
-                                    {{expense.customer_name.customerEmail}}<br>
-                                    {{expense.customer_name.city}}<br>
-                                    {{expense.customer_name.state}}<br>
-                                    {{expense.customer_name.zipcode}}<br>
+                                    {{project.c_name.customerEmail}}<br>
+                                    {{project.c_name.city}}<br>
+                                    {{project.c_name.state}}<br>
+                                    {{project.c_name.zipcode}}<br>
                                 </p>
                                 
                             </div>
                             
                         </div>
                     </section>
-                     <section class="store-user mt-1">
-                        <div class="row">
-                            <div class="col-5">
-                              
-                                <!-- <h6 class="text-capitalize mt-2" style="color: black;">&nbsp;&nbsp;</h6> -->
-                                <p class="address p-2">
-                                    <b>Account:</b> {{expense.expense_account}}<br>
-                                    <b>Date:</b> {{expense.date}}<br>
-                                    <b>Tax:</b> {{expense.tax}}<br>
-                                    <b>Amount:</b> {{expense.amount}}<br>
-                                </p>
-                               
-                            </div>
-                            
-                        </div>
-                    </section>
+               
                 </div>
  <!-- ........................................... Template 2  ..........................................  -->
  <div id="whatToPrint2" class="print-only page tabcontent p-1 m-3 printTemplates" style="display: none; background-color: rgb(255, 221, 176)">
@@ -550,9 +579,9 @@
         <div class="my-5 page" size="A4" style="background-color: rgb(255, 221, 176);">
           <div class="p-5" id="selected-area3">
             <div class="text-center" style="background-color: #8b3131;">
-                <h2 class="text-uppercase text-white pt-3">Expense Details</h2>
-                <span style="color: rgb(247, 243, 243);" class="pb-3">( {{expense.status}} ) </span>
-                <span style="color: rgb(247, 243, 243);" class="pb-3">{{expense.date}} </span>
+                <h2 class="text-uppercase text-white pt-3">Project Details</h2>
+                <span style="color: rgb(247, 243, 243);" class="pb-3">( {{project.action}} ) </span>
+                <!-- <span style="color: rgb(247, 243, 243);" class="pb-3">{{expense.date}} </span> -->
                
             </div>
             <section class="store-user mt-5">
@@ -573,34 +602,34 @@
               <div class="col-12">
                 <div class="row bb pb-3">
                   <div class="col-7">
-                    <p>Bill To,</p>
-                    <h5>{{expense.vendor_name}}</h5>
-                    <p class="address "> {{expense.vendor.vendor_email}}<br>
-                        {{expense.vendor.bcity}}<br>
-                        {{expense.vendor.bstate}}<br>
-                    </p>
+                    <p>Project Details,</p>
+                    <h5>{{project.name}}</h5>
+                    <p class="address "> {{project.start}}<br>
+                        {{project.end}}<br>
+                        {{project.desc}}<br>
+                    </p>    
 
                   </div>
                   <div class="col-5">
-                    <p>Deliver To,  </p>
-                    <h5>{{expense.customer_name.customerName}}</h5>
+                    <p>Customer Details,  </p>
+                    <h5>{{project.c_name.customerName}}</h5>
                     <p class="address col-9" style="margin-left: 0px;">
-                        {{expense.customer_name.customerEmail}} </p><br>
-                    <p class="address col-9"> {{expense.customer_name.city}}</p><br>
-                    <p class="address col-9">  {{expense.customer_name.state}}</p>
+                        {{project.c_name.customerEmail}} </p><br>
+                    <p class="address col-9"> {{project.c_name.city}}</p><br>
+                    <p class="address col-9">  {{project.c_name.state}}</p>
                    
-                    <p>{{expense.customer_name.zipcode}}</p>
+                    <p>{{project.c_name.zipcode}}</p>
                 </p>
 
                   </div>
                 </div>
-                <div class="row extra-info pt-3">
+                <!-- <div class="row extra-info pt-3">
                   <div class="col-7">
-                    <p>Date:{{expense.date}}
+                    <p>tartDate:{{expense.date}}
                   
                   </div>
 
-                </div>
+                </div> -->
               </div>
             </section>
 
@@ -612,9 +641,9 @@
                     <!-- <td style="font-weight:bold; color:black">HSN</td> -->
                     <!-- <td style="font-weight:bold; color:black">Quantity</td> -->
                     <!-- <td style="font-weight:bold; color:black">Price</td> -->
-                    <td style="font-weight:bold; color:black">Expense Acoount</td>
-                    <td style="font-weight:bold; color:black">Tax </td>
-                    <td style="font-weight:bold; color:black">Amount</td>
+                    <td style="font-weight:bold; color:black">Billing Methhod</td>
+                    <td style="font-weight:bold; color:black">Amount </td>
+                    <td style="font-weight:bold; color:black">Action</td>
 
                   </tr>
                 </thead>
@@ -622,9 +651,9 @@
 
                   
                   <tr>
-                    <td style="color:black; text-align: center;"> {{expense.expense_account}}</td>
-                    <td style="color:black">{{expense.tax}}</td>
-                    <td style="color:black">{{expense.amount}}</td>
+                    <td style="color:black; text-align: center;"> {{project.billing}}</td>
+                    <td style="color:black">{{project.rateperhour}}</td>
+                    <td style="color:black">{{project.action}}</td>
         
 
                   </tr>
@@ -648,7 +677,7 @@
  <!-- ....................................................... Template 3..................................... -->
  <div id="whatToPrint3" class="print-only page tabcontent  printTemplates" style="display:none; background-color: rgb(255, 221, 176)">
     <div class="text-center" style="background-color:#8b3131;">
-        <h2 class="text-uppercase text-light">Expense Detail </h2>
+        <h2 class="text-uppercase text-light">project Details </h2>
         <p class="address p-2" style="color: rgb(204, 203, 203);">
         {{company.company_name}}<br>
         {{company.company_email}}&nbsp; ,{{company.state}}<br>
@@ -662,10 +691,10 @@
         <div class="row ps-3">
             <div class="col-6">
                 <h6 style="color: black; border-bottom: 1px solid #ccc; padding-bottom: 10px;">
-                    <b>Expense Account : </b>{{expense.expense_account}} <br>
-                    <b>Expense Type &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;: </b>{{expense.expense_type}} <br>
-                    <b>Amount &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; : </b>{{expense.amount}} <br>
+                    <b>Project Name : </b>{{project.name}} <br>
+                    <b>Start Date &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;: </b>{{project.start}} <br>
+                    <b>Due Date &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                        &nbsp;&nbsp;&nbsp;: </b>{{project.end}} <br>
                 </h6>
                  
             </div>
@@ -675,12 +704,12 @@
     <section class="store-user mt-3">
         <div class="row ps-3">
             <div class="col-6">
-                <h4 style="font-weight: 700; border-bottom: 1px solid #ccc; padding-bottom: 10px;color: #8b3131;">Bill To</h4>
-                <h6 class="text-capitalize" style="color: black;">{{expense.vendor.first_name}}</h6>
+                <h4 style="font-weight: 700; border-bottom: 1px solid #ccc; padding-bottom: 10px;color: #8b3131;">Project details</h4>
+                <h6 class="text-capitalize" style="color: black;">{{project.name}}</h6>
                 <p class="address p-2">
-                    {{expense.vendor.vendor_email}}<br>
-                    {{expense.vendor.bcity}}<br>
-                    {{expense.vendor.bstate}}<br>
+                    {{project.billing}}<br>
+                    {{project.rateperhour}}<br>
+                    {{project.desc}}<br>
                 </p>
             </div>
         </div>
@@ -689,13 +718,13 @@
     <section class="store-user mt-3">
         <div class="row ps-3">
             <div class="col-6">
-                <h4 style="font-weight: 700; border-bottom: 1px solid #ccc; padding-bottom: 10px;color: #8b3131;">Deliver To</h4>
-                <h6 class="text-capitalize" style="color: black;">{{expense.customer_name.customerName}}</h6>
+                <h4 style="font-weight: 700; border-bottom: 1px solid #ccc; padding-bottom: 10px;color: #8b3131;">Customer Details,</h4>
+                <h6 class="text-capitalize" style="color: black;">{{project.c_name.customerName}}</h6>
                 <p class="address p-2">
-                    {{expense.customer_name.customerEmail}}<br>
-                    {{expense.customer_name.city}}<br>
-                    {{expense.customer_name.state}}<br>
-                    {{expense.customer_name.zipcode}}<br>
+                    {{project.c_name.customerEmail}}<br>
+                    {{project.c_name.city}}<br>
+                    {{project.c_name.state}}<br>
+                    {{project.c_name.zipcode}}<br>
                 </p>
             </div>
         </div>
@@ -713,48 +742,59 @@
             <div id="Overview" class="tabcontent mt-0 border-0 p-4 mx-0" style="overflow-x: hidden; border-top: #ccc double 2px; background-color: burlywood ;border-radius: 5px;display: block;">
                 <!-- <h3 class="mb-0 mx-5 text-muted" style="color: rgb(161, 195, 226);">{{ company.company_name }}</h3> -->
                 <center>
-                    <h2 class="mb-4" style=" color: #434141;">Expense</h2>
+                    <h2 class="mb-4" style=" color: #434141;">Project Details</h2>
                 </center>
             
                 <div class="row g-0">
                     <div class="col-md-7">
                         <div class="p-5" >
-                            <h4 class="text-black" style="color: brown;">Expense Details</h4>
+                            <h4 class="text-black" style="color: brown;">{{project.name}}</h4>
+                            <h6 class="text-black" style="color: brown;">{{project.action}}</h6>
                             <div class="d-flex justify-content-between align-items-center mb-5">
                                 <b>
                                     <span style=" color: #434141;">
                                      
-                                    </span>
+                                    </span> 
                                 </b>
                             </div>
+                            <!-- <div class="row mb-4 d-flex justify-content-between align-items-center">
+                                <div class="col-md-4 mt-3">
+                                    <h6 class="mb-0 text-black">Project code :</h6>
+                                </div>
+                                <div class="col-md-8 mt-3">
+                                    <p class="mb-0 text-capitalize" style="font-size: 18px; color: #434141;">{{project.desc}}</p>
+                                </div>
+
+                            </div> -->
                             <hr class="my-4">
 
                             
                             <div class="row mb-4 d-flex justify-content-between align-items-center">
                                 <div class="col-md-4 mt-3">
-                                    <h6 class="mb-0 text-black"> Date:</h6>
+                                    <h6 class="mb-0 text-black">Start Date:</h6>
                                 </div>
-                                <div class="col-md-8 mt-3">
-                                    <p class="mb-0" style="font-size: 18px; color: #434141;">{{ expense.date |date:'d-m-Y' }}</p>
+                                <div class="col-md-8 mt-3"> 
+                                    <p class="mb-0" style="font-size: 18px; color: #434141;">{{ project.start |date:'d-m-Y' }}</p>
+                                </div>
+                            </div>
+                            <div class="row mb-4 d-flex justify-content-between align-items-center">
+                                <div class="col-md-4 mt-3">
+                                    <h6 class="mb-0 text-black">Due Date:</h6>
+                                </div>
+                                <div class="col-md-8 mt-3"> 
+                                    <p class="mb-0" style="font-size: 18px; color: #434141;">{{ project.end |date:'d-m-Y' }}</p>
                                 </div>
                             </div>
             
                             <div class="row mb-4 d-flex justify-content-between align-items-center">
                                 <div class="col-md-4 mt-3">
-                                    <h6 class="mb-0 text-black">Destination of Supply:</h6>
+                                    <h6 class="mb-0 text-black">Billing Method:</h6>
                                 </div>
                                 <div class="col-md-8 mt-3">
-                                    <p class="mb-0" style="font-size: 18px; color: #434141;">{{expense.destination_of_supply}}</p>
+                                    <p class="mb-0" style="font-size: 18px; color: #434141;">{{project.billing}}</p>
                                 </div>
                             </div>
-                            <div class="row mb-4 d-flex justify-content-between align-items-center">
-                                <div class="col-md-4 mt-3">
-                                    <h6 class="mb-0 text-black">Tax:</h6>
-                                </div>
-                                <div class="col-md-8 mt-3">
-                                    <p class="mb-0" style="font-size: 18px; color: #434141;"> {{expense.tax}} %</p>
-                                </div>
-                            </div>
+                           
 
                            
                             <div class="row mb-4 d-flex justify-content-between align-items-center">
@@ -762,21 +802,21 @@
                                     <h6 class="mb-0 text-black">Notes :</h6>
                                 </div>
                                 <div class="col-md-8 mt-3">
-                                    <p class="mb-0 text-capitalize" style="font-size: 18px; color: #434141;">{{expense.notes}}</p>
+                                    <p class="mb-0 text-capitalize" style="font-size: 18px; color: #434141;">{{project.desc}}</p>
                                 </div>
 
                             </div>
                             
                             <div class="row mb-4 d-flex justify-content-between align-items-center">
                               <div class="col-md-4 mt-3">
-                                  <h6 class="mb-0 text-black">Expense Account</h6>
+                                  <h6 class="mb-0 text-black">Amount</h6>
                               </div>
                               <div class="col-md-8 mt-3">
-                                  <p class="mb-0 text-capitalize" style="font-size: 18px; color: #434141;">{{expense.expense_account}}</p>
+                                  <p class="mb-0 text-capitalize" style="font-size: 18px; color: #434141;">{{project.rateperhour}}</p>
                               </div>
 
                           </div>
-                          <div class="row mb-4 d-flex justify-content-between align-items-center">
+                          <!-- <div class="row mb-4 d-flex justify-content-between align-items-center">
                             <div class="col-md-4 mt-3">
                                 <h6 class="mb-0 text-black">Paid Through</h6>
                             </div>
@@ -793,7 +833,7 @@
                               <p class="mb-0 text-capitalize" style="font-size: 18px; color: #434141;">{{ expense.expense_type }}</p>
                           </div>
 
-                        </div>
+                        </div> -->
                         <hr>
 
                             <div class="row mb-4 d-flex justify-content-between align-items-center">
@@ -801,7 +841,7 @@
                                     <h6 class="mb-0 text-black">Customer Name:</h6>
                                 </div>
                                 <div class="col-md-8 mt-3">
-                                    <p class="mb-0 " style="font-size: 18px; color: #434141;">{{expense.customer_name.customerName}}</p>
+                                    <p class="mb-0 " style="font-size: 18px; color: #434141;">{{project.c_name.Fname}}&nbsp;{{project.c_name.Lname}}</p>
                                 </div>
                             </div>
                             <div class="row mb-4 d-flex justify-content-between align-items-center">
@@ -809,9 +849,9 @@
                                     <h6 class="mb-0 text-black">Customer Address:</h6>
                                 </div>
                                 <div class="col-md-8 ">
-                                    <p class="mb-0 " style="font-size: 18px; color: #434141;">{{expense.customer_name.Address1}} <br>
-                                        {{expense.customer_name.city}},{{expense.customer_name.state}} ,{{expense.customer_name.country}} ,
-                                        {{expense.customer_name.customerEmail}}
+                                    <p class="mb-0 " style="font-size: 18px; color: #434141;">{{project.c_name.Address1}} <br>
+                                        {{project.c_name.city}},{{project.c_name.state}} ,{{project.c_name.country}} ,
+                                        
                                         
                                     </p>
                                 </div>
@@ -821,17 +861,17 @@
 
                             <div class="row mb-4 d-flex justify-content-between align-items-center">
                                 <div class="col-md-4">
-                                    <h6 class="mb-0 text-black">Gst Type:</h6>
+                                    <h6 class="mb-0 text-black">Customer Email:</h6>
                                 </div>
                                 <div class="col-md-8 ">
-                                    <p class="mb-0 " style="font-size: 18px; color: #434141;">{{expense.customer_name.GSTTreatment}} <br>
+                                    <p class="mb-0 " style="font-size: 18px; color: #434141;">{{project.c_name.customerEmail}}<br>
                                         
                                         
                                     </p>
                                 </div>
                             </div>
 
-                            {% if expense.customer_name.GSTIN %} 
+                            <!-- {% if expense.customer_name.GSTIN %} 
                             <div class="row mb-4 d-flex justify-content-between align-items-center">
                                 <div class="col-md-4">
                                     <h6 class="mb-0 text-black">GST Number:</h6>
@@ -908,7 +948,7 @@
                             <hr>
             
             
-                            
+                             -->
                            
                             <!-- <hr class="my-4"> -->
                         </div>
@@ -926,7 +966,7 @@
                                         <h6 class="mb-0 text-black">Company</h6>
                                     </div>
                                     <div class="col-md-8 mt-3">
-                                        <p class="mb-0" style="font-size: 18px; color: #fbf3f3;">{{expense.company.company_name}}</p>
+                                        <p class="mb-0" style="font-size: 18px; color: #fbf3f3;">{{company.company_name}}</p>
                                     </div>
                                </div>
                                <div class="row mb-4 d-flex justify-content-between align-items-center">
@@ -934,8 +974,8 @@
                                         <h6 class="mb-0 text-black">Company Address</h6>
                                     </div>
                                     <div class="col-md-8 mt-3">
-                                        <p class="mb-0" style=" color: #fbf3f3;">{{expense.company.address}} <br>
-                                            {{expense.company.city}}  <br> {{expense.company.state}},{{expense.company.pincode}} <br> {{expense.company.company_email}}
+                                        <p class="mb-0" style=" color: #fbf3f3;">{{company.address}} <br>
+                                            {{company.city}}  <br> {{company.state}},{{company.pincode}} <br> 
                                         </p>
                                     </div>
                                </div>
@@ -944,28 +984,38 @@
                                         <h6 class="mb-0 text-black">Contact Number</h6>
                                     </div>
                                     <div class="col-md-8 mt-3">
-                                        <p class="mb-0" style=" color: #fbf3f3;">{{expense.company.contact_number}} 
+                                        <p class="mb-0" style=" color: #fbf3f3;">{{company.contact_number}} 
                                             
                                         </p>
                                     </div>
                                </div>
+                               <div class="row mb-4 d-flex justify-content-between align-items-center">
+                                <div class="col-md-4 mt-3">
+                                    <h6 class="mb-0 text-black">Company</h6>
+                                </div>
+                                <div class="col-md-8 mt-3">
+                                    <p class="mb-0" style=" color: #fbf3f3;">{{company.company_email}}
+                                        
+                                    </p>
+                                </div>
+                           </div>
                                <hr>
-                               <div class="row">
+                               <!-- <div class="row">
                                 <div class="col-md-12">
-                                    <h4 style="color: rgb(228, 152, 12);text-align: center;">Tax Details</h4>
+                                    <h4 style="color: rgb(228, 152, 12);text-align: center;">User Details</h4>
                                 </div>
                                </div>
                                 <div class="row mb-4 d-flex justify-content-between align-items-center">
                                     <div class="col-md-4 mt-3">
-                                        <h6 class="mb-0 text-black">Amount</h6>
+                                        <h6 class="mb-0 text-black">User Name</h6>
                                     </div>
                                     <div class="col-md-8 mt-3">
-                                        <p class="mb-0" style="font-size: 18px; color: #fbf3f3;">{{expense.currency}} {{expense.amount}}</p>
+                                        <p class="mb-0" style="font-size: 18px; color: #fbf3f3;">{{pay.first_name}} {{expense.amount}}</p>
                                     </div>
                                </div>
             
                             <!-- IGST -->
-                            {% if expense.igst != 0 %}
+<!--                            
                             <div class="row mb-4 d-flex justify-content-between align-items-center">
                                 <div class="col-md-4 mt-3">
                                     <h6 class="mb-0 text-black">CGST:</h6>
@@ -974,10 +1024,9 @@
                                     <p class="mb-0" style="font-size: 18px; color: #fbf3f3;">{{expense.igst}}</p>
                                 </div>
                             </div>
-                            {% endif %}
+                     
             
-                            <!-- CGST -->
-                            {% if expense.cgst != 0 %}
+                            
                             <div class="row mb-4 d-flex justify-content-between align-items-center">
                                 <div class="col-md-4 mt-3">
                                     <h6 class="mb-0 text-black">CGST:</h6>
@@ -986,9 +1035,8 @@
                                     <p class="mb-0" style="font-size: 18px; color: #fbf3f3;">{{ expense.cgst }}</p>
                                 </div>
                             </div>
-                            {% endif %}
-                            <!-- SGST -->
-                            {% if expense.cgst != 0 %}
+                         
+                   
                             <div class="row mb-4 d-flex justify-content-between align-items-center">
                                 <div class="col-md-4 mt-3">
                                     <h6 class="mb-0 text-black">SGST:</h6>
@@ -997,19 +1045,17 @@
                                     <p class="mb-0" style="font-size: 18px; color:#fbf3f3;">{{ expense.sgst }}</p>
                                 </div>
                             </div>
-                            {% endif %}
-            
-                            <!-- Total Tax -->
-                            <div class="row mb-4 d-flex justify-content-between align-items-center">
+                  
+                             Total Tax -->
+                            <!-- <div class="row mb-4 d-flex justify-content-between align-items-center">
                                 <div class="col-md-4 mt-3">
                                     <h6 class="mb-0 text-black">Total Tax:</h6>
                                 </div>
                                 <div class="col-md-8 mt-3">
                                     <p class="mb-0" style="font-size: 18px; color: #fbf3f3;">{{ expense.tax }}%</p>
                                 </div>
-                            </div>
-            
-                           
+                            </div> -->
+  
             
                            
 
@@ -1032,7 +1078,7 @@
                 </div>
                 <div class="modal-body" style="background: rgb(32, 35, 37); justify-content: center; overflow: hidden;">
                     <div class="card p-0 m-0">
-                        <form action="{% url 'add_exp_comment' expense.id %}" method="post" id="modalComment">
+                        <form action="" method="post" id="modalComment">
                             {% csrf_token %}
                             <input type="hidden" value="" id="com_id">
                             <div class="row mt-2">
@@ -1064,13 +1110,13 @@
                 <div class="modal-dialog modal-xl">
                   <div class="modal-content" style="background: rgb(32, 35, 37);border-radius: 20px;">
                     <div class="modal-header" style="background: rgb(32, 35, 37);">
-                      <h5 class="m-3 text-uppercase" id="shareBillEmailLabel">Share Expense Details</h5>
+                      <h5 class="m-3 text-uppercase" id="shareBillEmailLabel">Share Project Details</h5>
                       <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
                           aria-hidden="true">&times;</span></button>
                     </div>
                     <div class="modal-body" style="background: rgb(32, 35, 37);">
                       <div class="card p-3 m-3">
-                        <form action="{% url 'shareExpenseToEmail' expense.id %}" method="post" class="needs-validation"
+                        <form action="{% url 'shareProjectToEmail' project.id %}" method="post" class="needs-validation"
                           id="share_to_email_form" autocomplete="off">
                           {% csrf_token %}
                           <div class="form-group">
@@ -1083,11 +1129,12 @@
                             <textarea name="email_message" id="email_message" class="text-dark form-control" cols=""
                               rows="4" placeholder="This message will be sent along with Bill details."></textarea>
                           </div>
+                          <button type="submit" id="share_with_email"
+                          class="submitShareEmailBtn rounded-pill text-grey w-50 my-4 mx-3" >SEND MAIL</button> 
                         </form>
                       </div>
                       <div class="modal-footer d-flex justify-content-center" style="border-top: 1px solid #ffff;">
-                        <button type="submit" id="share_with_email"
-                          class="submitShareEmailBtn rounded-pill text-grey w-50 my-4 mx-3" >SEND MAIL</button>
+                  
                       </div>
                     </div>
     
@@ -1154,7 +1201,7 @@
                         <span aria-hidden="true">&times;</span>
                     </button>
                 </div>
-                <form action="{% url 'attach_expense_file' expense.id %}" method="POST" enctype="multipart/form-data">
+                <form action="{% url 'attach_project_file' project.id %}" method="POST" enctype="multipart/form-data">
                     {% csrf_token %}
                     <div class="modal-body">
                         <input type="file" class="form-control text-black" name="file">
@@ -1383,7 +1430,29 @@ $(document).ready(function () {
         $(document).on('click', '.toPDF', function (event) {
             console.log('print1');
             event.preventDefault();
-            var element = document.getElementById('whatToPrint');
+            var element = document.getElementById('whatToPrint1');
+            
+            var opt =
+            {
+                margin: 0,
+                filename: 'expense_'+$("#pid").text() + '.pdf',
+                image: { type: 'jpeg', quality: 0.98 },
+                html2canvas: { scale: 3 },
+                jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' }
+            };
+            html2pdf().set(opt).from(element).save();
+
+        });
+
+ });
+ 
+$(document).ready(function () {
+        console.log('print');
+
+        $(document).on('click', '.toPDF', function (event) {
+            console.log('print1');
+            event.preventDefault();
+            var element = document.getElementById('whatToPrint2');
             
             var opt =
             {
@@ -1399,6 +1468,28 @@ $(document).ready(function () {
 
  });
 
+
+ $(document).ready(function () {
+        console.log('print');
+
+        $(document).on('click', '.toPDF', function (event) {
+            console.log('print1');
+            event.preventDefault();
+            var element = document.getElementById('whatToPrint3');
+            
+            var opt =
+            {
+                margin: 0,
+                filename: 'expense_'+$("#pid").text() + '.pdf',
+                image: { type: 'jpeg', quality: 0.98 },
+                html2canvas: { scale: 3 },
+                jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' }
+            };
+            html2pdf().set(opt).from(element).save();
+
+        });
+
+ });
 </script>
 
 
@@ -1770,8 +1861,8 @@ function printSection(sectionId) {
 
     var printWindow = window.open('', '_blank');
     
-    // Set the text color to black in the print window
-    printWindow.document.write('<html><head><style type="text/css">body { color: black; }</style></head><body>');
+    // Set the text color and table borders to black in the print window
+    printWindow.document.write('<html><head><style type="text/css">body { color: black; } table, th, td { border: 1px solid black; }</style></head><body>');
     printWindow.document.write(printContents);
     printWindow.document.write('</body></html>');
     printWindow.document.close();
@@ -1780,10 +1871,131 @@ function printSection(sectionId) {
 
     document.body.innerHTML = originalContents;
 }
+
+    
+    </script>
+    <script>
+ function sortTable(columnIndex) {
+    let sortAscending = false
+    const table = document.getElementById("mytable");
+    const rows = Array.from(table.rows).slice(1); // Exclude the header row
+
+    rows.sort((row1, row2) => {
+        const cellValue1 = row1.cells[columnIndex].textContent.toLowerCase();
+        const cellValue2 = row2.cells[columnIndex].textContent.toLowerCase();
+
+        if (cellValue1 < cellValue2) {
+            return -1;
+        } else if (cellValue1 > cellValue2) {
+            return 1;
+        } else {
+            return 0;
+        }
+    });
+
+    // Clear the table body
+    while (table.rows.length > 1) {
+        table.deleteRow(1);
+    }
+
+    // Append the sorted rows back to the table
+    rows.forEach(row => table.appendChild(row));
+    sortAscending = !sortAscending;
+}
+
+function rsortTable(columnIndex) {
+    let sortAscending = false
+    const table = document.getElementById("mytable");
+    const rows = Array.from(table.rows).slice(1); // Exclude the header row
+
+    rows.sort((row1, row2) => {
+        const cellValue1 = row1.cells[columnIndex].textContent.toLowerCase();
+        const cellValue2 = row2.cells[columnIndex].textContent.toLowerCase();
+
+        if (sortAscending) {
+            if (cellValue1 < cellValue2) {
+                return -1;
+            } else if (cellValue1 > cellValue2) {
+                return 1;
+            } else {
+                return 0;
+            }
+        } else {
+            if (cellValue1 > cellValue2) {
+                return -1;
+            } else if (cellValue1 < cellValue2) {
+                return 1;
+            } else {
+                return 0;
+            }
+        }
+    });
+
+    // Clear the table body
+    while (table.rows.length > 1) {
+        table.deleteRow(1);
+    }
+
+    // Append the sorted rows back to the table
+    rows.forEach(row => table.appendChild(row));
+
+    // Toggle the sorting order for the next click
+    sortAscending = !sortAscending;
+}
+jQuery(document).ready(function($) {
+$(".clickable-row").click(function() {
+    window.location = $(this).data("href");
+});
+});
+
+
+function exportAsPDF() {
+      const container = document.getElementById('container-to-print');
+    
+      // change colour 
+      container.style.backgroundColor = 'white';
+    
+      const textWhiteElements = container.querySelectorAll('.text');
+      textWhiteElements.forEach(element => {
+        element.style.color = '#000000';
+      });
+
+      const table_rows = document.querySelectorAll('#myTable tbody tr');
+
+      table_rows.forEach(row => {
+            row.style.backgroundColor = 'white'; 
+            row.style.color = 'black'; 
+        });
+    
+      const pdfOptions = {
+        margin: 0,
+        filename: 'Sales_order.pdf',
+        image: { type: 'jpeg', quality: 0.98 },
+        html2canvas: { scale: 2 },
+        jsPDF: { unit: 'mm', format: 'a3', orientation: 'landscape' },
+      };
+    
+      // Generate PDF from the container
+      html2pdf().from(container).set(pdfOptions).save().then(() => {
+
+
+        container.style.backgroundColor = 'transparent';
+
+        // Restore the original background color'
+      textWhiteElements.forEach(element => {
+        element.style.color = 'white'; 
+      });
+
+      table_rows.forEach(row => {
+            row.style.backgroundColor = 'transparent'; 
+            row.style.color = 'white'; 
+        });
     
 
-    </script>
-
+      });
+    }
+    
+</script>
 
    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.12.9/dist/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
