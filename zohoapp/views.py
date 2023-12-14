@@ -9308,30 +9308,6 @@ def addproj(request):
 
 
 
-def overview(request,id):
-   
-    proje=project1.objects.filter(user=request.user)
-    # for p in proje:
-    #     tsk=task.objects.get(proj=p)
-    #     p.action = tsk.action
-    
-   
-    company=company_details.objects.get(user=request.user)
-    project = get_object_or_404(project1, id=id)
-    taskz=task.objects.get(proj=project)
-    usern=usernamez.objects.filter(projn=project)
-    attach=projectfiles.objects.filter(proj=project)
-    print(attach)
-    for i in usern:
-        emp= Payroll.objects.get(id=i.usernamez)
-        fname= emp.first_name
-        lname = emp.last_name
-        i.name = fname+ " "+lname
-    cmt=projectcomment.objects.filter(proj=id)
-     # Save the project object with the updated comment
-
-
-    return render(request,'overview.html',{'usern':usern,'taskz':taskz,'proje':proje,'project':project,'company':company,'cmt':cmt,'attach':attach})
 
 # def comment(request, product_id):
 #     if request.method == 'POST':
@@ -26101,13 +26077,12 @@ def shareProjectToEmail(request,pk):
                 # print(emails_list)
                 user = request.user
                 user1=User.objects.get(id=user.id)
-                expense = ExpenseE.objects.filter(user=user)
+                # expense = ExpenseE.objects.filter(user=user)
                 company = company_details.objects.get(user = request.user)
-                expense_account=ExpenseE.objects.get(id=pk)
+                # expense_account=ExpenseE.objects.get(id=pk)
                 project=project1.objects.get(id=pk)
                 context = {
-                    'expenses': expense,
-                    'expense': expense_account,
+                
                     'company':company,
                     'proj':project,
                 }
@@ -26731,6 +26706,12 @@ def add_vendorexp(request):
 
 
 def entr_custmrA3(request):
+
+
+
+
+
+    
     if request.user.is_authenticated:
         if request.method=='POST':
             
@@ -26845,3 +26826,31 @@ def entr_custmrA3(request):
             
             return redirect("save_expense")
         return render(request,'save_expense') 
+
+
+
+
+def overview(request,id):
+   
+    proje=project1.objects.filter(user=request.user)
+    # for p in proje:
+    #     tsk=task.objects.get(proj=p)
+    #     p.action = tsk.action
+    
+   
+    company=company_details.objects.get(user=request.user)
+    project = get_object_or_404(project1, id=id)
+    # taskz=task.objects.get(proj=project)
+    usern=usernamez.objects.filter(projn=project)
+    attach=projectfiles.objects.filter(proj=project)
+    print(attach)
+   
+    cmt=projectcomment.objects.filter(proj=id)
+     # Save the project object with the  updated comment
+
+
+    return render(request,'overview.html',{'usern':usern,'proje':proje,'project':project,'company':company,'cmt':cmt,'attach':attach})
+
+
+
+

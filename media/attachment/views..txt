@@ -1,0 +1,15 @@
+=====TINTO MT view update
+
+def vproj(request):
+   
+    proj=project1.objects.filter(user=request.user)
+    
+    active=Project.objects.all()
+    company=company_details.objects.get(user=request.user)
+    for i in proj:
+        tsk=task.objects.filter(proj=i)
+        usr=usernamez.objects.filter(projn=i)
+        
+        
+    return render(request,'projlist.html',{'proj':proj,'active':active,'company':company})
+    

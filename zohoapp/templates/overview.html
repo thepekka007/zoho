@@ -358,10 +358,11 @@
                     <i class="fas fa-sort m-1"></i>
                   </a>
                   <div class="dropdown-menu m-1">
-                    <a class="dropdown-item" href="">All</a>
-                    <a class="dropdown-item" onclick="sortTable()">Customer Name</a>
-                    <a class="dropdown-item" onclick="sortTablebybillno()">Sales Order Number</a>
+                    <a class="dropdown-item" href="javascript:sortTable(0)">All</a>
+                    <a class="dropdown-item" href="javascript:sortTable(0)">Date</a>
+                    <a class="dropdown-item" href="javascript:sortTable(1)">Project Name</a>
                   </div>
+                  
                 </div>
               </div>
               <div class="col-md-3   ">
@@ -376,7 +377,7 @@
 
                 <script>
                     function filterProjects() {
-                        var actionFilter = document.getElementById('actionFilter');
+                        var actionFilter = document.getElementById('mytable23');
                         var selectedAction = actionFilter.options[actionFilter.selectedIndex].value;
                 
                         var projects = document.querySelectorAll('.table.customer-table tbody tr');
@@ -406,27 +407,62 @@
             </div>
 
             <div class="scrollable-table">
-                <div class="col-md-9">
-                    <input type="text" id="search" class="form-control bg-light text-dark mt-2 " placeholder="Search.."
-                      autocomplete="off">
-                  </div>
-                  <table class="table customer-table" style="border:1px solid black;">
-
-                <tbody>
-                    {%for i in proje %}
-                    <tr>
-                      <td>
-                        <a class="text-white" data-action="{{ i.action }}"  href="{% url 'overview' i.id %}"><b>{{i.start}}</b> <span class="d-flex justify-content-end text-warning align-items-start" > {{i.name}}</span> <br>
-                            <span class="d-flex  align-items-start text-warning"> {{i.end}}</span> <span class="d-flex justify-content-end align-items-start"> {{i.action}}</span>
-                        </a> 
-                    </td>
-                    </tr>
-                    {%endfor%}
-
-                </tbody>
-              </table>
+              <div class="row">
+                <div class="col-md-12">
+                    <input type="text" id="search" placeholder="Search..." class="form-control text-dark bg-light" autocomplete="off" >
+                </div>
             </div>
-
+            <table class="table customer-table" style="border:1px solid black;" id="mytable23">
+              <tbody>
+                  {% for i in proje %}
+                  <tr>
+                      <td>
+                          <a class="text-white" data-action="{{ i.action }}"  href="{% url 'overview' i.id %}">
+                              <b>{{ i.start }}</b> <span class="d-flex justify-content-end text-warning align-items-start">{{ i.name }}</span> <br>
+                              <span class="d-flex align-items-start text-warning">{{ i.end }}</span> <span class="d-flex justify-content-end align-items-start">{{ i.action }}</span>
+                          </a> 
+                      </td>
+                  
+                  </tr>
+                  {% endfor %}
+              </tbody>
+          </table>
+          
+            </div>
+            <script>
+              function sortTable(columnIndex) {
+                var table, rows, switching, i, x, y, shouldSwitch;
+                table = document.getElementById("mytable23");
+                switching = true;
+                
+                while (switching) {
+                  switching = false;
+                  rows = table.getElementsByTagName("tr");
+                  
+                  for (i = 1; i < rows.length - 1; i++) {
+                    shouldSwitch = false;
+                    x = rows[i].getElementsByTagName("td")[columnIndex].innerText.toLowerCase();
+                    y = rows[i + 1].getElementsByTagName("td")[columnIndex].innerText.toLowerCase();
+                    
+                    // Check if the two rows should switch places
+                    if (columnIndex === 0) {
+                      // If the column is the date column, parse the dates for comparison
+                      x = new Date(x);
+                      y = new Date(y);
+                      shouldSwitch = x > y;
+                    } else {
+                      shouldSwitch = x > y;
+                    }
+            
+                    if (shouldSwitch) {
+                      rows[i].parentNode.insertBefore(rows[i + 1], rows[i]);
+                      switching = true;
+                    }
+                  }
+                }
+              }
+            </script>
+            
 
           </div>
 
@@ -464,9 +500,12 @@
 
               <div class="col-md-6" style="text-align: center;">
       
-                <a href="" class=" text-dark">
-                  <button class="btn btn-outline-warning" title="Edit"><i class="fas fa-edit"></i></button>
-                </a>
+                <a href="{% url 'edit_project' project.id %}" class=" fa fa-pencil btn btn-outline-warning text-warning  py-2"
+                data-toggle="tooltip" title="EDIT"> </a>
+               
+                    <a href="{% url 'deletp' project.id %}" class="delete fa fa-trash btn btn-outline-warning text-warning px-2 py-2"
+                     data-toggle="tooltip" title="DELETE" onclick="return confirm('Do you want to Delete this project?');"> </a>
+          
                 <a class="text-dark" data-toggle="dropdown">
                   <button class="btn btn-outline-warning " title="Share"><i class="fas fa-share"></i></button>
                 </a>
@@ -474,9 +513,7 @@
                   <a class="dropdown-item" data-target="#shareBillEmail" data-toggle="modal">GMAIL</a>
                   <a class="dropdown-item" href="javascript:void(0);" onclick="shareOnWhatsApp()">WhatsApp</a>
                 </div>
-                <a href="" class="  text-dark">
-                  <button class="btn btn-outline-warning" title="Delete"><i class="fas fa-trash-alt"></i></button>
-                </a>
+               
                 <a class="  text-dark" onclick="exportToPDF()">
                   <button class="btn btn-outline-warning" title="Pdf"><i class="fas fa-file-pdf-o"></i></button>
                 </a>
@@ -484,9 +521,24 @@
                   <button class="btn btn-outline-warning" title="Print"><i class="fas fa-print"></i>
                   </button>
                 </a>
-                <a class="text-dark" onclick="show_slip()">
-                  <button class="btn btn-outline-warning" title="Slip"><i class="fas fa-receipt"></i></button></a>
-              </div>
+              
+     
+           
+               
+                    <a href=" " class=" fas fa-paperclip dropdown-toggle btn btn-outline-warning text-warning py-2 "  
+                        data-bs-toggle="dropdown" id="attachmentDropdown" aria-haspopup="true" aria-expanded="false"> 
+                    </a>
+
+                    <div class="dropdown-menu" aria-labelledby="attachmentDropdown">
+                        <a class="dropdown-item" style="cursor: pointer;" data-toggle="modal"
+                            data-target="#files"><i class="fa fa-paperclip"></i> Attach File</a>
+                        {% if project.attachment != "" %}
+                        <a class="dropdown-item" href="{{ project.attachment.url }}"><i
+                                class="fa fa-download"></i> Download File</a>
+                        {% endif %}
+             
+                    </div>
+            </div>
             </div><br>
 
             <div class="row" id="div-to-pdf"
@@ -653,9 +705,11 @@
                   <i class="fa fa-save" aria-hidden="true"></i>
                 </a>
                 {% endif %}
-                <a href="" class=" text-dark">
-                  <button class="btn btn-outline-warning" title="Edit"><i class="fas fa-edit"></i></button>
-                </a>
+                <a href="{% url 'edit_project' project.id %}" class=" fa fa-pencil btn btn-outline-warning text-warning  py-2"
+                data-toggle="tooltip" title="EDIT"> </a>
+                <a href="{% url 'deletp' project.id %}" class="delete fa fa-trash btn btn-outline-warning text-warning px-2 py-2"
+                data-toggle="tooltip" title="DELETE" onclick="return confirm('Do you want to Delete this project?');"> </a>
+     
                 <a class="text-dark" data-toggle="dropdown">
                   <button class="btn btn-outline-warning " title="Share"><i class="fas fa-share"></i></button>
                 </a>
@@ -674,8 +728,19 @@
                   <button class="btn btn-outline-warning" title="Print"><i class="fas fa-print"></i>
                   </button>
                 </a>
-                <a class="text-dark" onclick="show_slip()">
-                  <button class="btn btn-outline-warning" title="Slip"><i class="fas fa-receipt"></i></button></a>
+                <a href=" " class=" fas fa-paperclip dropdown-toggle btn btn-outline-warning text-warning py-2 "  
+                data-bs-toggle="dropdown" id="attachmentDropdown" aria-haspopup="true" aria-expanded="false"> 
+            </a>
+
+            <div class="dropdown-menu" aria-labelledby="attachmentDropdown">
+                <a class="dropdown-item" style="cursor: pointer;" data-toggle="modal"
+                    data-target="#files"><i class="fa fa-paperclip"></i> Attach File</a>
+                {% if project.attachment != "" %}
+                <a class="dropdown-item" href="{{project.attachment.url}}"><i
+                        class="fa fa-download"></i> Download File</a>
+                {% endif %}
+     
+            </div>
               </div>
             </div>
 
@@ -905,9 +970,11 @@
                   <i class="fa fa-save" aria-hidden="true"></i>
                 </a>
                 {% endif %}
-                <a href="" class=" text-dark">
-                  <button class="btn btn-outline-warning" title="Edit"><i class="fas fa-edit"></i></button>
-                </a>
+                <a href="{% url 'edit_project' project.id %}" class=" fa fa-pencil btn btn-outline-warning text-warning  py-2"
+                data-toggle="tooltip" title="EDIT"> </a>
+                <a href="{% url 'deletp' project.id %}" class="delete fa fa-trash btn btn-outline-warning text-warning px-2 py-2"
+                data-toggle="tooltip" title="DELETE" onclick="return confirm('Do you want to Delete this project?');"> </a>
+     
                 <a class="text-dark" data-toggle="dropdown">
                   <button class="btn btn-outline-warning " title="Share"><i class="fas fa-share"></i></button>
                 </a>
@@ -916,9 +983,9 @@
                   <a class="dropdown-item" href="javascript:void(0);" onclick="shareOnWhatsApp()">WhatsApp</a>
                 </div>
 
-                <a href="" class="  text-dark">
+                <!-- <a href="" class="  text-dark">
                   <button class="btn btn-outline-warning" title="Delete"><i class="fas fa-trash-alt"></i></button>
-                </a>
+                </a> -->
                 <a class="  text-dark" onclick="exportToPDF()">
                   <button class="btn btn-outline-warning" title="Pdf"><i class="fas fa-file-pdf-o"></i></button>
                 </a>
@@ -926,8 +993,19 @@
                   <button class="btn btn-outline-warning" title="Print"><i class="fas fa-print"></i>
                   </button>
                 </a>
-                <a class="text-dark" onclick="show_slip()">
-                  <button class="btn btn-outline-warning" title="Slip"><i class="fas fa-receipt"></i></button></a>
+                <a href=" " class=" fas fa-paperclip dropdown-toggle btn btn-outline-warning text-warning py-2 "  
+                data-bs-toggle="dropdown" id="attachmentDropdown" aria-haspopup="true" aria-expanded="false"> 
+            </a>
+
+            <div class="dropdown-menu" aria-labelledby="attachmentDropdown">
+                <a class="dropdown-item" style="cursor: pointer;" data-toggle="modal"
+                    data-target="#files"><i class="fa fa-paperclip"></i> Attach File</a>
+                {% if project.attachment != "" %}
+                <a class="dropdown-item" href="{{project.attachment.url}}"><i
+                        class="fa fa-download"></i> Download File</a>
+                {% endif %}
+     
+            </div>
               </div>
             </div>
 
@@ -940,8 +1018,7 @@
               <section id="selected-area" style="background-color: rgb(255, 221, 176);height: auto;" class=" p-2 m-2">
                 <header style="	background-color: #8b3131;border-radius: 1rem;">
                   <div class="logo ">
-                    <img class="ml-2" width="100rem" style="border-radius: 50%;" src="{% static 'images/zlogo.png' %}"
-                      alt="Company Logo">
+                  <H1>PROJECT DETAILS</H1>
                   </div>
                   <div style="background: #8b3131;color: white;" class="company-info">
                     <h2 class="text-white">{{company.company_name}}</h2>
@@ -951,24 +1028,24 @@
                   </div>
                 </header>
                 <div class="invoice-box">
-                  <h1 class="text-dark">SalesOrder</h1>
+                  <h1 class="text-dark">{{project.name}}</h1>
                   <div class="invoice-header">
                     <div class="invoice-details text-dark">
                       <table>
                         <tr>
-                          <td class="table-cell text-black" style="border: none;">Sales No#</td>
+                          <td class="table-cell text-black" style="border: none;">Project code#</td>
                           <td class="table-cell text-black" style="border: none;">:</td>
-                          <td class="table-cell text-black" style="border: none;">{{sale.sales_no}}</td>
+                          <td class="table-cell text-black" style="border: none;">{{project.project_code}}</td>
                         </tr>
                         <tr>
-                          <td class="table-cell text-black" style="border: none;">Sales Order Date</td>
+                          <td class="table-cell text-black" style="border: none;">Start Date</td>
                           <td class="table-cell text-black" style="border: none;">:</td>
-                          <td class="table-cell text-black" style="border: none;">{{sale.sales_date}}</td>
+                          <td class="table-cell text-black" style="border: none;">{{project.start}}</td>
                         </tr>
                         <tr>
-                          <td class="table-cell text-black" style="border: none;">Expiry Date</td>
+                          <td class="table-cell text-black" style="border: none;">Due Date</td>
                           <td class="table-cell text-black" style="border: none;">:</td>
-                          <td class="table-cell text-black" style="border: none;">{{sale.ship_date}}</td>
+                          <td class="table-cell text-black" style="border: none;">{{project.end}}</td>
                         </tr>
                       </table>
                     </div>
@@ -994,37 +1071,55 @@
                       </table>
                     </div>
                   </div>
-
+<br><br>
                   <table>
                     <thead>
                       <tr>
 
-                        <th id="th" style="text-align: center;">Product</th>
-                        <th id="th" style="text-align: center;">HSN</th>
-                        <th id="th" style="text-align: center;">Quantity</th>
-                        <th id="th" style="text-align: center;">Price</th>
-                        <th id="th" style="text-align: center;">Discount</th>
-                        <th id="th" style="text-align: center;">Tax %</th>
-                        <th id="th" style="text-align: center;"> Total</th>
+                        <th id="th" style="text-align: center;">Project</th>
+                        <th id="th" style="text-align: center;">Billing Method</th>
+                        <!-- <th id="th" style="text-align: center;">Quantity</th> -->
+                        <th id="th" style="text-align: center;">Amount</th>
+                        <th id="th" style="text-align: center;">Start Date</th>
+                        <th id="th" style="text-align: center;">Due Date</th>
+                        <th id="th" style="text-align: center;"> Action</th>
                       </tr>
                     </thead>
                     <tbody>
-                      {% for i in saleitem %}
+                   
                       <tr style="color: black;">
-                        <td style="text-align: center;">{{i.product}}</td>
-                        <td style="text-align: center;">{{i.hsn}}</td>
-                        <td style="text-align: center;">{{i.quantity}}</td>
-                        <td style="text-align: center;">{{i.rate}}</td>
-                        <td style="text-align: center;">{{i.desc}}</td>
-                        <td style="text-align: center;">{{i.tax}}</td>
-                        <td style="text-align: center;">{{i.total}}</td>
+                        <td style="text-align: center;">{{project.name}}</td>
+                        <td style="text-align: center;">{{project.billing}}</td>
+                        <!-- <td style="text-align: center;">{{i.quantity}}</td> -->
+                        <td style="text-align: center;">{{project.rateperhour}}</td>
+                        <td style="text-align: center;">{{project.start}}</td>
+                        <td style="text-align: center;">{{project.end}}</td>
+                        <td style="text-align: center;">{{project.action}}</td>
                       </tr>
-                      {% endfor %}
+  
 
                     </tbody>
                   </table><br>
-
-                  <div class="invoice-total">
+                  <div class="invoice-details text-dark">
+                    <table>
+                      <tr>
+                        <td class="table-cell text-black" style="border: none;">Customer Name</td>
+                        <td class="table-cell text-black" style="border: none;">:</td>
+                        <td class="table-cell text-black" style="border: none;">{{project.c_name.customerName}}</td>
+                      </tr>
+                      <tr>
+                        <td class="table-cell text-black" style="border: none;">Address</td>
+                        <td class="table-cell text-black" style="border: none;">:</td>
+                        <td class="table-cell text-black" style="border: none;">{{project.c_name.Address1}}</td>
+                      </tr>
+                      <tr>
+                        <td class="table-cell text-black" style="border: none;">Email</td>
+                        <td class="table-cell text-black" style="border: none;">:</td>
+                        <td class="table-cell text-black" style="border: none;">{{project.c_name.customerEmail}}</td>
+                      </tr>
+                    </table>
+                  </div>
+                  <!-- <div class="invoice-total">
                     <div class="row">
                       <div class="col-6"></div>
 
@@ -1087,7 +1182,7 @@
 
                     </div>
 
-                  </div>
+                  </div> -->
 
                 </div>
 
@@ -1136,9 +1231,11 @@
                   <i class="fa fa-save" aria-hidden="true"></i>
                 </a>
                 {% endif %}
-                <a href="" class=" text-dark">
-                  <button class="btn btn-outline-warning" title="Edit"><i class="fas fa-edit"></i></button>
-                </a>
+                <a href="{% url 'edit_project' project.id %}" class=" fa fa-pencil btn btn-outline-warning text-warning  py-2"
+                data-toggle="tooltip" title="EDIT"> </a>
+                <a href="{% url 'deletp' project.id %}" class="delete fa fa-trash btn btn-outline-warning text-warning px-2 py-2"
+                data-toggle="tooltip" title="DELETE" onclick="return confirm('Do you want to Delete this project?');"> </a>
+     
                 <a class="text-dark" data-toggle="dropdown">
                   <button class="btn btn-outline-warning " title="Share"><i class="fas fa-share"></i></button>
                 </a>
@@ -1147,9 +1244,9 @@
                   <a class="dropdown-item" href="javascript:void(0);" onclick="shareOnWhatsApp()">WhatsApp</a>
                 </div>
 
-                <a href="" class="  text-dark">
+                <!-- <a href="" class="  text-dark">
                   <button class="btn btn-outline-warning" title="Delete"><i class="fas fa-trash-alt"></i></button>
-                </a>
+                </a> -->
                 <a class="  text-dark" onclick="exportToPDF2()">
                   <button class="btn btn-outline-warning" title="Pdf"><i class="fas fa-file-pdf-o"></i></button>
                 </a>
@@ -1157,8 +1254,19 @@
                   <button class="btn btn-outline-warning" title="Print"><i class="fas fa-print"></i>
                   </button>
                 </a>
-                <a class="text-dark" onclick="show_slip()">
-                  <button class="btn btn-outline-warning" title="Slip"><i class="fas fa-receipt"></i></button></a>
+                <a href=" " class=" fas fa-paperclip dropdown-toggle btn btn-outline-warning text-warning py-2 "  
+                data-bs-toggle="dropdown" id="attachmentDropdown" aria-haspopup="true" aria-expanded="false"> 
+            </a>
+
+            <div class="dropdown-menu" aria-labelledby="attachmentDropdown">
+                <a class="dropdown-item" style="cursor: pointer;" data-toggle="modal"
+                    data-target="#files"><i class="fa fa-paperclip"></i> Attach File</a>
+                {% if project.attachment != "" %}
+                <a class="dropdown-item" href="{{project.attachment.url}}"><i
+                        class="fa fa-download"></i> Download File</a>
+                {% endif %}
+     
+            </div>
               </div>
             </div>
 
@@ -1170,7 +1278,7 @@
               <div class="my-3 page" style="background-color: rgb(255, 221, 176);" id="selected-area2">
                 <div class="p-5">
                   <div style="background-color: #8b3131;border-radius: 1rem;padding: 20px;">
-                    <center class="h3"><b>SALES ORDER</b></center>
+                    <center class="h3"><b>PROJECT DETAILS</b></center>
                   </div>
                   <div class="row mt-5">
                     <div class="col-md-8">
@@ -1187,15 +1295,15 @@
                     <div class="col-md-4">
                       <div class="top-left">
                         <div class="graphic-path">
-                          <p>Sales Order No. #:<b>{{sale.sales_no}}</b></p>
+                          <p>Project Code. #:<b>{{project.project_code}}</b></p>
                         </div>
                         <div class="mt-2">
 
-                          <p style="color: #000;">Sales Order Date:
-                            <b>{{ sale.sales_date | date:'d-m-Y'}}</b>
+                          <p style="color: #000;">Sart Date:
+                            <b>{{ project.start | date:'d-m-Y'}}</b>
                           </p>
-                          <p style="color: #000;">Expiry Date:
-                            <b>{{ sale.ship_date | date:'d-m-Y'}}</b>
+                          <p style="color: #000;">Due Date:
+                            <b>{{ project.end | date:'d-m-Y'}}</b>
                           </p>
                         </div>
                       </div>
@@ -1212,26 +1320,25 @@
                     <div class="col-12">
                       <div class="row bb pb-2 mt-3">
                         <div class="col-4 pl-0">
-                          <label class="text-white bg-secondary w-100 p-1"><b>BILL
-                              TO</b></label>
+                          <label class="text-white bg-secondary w-100 p-1"><b>Customer</b></label>
                           <h5 class="" style="font-weight: bold; color: #8b3131;">
-                            {{sale.customer.customerName}}</h5>
+                            {{project.c_name.customerName}}</h5>
                           <p class="address" style="font-weight: bold;color: #000;">
-                            {{sale.customer.customerEmail}}
+                            {{project.c_name.customerEmail}}
                             <br>
-                            {{sale.customer.Address1}}
+                            {{project.c_name.Address1}}
                             <br>
 
-                            <span>Mob: </span><b>{{sale.customer.phone1}}</b>
+                            <span>Mob: </span><b>{{project.c_name.phone1}}</b>
                           </p>
                         </div>
                         <div class="col-4"></div>
                         <div class="col-4 pr-0">
-                          <label class="text-white bg-secondary w-100 p-1"><b>GST Details</b></label>
+                          <label class="text-white bg-secondary w-100 p-1"><b>Project Details</b></label>
                           <h5 class="" style="font-weight: bold; color: #8b3131;">
-                            {{sale.customer.GSTTreatment}}</h5>
+                            {{project.name}}</h5>
                           <p class="address" style="font-weight: bold;color: #000;">
-                            {{ sale.customer.GSTIN}}
+                            {{ project.action}}
                           </p>
                         </div>
                       </div>
@@ -1241,144 +1348,42 @@
 
                   <section class="product-area mt-2">
                     <table class="table table-hover table-bordered table-secondary">
-                      <thead>
-                        <tr class="">
-                          <th class="text-center" style="color:#8b3131;">Product</th>
-                          <th class="text-center" style="color:#8b3131;">HSN</th>
-                          <th class="text-center" style="color:#8b3131;">Quantity</th>
-                          <th class="text-center" style="color:#8b3131;">Price</th>
-                          <th class="text-center" style="color:#8b3131;">Discount</th>
-                          <th class="text-center" style="color:#8b3131;">Tax %</th>
-                          <th class="text-center" style="color:#8b3131;">Total</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {% for itm in saleitem %}
-                        <tr>
-                          <td class="text-center" style="color:#000">{{ itm.product }}</td>
-                          <td class="text-center" style="color:#000">{{ itm.hsn }}</td>
-                          <td class="text-center" style="color:#000">{{ itm.quantity }}</td>
-                          <td class="text-center" style="color:#000">{{ itm.rate }}</td>
-                          <td class="text-center" style="color:#000">{{ itm.desc }}</td>
-                          <td class="text-center" style="color:#000">{{ itm.tax }}</td>
-                          <td class="text-center" style="color:#000">{{ itm.total }}</td>
-                        </tr>
-                        {% endfor %}
-                      </tbody>
+                        <thead>
+                            <tr>
+      
+                              <th id="th" style="text-align: center;">Project</th>
+                              <th id="th" style="text-align: center;">Billing Method</th>
+                              <!-- <th id="th" style="text-align: center;">Quantity</th> -->
+                              <th id="th" style="text-align: center;">Amount</th>
+                              <th id="th" style="text-align: center;">Start Date</th>
+                              <th id="th" style="text-align: center;">Due Date</th>
+                              <th id="th" style="text-align: center;"> Action</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                         
+                            <tr style="color: black;">
+                              <td style="text-align: center;">{{project.name}}</td>
+                              <td style="text-align: center;">{{project.billing}}</td>
+                              <!-- <td style="text-align: center;">{{i.quantity}}</td> -->
+                              <td style="text-align: center;">{{project.rateperhour}}</td>
+                              <td style="text-align: center;">{{project.start}}</td>
+                              <td style="text-align: center;">{{project.end}}</td>
+                              <td style="text-align: center;">{{project.action}}</td>
+                            </tr>
+        
+      
+                          </tbody>
                     </table>
                   </section>
-
-                  <section class="balance-info">
-                    <div class="row mt-3">
-                      <div class="col-4">
-                        <table class="table table-borderless">
-                          <tbody>
-
-                            <!-- <tr >
-                                              <td style="color: #000;text-align: left;">Payment Type</td>
-                                              <td style="color: #000;text-align: left;">:</td>
-                                              {% if bank %}
-                                              <th style="color: #000;text-align: center;">{{bank.bankname}}</th>
-                                              {% else %}
-                                              <th style="color: #000;text-align: center;">{{pbill.payment_type}}</th>
-                                              {% endif %}
-                                          </tr>
-                                          <tr>
-                                              <td></td>
-                                              <td></td>
-                                              <td></td>
-                                              
-                                          </tr> -->
-                            {% if ewbill.note %}
-                            <tr>
-                              <td style="color: #000;text-align: left;">Note</td>
-                              <td style="color: #000;text-align: left;">:</td>
-                              <th style="color: #000;text-align: center;">{{ewbill.note}}
-                              </th>
-                            </tr>
-                            {% endif %}
-
-                          </tbody>
-                        </table>
-                      </div>
-                      <div class="col-4"></div>
-                      <div class="col-4">
-                        <table class="table table-borderless">
-                          <tbody>
-                            <tr>
-                              <td style="color: #000;">Sub Total</td>
-                              <td style="color: #000;">:</td>
-                              <td class="text-center" style="color: #000;">
-                                {{sale.subtotal}}</td>
-                            </tr>
-                            {% if sale.igst != '0.00' %}
-                            <tr>
-                              <td style="color: #000;">IGST</td>
-                              <td style="color: #000;">:</td>
-                              <td class="text-center" style="color: #000;">
-                                {{sale.igst}}</td>
-                            </tr>
-                            {% else %}
-                            <tr>
-                              <td style="color: #000;">SGST</td>
-                              <td style="color: #000;">:</td>
-                              <td class="text-center" style="color: #000;">
-                                {{sale.sgst}}</td>
-                            </tr>
-                            <tr>
-                              <td style="color: #000;">CGST</td>
-                              <td style="color: #000;">:</td>
-                              <td class="text-center" style="color: #000;">
-                                {{sale.cgst}}</td>
-                            </tr>
-                            {% endif %}
-                            <tr>
-                              <td style="color: #000;">Tax Amount</td>
-                              <td style="color: #000;">:</td>
-                              <td class="text-center" style="color: #000;">
-                                {{sale.t_tax}}</td>
-                            </tr>
-                            <tr>
-                              <td style="color: #000;">Shipping Charge</td>
-                              <td style="color: #000;">:</td>
-                              <td class="text-center" style="color: #000;">
-                                {{sale.sh_charge}}</td>
-                            </tr>
-                            <tr>
-                              <td style="color: #000;">Adjustment</td>
-                              <td style="color: #000;">:</td>
-                              <td class="text-center" style="color: #000;">
-                                {{sale.adjust}}</td>
-                            </tr>
-                            {% if sale.advance != 0.0 %}
-                            <tr>
-                              <td style="color: #000;">Advance</td>
-                              <td style="color: #000;">:</td>
-                              <td class="text-center" style="color: #000;">
-                                {{sale.advance}}</td>
-                            </tr>
-                            {% endif %}
-                            <tr>
-                              <td style="color: #000;">Total</td>
-                              <td style="color: #000;">:</td>
-                              <td class="text-center" style="color: #000;">
-                                <b>{{sale.grandtotal}}</b>
-                              </td>
-                            </tr>
-
-                          </tbody>
-
-                        </table>
-
-                      </div>
-                    </div>
-                    <footer class="mb-5">
+<br><br><br><br><br><br><br><br><br><br>
+                                     <footer class="mb-5">
                       <p class="text-dark">&copy; Zho Books 2023 | Info park kakkanad kochi,
                         Ernamkulam,
                         kerala India 12345
                         | Phone: (123) 456-7890 | Email: info@zohodjango.com</p>
                     </footer>
-                  </section>
+             
 
                 </div>
               </div>
@@ -1423,9 +1428,11 @@
                   <i class="fa fa-save" aria-hidden="true"></i>
                 </a>
                 {% endif %}
-                <a href="" class=" text-dark">
-                  <button class="btn btn-outline-warning" title="Edit"><i class="fas fa-edit"></i></button>
-                </a>
+                <a href="{% url 'edit_project' project.id %}" class=" fa fa-pencil btn btn-outline-warning text-warning  py-2"
+                data-toggle="tooltip" title="EDIT"> </a>
+                <a href="{% url 'deletp' project.id %}" class="delete fa fa-trash btn btn-outline-warning text-warning px-2 py-2"
+                data-toggle="tooltip" title="DELETE" onclick="return confirm('Do you want to Delete this project?');"> </a>
+     
                 <a class="text-dark" data-toggle="dropdown">
                   <button class="btn btn-outline-warning " title="Share"><i class="fas fa-share"></i></button>
                 </a>
@@ -1434,9 +1441,9 @@
                   <a class="dropdown-item" href="javascript:void(0);" onclick="shareOnWhatsApp()">WhatsApp</a>
                 </div>
 
-                <a href="" class="  text-dark">
+                <!-- <a href="" class="  text-dark">
                   <button class="btn btn-outline-warning" title="Delete"><i class="fas fa-trash-alt"></i></button>
-                </a>
+                </a> -->
                 <a class="  text-dark" onclick="exportToPDF3()">
                   <button class="btn btn-outline-warning" title="Pdf"><i class="fas fa-file-pdf-o"></i></button>
                 </a>
@@ -1444,8 +1451,19 @@
                   <button class="btn btn-outline-warning" title="Print"><i class="fas fa-print"></i>
                   </button>
                 </a>
-                <a class="text-dark" onclick="show_slip()">
-                  <button class="btn btn-outline-warning" title="Slip"><i class="fas fa-receipt"></i></button></a>
+                <a href=" " class=" fas fa-paperclip dropdown-toggle btn btn-outline-warning text-warning py-2 "  
+                data-bs-toggle="dropdown" id="attachmentDropdown" aria-haspopup="true" aria-expanded="false"> 
+            </a>
+
+            <div class="dropdown-menu" aria-labelledby="attachmentDropdown">
+                <a class="dropdown-item" style="cursor: pointer;" data-toggle="modal"
+                    data-target="#files"><i class="fa fa-paperclip"></i> Attach File</a>
+                {% if project.attachment != "" %}
+                <a class="dropdown-item" href="{{project.attachment.url}}"><i
+                        class="fa fa-download"></i> Download File</a>
+                {% endif %}
+     
+            </div>
               </div>
             </div>
 
@@ -1462,11 +1480,11 @@
                     </div>
                     <div class="top-left">
                       <div class="graphic-path">
-                        <p>Sales Order</p>
+                        <p>Project Details</p>
                       </div>
                       <div class="position-relative" style="margin-right: 5px;">
-                        <p>Sales Order No.
-                          <span>{{sale.sales_no}}</span>
+                        <p>Project code.
+                          <span>{{project.project_code}}</span>
                         </p>
                       </div>
                     </div>
@@ -1476,7 +1494,7 @@
                     <div class="col-12">
                       <div class="row bb pb-3">
                         <div class="col-7">
-                          <p>FROM,</p>
+                          <p>Comapny Details,</p>
                           <h5>{{company.company_name }}</h5>
                           <p class="address "> {{company.address}}<br>
                             {{company.city}},
@@ -1486,23 +1504,23 @@
 
                         </div>
                         <div class="col-5">
-                          <p>TO,</p>
-                          <h5>{{sale.customer.customerName}}</h5>
+                          <p>Customer Details,</p>
+                          <h5>{{project.c_name.customerName}}</h5>
                           <p class="address col-9" style="margin-left: 0px;">
-                            {{sale.customer.Address1}} </p><br>
-                          <p class="address col-9">{{sale.customer.GSTTreatment}}</p><br>
-                          <p class="address col-9">{{sale.customer.GSTIN}}</p>
+                            {{project.c_name.Address1}} </p>
+                          <p class="address col-9">{{project.c_name.GSTTreatment}}</p>
+                          <p class="address col-9">{{project.c_name.customerEmail}}</p>
 
 
                         </div>
                       </div>
                       <div class="row extra-info pt-3">
                         <div class="col-7">
-                          <p>Sales Order Date:
-                            <span>{{sale.sales_date |date:'d-m-Y'}}</span>
+                          <p> Date:
+                            <span>{{project.start |date:'d-m-Y'}}</span>
                           </p>
-                          <p>Expiry Date:
-                            <span>{{sale.ship_date |date:'d-m-Y'}}</span>
+                          <p>Due Date:
+                            <span>{{project.end |date:'d-m-Y'}}</span>
                           </p>
                         </div>
 
@@ -1512,33 +1530,32 @@
 
                   <section class="product-area mt-4">
                     <table class=" table table-hover table-bordered " id="table1">
-                      <thead>
-                        <tr>
-                          <td style="text-align: center; font-weight:bold; color:black ">Items</td>
-                          <td style="font-weight:bold; color:black">HSN</td>
-                          <td style="font-weight:bold; color:black">Quantity</td>
-                          <td style="font-weight:bold; color:black">Price</td>
-                          <td style="font-weight:bold; color:black">Discount</td>
-                          <td style="font-weight:bold; color:black">Tax %</td>
-                          <td style="font-weight:bold; color:black">Total</td>
-
-                        </tr>
-                      </thead>
-                      <tbody>
-
-                        {% for j in saleitem %}
-                        <tr>
-                          <td style="color:black; text-align: center;">{{j.product}}</td>
-                          <td style="color:black">{{j.hsn}}</td>
-                          <td style="color:black">{{j.quantity}}</td>
-                          <td style="color:black">{{j.rate}} </td>
-                          <td style="color:black">{{j.desc}} </td>
-                          <td style="color:black">{{j.tax}} </td>
-                          <td style="color:black">{{j.total}} </td>
-
-                        </tr>
-                        {% endfor %}
-                      </tbody>
+                        <thead>
+                            <tr>
+      
+                              <th id="th" style="text-align: center;">Project</th>
+                              <th id="th" style="text-align: center;">Billing Method</th>
+                              <!-- <th id="th" style="text-align: center;">Quantity</th> -->
+                              <th id="th" style="text-align: center;">Amount</th>
+                              <th id="th" style="text-align: center;">Start Date</th>
+                              <th id="th" style="text-align: center;">Due Date</th>
+                              <th id="th" style="text-align: center;"> Action</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                         
+                            <tr style="color: black;">
+                              <td style="text-align: center;">{{project.name}}</td>
+                              <td style="text-align: center;">{{project.billing}}</td>
+                              <!-- <td style="text-align: center;">{{i.quantity}}</td> -->
+                              <td style="text-align: center;">{{project.rateperhour}}</td>
+                              <td style="text-align: center;">{{project.start}}</td>
+                              <td style="text-align: center;">{{project.end}}</td>
+                              <td style="text-align: center;">{{project.action}}</td>
+                            </tr>
+        
+      
+                          </tbody>
                     </table><br><br>
                   </section>
 
@@ -1550,64 +1567,70 @@
                         <table class="table table-borderless">
                           <tbody>
                             <tr>
-                              <td style="color: #000;">Sub Total</td>
+                              <td style="color: #000;"></td>
                               <td style="color: #000;">:</td>
                               <td class="text-right" style="color: #000;">
-                                {{sale.subtotal}}</td>
+                               </td>
                             </tr>
-                            {% if sale.igst != '0.00' %}
+                       
                             <tr>
-                              <td style="color: #000;">IGST</td>
-                              <td style="color: #000;">:</td>
+                              <td style="color: #000;"></td>
+                              <td style="color: #000;"></td>
                               <td class="text-right" style="color: #000;">
-                                {{sale.igst}}</td>
+                                </td>
                             </tr>
-                            {% else %}
+          
                             <tr>
-                              <td style="color: #000;">SGST</td>
-                              <td style="color: #000;">:</td>
+                              <td style="color: #000;"></td>
+                              <td style="color: #000;"></td>
                               <td class="text-right" style="color: #000;">
-                                {{sale.sgst}}</td>
-                            </tr>
-                            <tr>
-                              <td style="color: #000;">CGST</td>
-                              <td style="color: #000;">:</td>
-                              <td class="text-right" style="color: #000;">
-                                {{sale.cgst}}</td>
-                            </tr>
-                            {% endif %}
-                            <tr>
-                              <td style="color: #000;">Tax Amount</td>
-                              <td style="color: #000;">:</td>
-                              <td class="text-right" style="color: #000;">
-                                {{sale.t_tax}}</td>
-                            </tr>
-                            <tr>
-                              <td style="color: #000;">Shipping Charge</td>
-                              <td style="color: #000;">:</td>
-                              <td class="text-right" style="color: #000;">{{sale.sh_charge}}</td>
-                            </tr>
-                            <tr>
-                              <td style="color: #000;">Adjustment</td>
-                              <td style="color: #000;">:</td>
-                              <td class="text-right" style="color: #000;">{{sale.adjust}}</td>
-                            </tr>
-                            {% if sale.advance != 0.0 %}
-                            <tr>
-                              <td style="color: #000;">Advance</td>
-                              <td style="color: #000;">:</td>
-                              <td class="text-center" style="color: #000;">{{sale.advance}}</td>
-                            </tr>
-
-                            {% endif %}
-                            <tr>
-                              <td style="color: #000;">Total</td>
-                              <td style="color: #000;">:</td>
-                              <td class="text-right" style="color: #000;">
-                                <b>{{sale.grandtotal}}</b>
                               </td>
                             </tr>
-
+                            <tr>
+                              <td style="color: #000;"></td>
+                              <td style="color: #000;"></td>
+                              <td class="text-right" style="color: #000;">
+                              </td>
+                            </tr>
+                       
+                            <tr>
+                              <td style="color: #000;"></td>
+                              <td style="color: #000;"></td>
+                              <td class="text-right" style="color: #000;">
+                          </td>
+                            </tr>
+                            <tr>
+                                <td style="color: #000;"></td>
+                                <td style="color: #000;"></td>
+                                <td class="text-right" style="color: #000;">
+                            </td>
+                              </tr>   <tr>
+                                <td style="color: #000;"></td>
+                                <td style="color: #000;"></td>
+                                <td class="text-right" style="color: #000;">
+                            </td>
+                              </tr>   <tr>
+                                <td style="color: #000;"></td>
+                                <td style="color: #000;"></td>
+                                <td class="text-right" style="color: #000;">
+                            </td>
+                              </tr>   <tr>
+                                <td style="color: #000;"></td>
+                                <td style="color: #000;"></td>
+                                <td class="text-right" style="color: #000;">
+                            </td>
+                              </tr>
+                              <tr>
+                                <td style="color: #000;"></td>
+                                <td style="color: #000;"></td>
+                                <td class="text-right" style="color: #000;">
+                            </td>
+                              </tr>   <tr>
+                                <td style="color: #000;"></td>
+                                <td style="color: #000;"></td>
+                                <td class="text-right" style="color: #000;">
+                            </td>
+                              </tr>
                           </tbody>
 
                         </table>
@@ -1744,29 +1767,85 @@
   }
 
   function exportToPDF() {
-    var content = document.getElementById('selected-area');
-    html2pdf()
-      .from(content)
-      .save('{{sale.sales_no}}' + '.pdf')
+  // Get the content element
+  var content = document.getElementById('selected-area');
+
+  // Apply styles to the content
+  content.style.backgroundColor = 'white';
+  content.style.color = 'black';
+
+  // Apply styles to h1 elements within the content
+  var h1Elements = content.getElementsByTagName('h1');
+  for (var i = 0; i < h1Elements.length; i++) {
+    h1Elements[i].style.color = 'black';
   }
-  function exportToPDF2() {
-    var content = document.getElementById('selected-area2');
-    html2pdf()
-      .from(content)
-      .save('{{sale.sales_no}}' + '.pdf')
+
+  // Generate PDF using html2pdf
+  html2pdf()
+    .from(content)
+    .save('{{sale.sales_no}}' + '.pdf');
+}
+
+function exportToPDF2() {
+  // Get the content element
+  var content = document.getElementById('selected-area2');
+
+  // Apply styles to the content
+  content.style.backgroundColor = 'white';
+  content.style.color = 'black';
+
+  // Apply styles to h1 elements within the content
+  var h1Elements = content.getElementsByTagName('h1');
+  for (var i = 0; i < h1Elements.length; i++) {
+    h1Elements[i].style.color = 'black';
   }
-  function exportToPDF3() {
-    var content = document.getElementById('selected-area3');
-    html2pdf()
-      .from(content)
-      .save('{{sale.sales_no}}' + '.pdf')
+
+  // Generate PDF using html2pdf
+  html2pdf()
+    .from(content)
+    .save('{{sale.sales_no}}' + '.pdf');
+}
+
+function exportToPDF3() {
+  // Get the content element
+  var content = document.getElementById('selected-area3');
+
+  // Apply styles to the content
+  content.style.backgroundColor = 'white';
+  content.style.color = 'black';
+
+  // Apply styles to h1 elements within the content
+  var h1Elements = content.getElementsByTagName('h1');
+  for (var i = 0; i < h1Elements.length; i++) {
+    h1Elements[i].style.color = 'black';
   }
-  function exportToPDF4() {
-    var content = document.getElementById('printslip');
-    html2pdf()
-      .from(content)
-      .save('{{sale.sales_no}}' + '.pdf')
+
+  // Generate PDF using html2pdf
+  html2pdf()
+    .from(content)
+    .save('{{sale.sales_no}}' + '.pdf');
+}
+
+function exportToPDF4() {
+  // Get the content element
+  var content = document.getElementById('selected-area4');
+
+  // Apply styles to the content
+  content.style.backgroundColor = 'white';
+  content.style.color = 'black';
+
+  // Apply styles to h1 elements within the content
+  var h1Elements = content.getElementsByTagName('h1');
+  for (var i = 0; i < h1Elements.length; i++) {
+    h1Elements[i].style.color = 'black';
   }
+
+  // Generate PDF using html2pdf
+  html2pdf()
+    .from(content)
+    .save('{{sale.sales_no}}' + '.pdf');
+}
+
 
 </script>
 
@@ -1974,6 +2053,136 @@
 
 </script>
 
+<script>
+  $(document).ready(function() {
+      // Cache the customer table for faster access
+      var customerTable = $("table");
+  
+      // Handle keyup event on the search input
+      $("#search").keyup(function() {
+          var searchText = $(this).val().toLowerCase();
+  
+          // Hide all rows initially
+          customerTable.find("tbody tr").hide();
+  
+          // Show rows that match the search criteria
+          customerTable.find("tbody tr").each(function() {
+              var customerName = $(this).find("td:eq(0)").text().toLowerCase();
+              var creditNoteNumber = $(this).find("td:eq(1)").text().toLowerCase();
+              var totalAmount = $(this).find("td:eq(2)").text().toLowerCase();
+  
+              // Clean up creditNoteNumber and totalAmount by removing special characters and whitespace
+              creditNoteNumber = creditNoteNumber.replace(/[^0-9]/g, '');
+              totalAmount = totalAmount.replace(/[^0-9.]/g, '');
+  
+              if (
+                  customerName.includes(searchText) ||
+                  creditNoteNumber.includes(searchText) ||
+                  totalAmount.includes(searchText)
+              ) {
+                  $(this).show();
+              }
+          });
+      });
+  });
+  </script>
 
+     <!-- attach file modal -->
+ 
+     <div class="modal fade" id="files" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+      <div class="modal-dialog" role="document">
+          <div class="modal-content" style="background-color: #213b52;">
+              <div class="modal-header">
+                  <h5 class="modal-title" id="exampleModalLabel">Add File</h5>
+                  <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                      <span aria-hidden="true">&times;</span>
+                  </button>
+              </div>
+              <form action="{% url 'attach_project_file' project.id %}" method="POST" enctype="multipart/form-data">
+                  {% csrf_token %}
+                  <div class="modal-body">
+                      <input type="file" class="form-control text-black" name="file">
+                  </div>
+                  <div class="modal-footer">
+                      <button type="button" class="btn btn-outline-info" data-dismiss="modal">Close</button>
+                      <button type="submit" class="btn btn-outline-info">Save</button>
+                  </div>
+              </form>
+          </div>
+      </div>
+  </div>
+  <script>
+    function sortTable(columnIndex) {
+        let sortAscending = false
+        const table = document.getElementById("mytable23");
+        const rows = Array.from(table.rows).slice(1); // Exclude the header row
 
+        rows.sort((row1, row2) => {
+            const cellValue1 = row1.cells[columnIndex].textContent.toLowerCase();
+            const cellValue2 = row2.cells[columnIndex].textContent.toLowerCase();
+
+            if (cellValue1 < cellValue2) {
+                return -1;
+            } else if (cellValue1 > cellValue2) {
+                return 1;
+            } else {
+                return 0;
+            }
+        });
+
+        // Clear the table body
+        while (table.rows.length > 1) {
+            table.deleteRow(1);
+        }
+
+        // Append the sorted rows back to the table
+        rows.forEach(row => table.appendChild(row));
+        sortAscending = !sortAscending;
+    }
+
+    function rsortTable(columnIndex) {
+        let sortAscending = false
+        const table = document.getElementById("mytable23");
+        const rows = Array.from(table.rows).slice(1); // Exclude the header row
+
+        rows.sort((row1, row2) => {
+            const cellValue1 = row1.cells[columnIndex].textContent.toLowerCase();
+            const cellValue2 = row2.cells[columnIndex].textContent.toLowerCase();
+
+            if (sortAscending) {
+                if (cellValue1 < cellValue2) {
+                    return -1;
+                } else if (cellValue1 > cellValue2) {
+                    return 1;
+                } else {
+                    return 0;
+                }
+            } else {
+                if (cellValue1 > cellValue2) {
+                    return -1;
+                } else if (cellValue1 < cellValue2) {
+                    return 1;
+                } else {
+                    return 0;
+                }
+            }
+        });
+
+        // Clear the table body
+        while (table.rows.length > 1) {
+            table.deleteRow(1);
+        }
+
+        // Append the sorted rows back to the table
+        rows.forEach(row => table.appendChild(row));
+
+        // Toggle the sorting order for the next click
+        sortAscending = !sortAscending;
+    }
+  jQuery(document).ready(function($) {
+    $(".clickable-row").click(function() {
+        window.location = $(this).data("href");
+    });
+});
+  </script>
 {% endblock %}
