@@ -933,7 +933,7 @@ def add_vendor(request):
      
         salutation =request.POST.getlist('salutation[]')
         first_name =request.POST.getlist('first_name[]')
-        last_name =request.POST.getlist('last_name[]')
+        # last_name =request.POST.getlist('last_name[]')
         email =request.POST.getlist('email[]')
         work_phone =request.POST.getlist('wphone[]')
         mobile =request.POST.getlist('mobile[]')
@@ -25892,151 +25892,7 @@ def customerdata(request):
     data7 = {'email': cust.customerEmail,'gstno':cust.GSTIN,'place':cust.placeofsupply,'gsttreat':cust.GSTTreatment,'billingAddress':cust.Address1}
     return JsonResponse(data7)
     
-def save_expense(request):
-    company = company_details.objects.get(user = request.user)
-    exp = ExpenseE.objects.filter(user=request.user).order_by('expense_number').last()
 
-# Now, latest_expense contains the latest ExpenseE object for the user, or None if no entry exists.
-
-    cur_user = request.user
-    usr = User.objects.get(id=cur_user.id)
-    # view=Chart_of_Account.objects.filter(user=user)
-    view=Chart_of_Account.objects.filter(user=usr)
-  
-    if request.user.is_authenticated:
-        if request.method == 'POST':
-            date = request.POST.get('date')
-            stat=request.POST['sub']
-            if stat == 'draft':
-                status='draft'
-            else:
-                status='save'
-            
-            expense_account = request.POST.get('expense_account')
-            expense_type = request.POST.get('expense_type')
-            amount = request.POST.get('amount')
-            currency = request.POST.get('currency')
-            expense_number = request.POST.get('expense_number')
-            paid = request.POST.get('select_payment')
-            accno=request.POST.get('acc_no')
-            upiid=request.POST.get('upi_id')
-            chequeno=request.POST.get('cheque_no')
-            if accno and accno != '0':
-                bank=Bankcreation.objects.get(ac_no=accno)
-                bankid=bank.id
-            else:
-                bankid=""
-
-
-            notes = request.POST.get('notes')
-            if request.POST.get('expense_type') == 'goods':
-                hsn_code = request.POST.get('sac')
-                sac = request.POST.get('hsn_code')
-            else:
-                hsn_code = request.POST.get('hsn_code')
-                sac = request.POST.get('sac')
-    
-            gst_treatment = request.POST.get('gst_treatment')
-            gstin=request.POST.get('gstin',None)
-            destination_of_supply = request.POST.get('destination_of_supply')
-            reverse_charge = request.POST.get('reverse_charge')
-            invoice = request.POST.get('invoice')
-            c = request.POST.get('customer')
-            customere = customer.objects.get(id=c)
-            custo_name=customere.customerName
-            v= request.POST.get('vendor')
-            vendor=vendor_table.objects.get(id=v)
-            vend_name=vendor.vendor_display_name 
-            c_placesupply=request.POST['place_of_supply2']
-            v_placesupply=request.POST['source_of_supply2']
-            if c_placesupply == v_placesupply:
-                tax = request.POST.get('tax')
-            else:
-                tax = request.POST.get('tax2')
-
-            # igst=request.POST['igst']
-            # cgst=request.POST['cgst']
-            # sgst=request.POST['sgst']
-            reference=request.POST['reference_number']
-            print("hellooooooooooooooooooooooooooooo")
-            print(vend_name)
-            vend_name1=vend_name.upper()
-
-          
-            taxamt = request.POST.get('taxamt',False)
-           
-            image = request.FILES.get('image')
-
-
-            expense = ExpenseE.objects.create(
-                user=request.user,
-                date=date,
-                image=image,
-                expense_account=expense_account,
-                expense_number=expense_number,
-                amount=amount,
-                currency=currency,
-                taxamt=taxamt,
-                sac=sac,
-                expense_type=expense_type,
-                paid=paid,
-                notes=notes,
-                hsn_code=hsn_code,
-                gst_treatment=gst_treatment,
-                gstin=gstin,
-                destination_of_supply=destination_of_supply,
-                reverse_charge=reverse_charge,
-                tax=tax,
-                invoice=invoice,
-                customer_name= customere,
-                vendor=vendor,
-                company=company,
-                vendor_name=vend_name1,
-                status=status,
-                reference_number=reference,
-                # igst=igst,
-                # cgst=cgst,
-                # sgst=sgst,
-                customer_place_supply= c_placesupply,
-                vendor_place_supply=v_placesupply,
-                accno=accno,
-                bankid=bankid,
-                upiid=upiid,
-                chequeno=chequeno,
-                customername=custo_name
-            )
-
-            expense.save()
-
-            return redirect('expensepage')
-        else:
-          
-            c = customer.objects.filter(user=request.user)
-            v = vendor_table.objects.filter(user=request.user)
-            accounts = AccountE.objects.filter(user=request.user)
-            account_types = set(AccountE.objects.filter(user=request.user).values_list('account_type', flat=True))
-            p = payment_termsE.objects.filter(user=request.user)
-            cp= company_details.objects.get(user = request.user)
-            paym = payment_terms.objects.filter(user=request.user.id)
-            banks=Bankcreation.objects.all()
-            if ExpenseE.objects.filter(company = cp).exists():
-                latest_bill = ExpenseE.objects.filter(company = cp).order_by('-reference_number').first()
-                if latest_bill:
-                    print("ssssssssssssssssssssssssssssssssssssssss") 
-                    last_number = int(latest_bill.reference_number)
-                    print(last_number)
-                    new_number = last_number + 1
-                    print(new_number)
-            else:
-                new_number=1
-
-            if deletedexpenses.objects.filter(cid=cp).exists():
-                   deleted=deletedexpenses.objects.get(cid = cp)
-                   if deleted:
-                       while int(deleted.reference_number) >= new_number:
-                           new_number+=1
-            return render(request, 'addexpense.html', {'banks':banks,'pay':paym,'company':cp,'vendor':v,'customer': c,'payments':p,'accounts': accounts, 'account_types': account_types,'count':new_number,'view':view,'exp':exp})
-   
 
 def overview(request,id):
    
@@ -26854,3 +26710,212 @@ def overview(request,id):
 
 
 
+
+   
+def add_vendort(request):
+    
+    if request.method=='POST':
+
+        vendor_data=vendor_table()
+        vendor_data.salutation = request.POST.get('salutation')
+        vendor_data.first_name=request.POST['first_name']
+        # vendor_data.last_name=request.POST['last_name']
+        vendor_data.company_name=request.POST['company_name']
+        # vendor_data.vendor_display_name=request.POST['v_display_name']
+        vendor_data.vendor_email=request.POST['vendor_email']
+        vendor_data.vendor_wphone=request.POST['w_phone']
+        vendor_data.vendor_mphone=request.POST['m_phone']
+        vendor_data.skype_number=request.POST['skype_number']
+        vendor_data.designation=request.POST['designation']
+        vendor_data.department=request.POST['department']
+        vendor_data.website=request.POST['website']
+        vendor_data.gst_treatment=request.POST['gst']
+        vendor_data.status="Active"
+
+        x=request.POST['gst']
+        if x=="Unregistered Business-not Registered under GST":
+            vendor_data.pan_number=request.POST['pan_number']
+            vendor_data.gst_number="null"
+        else:
+            vendor_data.gst_number=request.POST['gst_number']
+            vendor_data.pan_number=request.POST['pan_number']
+
+        vendor_data.source_supply=request.POST['source_supply']
+        vendor_data.currency=request.POST['currency']
+        vendor_data.opening_bal=request.POST['opening_bal']
+        # vendor_data.payment_terms=request.POST['payment_terms']
+
+        user_id=request.user.id
+        udata=User.objects.get(id=user_id)
+        vendor_data.user=udata
+        # vendor_data.battention=reque  st.POST['battention']
+        vendor_data.bcountry=request.POST['bcountry']
+        vendor_data.baddress=request.POST['baddress']
+        vendor_data.bcity=request.POST['bcity']
+        vendor_data.bstate=request.POST['bstate']
+        vendor_data.bzip=request.POST['bzip']
+        vendor_data.bphone=request.POST['bphone']
+        # vendor_data.bfax=request.POST['bfax']
+
+        # vendor_data.sattention=request.POST['sattention']
+        vendor_data.scountry=request.POST['scountry']
+        vendor_data.saddress=request.POST['saddress']
+        vendor_data.scity=request.POST['scity']
+        vendor_data.sstate=request.POST['sstate']
+        vendor_data.szip=request.POST['szip']
+        vendor_data.sphone=request.POST['sphone']
+        # vendor_data.sfax=request.POST['sfax']
+        vendor_data.save()
+        return render(request,"add_expense.html")
+
+
+
+        # ====updated 
+
+
+  
+def save_expense(request):
+    company = company_details.objects.get(user = request.user)
+    exp = ExpenseE.objects.filter(user=request.user).order_by('expense_number').last()
+
+# Now, latest_expense contains the latest ExpenseE object for the user, or None if no entry exists.
+
+    cur_user = request.user
+    usr = User.objects.get(id=cur_user.id)
+    # view=Chart_of_Account.objects.filter(user=user)
+    view=Chart_of_Account.objects.all()
+    payment=payment_terms.objects.filter(user=usr)
+    if request.user.is_authenticated:
+        if request.method == 'POST':
+            date = request.POST.get('date')
+            stat=request.POST['sub']
+            if stat == 'draft':
+                status='draft'
+            else:
+                status='save'
+            
+            expense_account = request.POST.get('expense_account')
+            expense_type = request.POST.get('expense_type')
+            amount = request.POST.get('amount')
+            currency = request.POST.get('currency')
+            expense_number = request.POST.get('expense_number')
+            paid = request.POST.get('select_payment')
+            accno=request.POST.get('acc_no')
+            upiid=request.POST.get('upi_id')
+            chequeno=request.POST.get('cheque_no')
+            if accno and accno != '0':
+                bank=Bankcreation.objects.get(ac_no=accno)
+                bankid=bank.id
+            else:
+                bankid=""
+
+
+            notes = request.POST.get('notes')
+            if request.POST.get('expense_type') == 'goods':
+                hsn_code = request.POST.get('sac')
+                sac = request.POST.get('hsn_code')
+            else:
+                hsn_code = request.POST.get('hsn_code')
+                sac = request.POST.get('sac')
+    
+            gst_treatment = request.POST.get('gst_treatment')
+            gstin=request.POST.get('gstin',None)
+            destination_of_supply = request.POST.get('destination_of_supply')
+            reverse_charge = request.POST.get('reverse_charge')
+            invoice = request.POST.get('invoice')
+            c = request.POST.get('customer')
+            customere = customer.objects.get(id=c)
+            custo_name=customere.customerName
+            v= request.POST.get('vendor')
+            vendor=vendor_table.objects.get(id=v)
+            vend_name=vendor.vendor_display_name 
+            c_placesupply=request.POST['place_of_supply2']
+            v_placesupply=request.POST['source_of_supply2']
+            if c_placesupply == v_placesupply:
+                tax = request.POST.get('tax')
+            else:
+                tax = request.POST.get('tax2')
+
+            # igst=request.POST['igst']
+            # cgst=request.POST['cgst']
+            # sgst=request.POST['sgst']
+            reference=request.POST['reference_number']
+            print("hellooooooooooooooooooooooooooooo")
+            print(vend_name)
+            vend_name1=vend_name.upper()
+
+          
+            taxamt = request.POST.get('taxamt',False)
+           
+            image = request.FILES.get('image')
+
+
+            expense = ExpenseE.objects.create(
+                user=request.user,
+                date=date,
+                image=image,
+                expense_account=expense_account,
+                expense_number=expense_number,
+                amount=amount,
+                currency=currency,
+                taxamt=taxamt,
+                sac=sac,
+                expense_type=expense_type,
+                paid=paid,
+                notes=notes,
+                hsn_code=hsn_code,
+                gst_treatment=gst_treatment,
+                gstin=gstin,
+                destination_of_supply=destination_of_supply,
+                reverse_charge=reverse_charge,
+                tax=tax,
+                invoice=invoice,
+                customer_name= customere,
+                vendor=vendor,
+                company=company,
+                vendor_name=vend_name1,
+                status=status,
+                reference_number=reference,
+                # igst=igst,
+                # cgst=cgst,
+                # sgst=sgst,
+                customer_place_supply= c_placesupply,
+                vendor_place_supply=v_placesupply,
+                accno=accno,
+                bankid=bankid,
+                upiid=upiid,
+                chequeno=chequeno,
+                customername=custo_name
+            )
+
+            expense.save()
+
+            return redirect('expensepage')
+        else:
+          
+            c = customer.objects.filter(user=request.user)
+            v = vendor_table.objects.filter(user=request.user)
+            accounts = AccountE.objects.filter(user=request.user)
+            account_types = set(AccountE.objects.filter(user=request.user).values_list('account_type', flat=True))
+            p = payment_termsE.objects.filter(user=request.user)
+            cp= company_details.objects.get(user = request.user)
+            paym = payment_terms.objects.filter(user=request.user.id)
+            banks=Bankcreation.objects.all()
+            if ExpenseE.objects.filter(company = cp).exists():
+                latest_bill = ExpenseE.objects.filter(company = cp).order_by('-reference_number').first()
+                if latest_bill:
+                    print("ssssssssssssssssssssssssssssssssssssssss") 
+                    last_number = int(latest_bill.reference_number)
+                    print(last_number)
+                    new_number = last_number + 1
+                    print(new_number)
+            else:
+                new_number=1
+
+            if deletedexpenses.objects.filter(cid=cp).exists():
+                   deleted=deletedexpenses.objects.get(cid = cp)
+                   if deleted:
+                       while int(deleted.reference_number) >= new_number:
+                           new_number+=1
+            return render(request, 'addexpense.html', {'payment':payment,'banks':banks,'pay':paym,'company':cp,'vendor':v,'customer': c,'payments':p,'accounts': accounts, 'account_types': account_types,'count':new_number,'view':view,'exp':exp})
+   

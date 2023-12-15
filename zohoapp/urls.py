@@ -1167,7 +1167,7 @@ urlpatterns = [
           path('attach_project_file/<int:pk>',views.attach_project_file,name='attach_project_file'),
   path('downloadProjectSampleImportFile',views.downloadProjectSampleImportFile,name='downloadProjectSampleImportFile'),
     path('import_project',views.import_project,name='import_project'),
-     path('add_vendor2/',views.add_vendor2,name='add_vendor2'),
+     path('add_vendort/',views.add_vendort,name='add_vendort'),
      
       path('projectcust',views.projectcust,name='projectcust'),
         path('entr_custmrApro', views.entr_custmrApro, name='entr_custmrApro'),
@@ -1180,7 +1180,7 @@ urlpatterns = [
 
 
 
-
+    
     
 ]
 urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)

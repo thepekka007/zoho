@@ -95,7 +95,7 @@ class History(models.Model):
 class vendor_table(models.Model):
     user=models.ForeignKey(User,on_delete=models.CASCADE,null=True)
     salutation=models.CharField(max_length=25,default='')
-    first_name=models.CharField(max_length=50,default='')
+    first_name=models.CharField(max_length=50,default='',null=True)
     last_name=models.CharField(max_length=50,default='')
     company_name=models.CharField(max_length=150,default='')
     vendor_display_name=models.CharField(max_length=150,default='')
@@ -1057,7 +1057,7 @@ class ExpenseE(models.Model):
     cgst=models.IntegerField(blank=True,null=True)
     sgst=models.IntegerField(blank=True,null=True)
     reference_number=models.IntegerField(blank=True,null=True)
-    expense_number=models.IntegerField(blank=True,null=True)
+    expense_number=models.TextField(blank=True,null=True)
     
     
 class AttachE(models.Model):

@@ -7,6 +7,53 @@
 <!-- class="row fixed-top " -->
 <!-- style=" position: fixed;" -->
 <style>
+  /* Style the Select2 container */
+
+
+  /* Style the Select2 dropdown trigger */
+  .select2-selection {
+    height: 50px; /* Set the height as needed */
+   /* Add border color */
+    border-radius: 4px; /* Add border-radius for rounded corners */
+  }
+
+  /* Style the Select2 dropdown arrow */
+  .select2-selection__arrow {
+    top: 10px; /* Adjust arrow position as needed */
+  }
+
+  /* Style the Select2 options */
+  .select2-results__option {
+    padding: 2px; /* Adjust padding as needed */
+  }
+
+  /* Style the Select2 highlighted option */
+  .select2-results__option--highlighted {
+    background-color: #000000; /* Change the background color of the highlighted option */
+    color: #fff; /* Change the text color of the highlighted option */
+  }
+
+  .select2-container--default .select2-selection--single .select2-selection__rendered {
+    color: #f3eded;
+    line-height: 2px;
+    background-color: #f1f1f1;
+    border: #f3eded;
+    padding-top: -19px;
+} 
+</style>
+<style>
+  /* Style the Select2 search input */
+  .select2-search__field {
+    width: 100%; /* Set the width as needed */
+    padding: 8px; /* Adjust padding as needed */
+    border: 1px solid #ced4da; /* Add border color */
+    border-radius: 4px; /* Add border-radius for rounded corners */
+    outline: none; /* Remove the outline */
+    color: #000;
+  }
+</style>
+
+<style>
     .modal{
       z-index: 9999;
       overflow: scroll;
@@ -215,13 +262,13 @@
 
 
     </div>
-    <div class="form-group row mt-4">
+    <!-- <div class="form-group row mt-4">
       <div class="col-sm-12 col-md-3 col-lg-3 col-form-label">
         <label>Customer Name*</label>
       </div>
       <div class="col-sm-12 col-md-6 col-lg-6 d-flex align-items-center">
-        <!-- Add the "d-flex" and "align-items-center" classes -->
-        <select name="c_name" id="customer" class="form-control bg-light text-dark">
+      Add the "d-flex" and "align-items-center" classes -->
+        <!-- <select name="c_name" id="customer" class="form-control bg-light text-dark">
           <option value="">Select Customer</option>
           {% for d in data %}
           <option value="{{d.id}}" data-email="{{ d.customerEmail }}">{{d.customerName}}</option>
@@ -232,10 +279,28 @@
               data-toggle="tooltip" title="Create Vendor"></i>
       </a>
       </div>
+    </div>  -->
+    <div class="form-group row mt-4">
+      <div class="col-sm-12 col-md-3 col-lg-3 col-form-label">
+        <label>Customer Name*</label>
+      </div>
+      <div class="col-sm-12 col-md-6 col-lg-6 d-flex align-items-center">
+        <!-- Add the "d-flex" and "align-items-center" classes -->
+        <select name="c_name" id="selected" class="form-control bg-light text-dark select" style="color: #000;">
+         
+          {% for d in data %}
+          <option value="{{d.id}}" data-email="{{ d.customerEmail }}">{{d.customerName}}</option>
+          {% endfor %}
+        </select>
+        <a href="" class="p-2" data-toggle="modal" data-target="#create_customer">
+          <i class="fas fa-plus p-2 rounded " style="color: white; background-color: rgb(210, 132, 30); "
+              data-toggle="tooltip" title="Create Vendor"></i>
+      </a>
+      </div>
     </div>
-    <script>
-      $(document).on('change', '#customer', function () {
-        var customer = $('#customer').val();
+ <!-- <script>
+      $(document).on('change', '#selected', function () {
+        var customer = $('#selected').val();
         $.ajax({
           type: "GET",
           url: "{% url 'customerdata' %}",
@@ -248,6 +313,7 @@
             datagst =response.gst;
             datagstin =response.gstin;
             address2 = response.billingAddress;
+            console.
             document.getElementById('customer-address').value = address2;
             document.getElementById('customer-email').value = dataemail;
             document.getElementById('customer-gst').value = datagst;
@@ -264,6 +330,60 @@
         });
       });
     </script>
+    <script>
+      $(document).ready(function() {
+       
+          $('#selected').select2();
+      });
+  </script> -->
+  <script>
+    $(document).ready(function() {
+      // Initialize select2
+      $('#selected').select2();
+  
+      // Handle change event for the 'selected' element
+      $(document).on('change', '#selected', function () {
+        var customer = $('#selected').val();
+        $.ajax({
+          type: "GET",
+          url: "{% url 'customerdata' %}",
+          data: {
+            id: customer
+          },
+          success: function (response) {
+            // console.log(response.email)
+            dataemail = response.email;
+            datagst =response.gst;
+            datagstin =response.gstin;
+            address2 = response.billingAddress;
+  
+            document.getElementById('customer-address').value = address2;
+            document.getElementById('customer-email').value = dataemail;
+            document.getElementById('customer-gst').value = datagst;
+  
+            if(datagst !='Unregistered Business-not Registered under GST' ){
+              document.getElementById('gstin').style.display='flex';
+              document.getElementById('customer-gstin').value = datagstin;
+            }
+            else{
+              document.getElementById('gstin').style.display='none';
+            }
+          }
+        });
+      });
+    });
+  </script>
+  
+    <script src="https://code.jquery.com/jquery-3.6.4.min.js" ></script>
+    <!-- Include Select2 -->
+   <link href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/css/select2.min.css" rel="stylesheet" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/js/select2.min.js" defer ></script>
+  
+  
+  
+  <script src="https://code.jquery.com/jquery-3.6.4.min.js" ></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/js/select2.min.js" ></script>
+   
 
 
     <div class="form-group row mt-4">
@@ -358,7 +478,17 @@
         <input type="date" id="enddate" name="end" class="form-control bg-light text-dark">
       </div>
     </div>
-    
+    <div class=" form-group row">
+      <div class="col-sm-12 col-md-3 col-lg-3 col-form-label">
+        <label>Description</label>
+      </div>
+      <div class="col-sm-12 col-md-6 col-lg-6">
+        <input type="text" class="form-control bg-light text-dark" name="name" required>
+        <div class="invalid-feedback">Please fill out this field.</div>
+
+      </div>
+
+    </div>
     <script>
       document.addEventListener('DOMContentLoaded', function () {
         // Get the current date in the format YYYY-MM-DD
@@ -389,7 +519,7 @@
 
 
     <label for="">Users</label><br>
-    <table class="table text-black" id="tab_logic">
+    <!-- <table class="table text-black" id="tab_logic">
       <thead>
         <tr>
           <th>No.</th>
@@ -421,8 +551,401 @@
         </tr>
       </tbody>
     </table>
-    
+      -->
+    <div class="row mt-2">
+      <div class="col-md-12 table-responsive-md mt-3">
+        <table class="table  " id="item_table" onclick='toggleDateInput()' >
+          <thead>
+        
+          </thead>
+          <tbody>
+            <tr id="row1">
+                <td style="width: 10%;">
+                Select Employee
+                </td>
+                
+                
+                <td style="width: 40%;" class='text-right text-dark'> <select name="user_select[]" class="form-control bg-light text-dark">
+                  <option value=" ">Select Employee</option>
+                  {% for d in emp %}
+                  <option value="{{ d.id }}" data-email="{{ d.first_name }}">{{ d.first_name }} {{ d.last_name }}</option>
+                  {% endfor %}
+                </select>
+                        
+                </td>
+                <td style="width: 40%;" class='text-right text-dark'>   <input type="email" placeholder="Enter the email id" name="user_email[]" class="form-control bg-light text-dark">
+     
+                </td>
+
+                <td class='text-center'><button type='button' id='del_btn1'
+                        class='btn btn-transparent text-danger btn-sm btn-outline-danger rounded-circle delete-row'
+                        style='width:30px'>X</button></td>
+                        <td class='text-center'>
+                          <!-- <button type='button' class='btn btn-transparent text-warning btn-sm btn-outline-warning rounded-circle clone-row' data-row=1 style='width:30px'><i class="fa fa-clone"></i>
+                          </button> -->
+                        </td>
+                        <td>
+                          <a href="" class="p-2" data-toggle="modal"  id="create-user">
+                            <i class="fas fa-plus p-2 rounded " style="color: white; background-color: rgb(210, 132, 30); "
+                                data-toggle="tooltip" title="Create Vendor"></i>
+                        </a>
+                        </td>
+</tr>
+    </tbody>
+  </table>
+  <button type="button" class="btn btn-sm text-white" style="background-color: rgb(210, 132, 30);" id="add-row">Add another line</button>
+</div >
+</div>
+    <!-- <button type="button" class="btn btn-sm text-white" style="background-color: rgb(210, 132, 30);" id="add-row">Add another line</button> -->
     <script>
+      var rowCount = 1;
+      $(document).ready(function () {
+        // Counter for row IDs
+      
+        // Function to calculate the row amount
+        function calculateRowAmount(row) {
+          var qty = parseFloat(row.find('.qty').val());
+          var rate = parseFloat(row.find('.rate').val());
+          var tax = parseFloat(row.find('.tax').val());
+          var discount = parseFloat(row.find('.discount').val());
+      
+          var rowAmount = (qty * rate) - discount;
+          var taxAmount = (rowAmount * tax) / 100;
+      
+          row.find('.amount').val(rowAmount.toFixed(2));
+          row.find('.taxamount').val(taxAmount.toFixed(2));
+          
+          return rowAmount;
+          calculateTaxAmount();
+        }
+      
+        // Function to calculate the subtotal
+        function calculateSubtotal() {
+          var subtotal = 0;
+          $('#item_table tbody tr').each(function () {
+            subtotal += calculateRowAmount($(this));
+          });
+          $('#subtotal').val(subtotal.toFixed(2));
+        }
+      
+      // Function to calculate the grand total
+      function calculateGrandTotal() {
+        var grandTotal = 0;
+        var totalTaxAmount = 0;
+      
+        $('#item_table tbody tr').each(function () {
+          var rowAmount = calculateRowAmount($(this));
+          grandTotal += rowAmount;
+          var taxAmount = parseFloat($(this).find('.taxamount').val());
+          grandTotal += taxAmount;
+          totalTaxAmount += taxAmount;
+        });
+        var shippingCharges = parseFloat($('#shipping').val());
+        var adjust = parseFloat($('#adjustment').val());
+      
+        grandTotal += shippingCharges ;
+        if (adjust >= 0) {
+                    grandtotal += adjust;
+                } else {
+                    grandtotal -= Math.abs(adjust);
+                }
+      
+        $('#grandtotal').val(grandTotal.toFixed(2));
+        $('#total_taxamount').val(totalTaxAmount.toFixed(2));
+      }
+      
+        $('#item_table').on('change', '.tax', function () {
+          var row = $(this).closest('tr');
+          calculateRowAmount(row);
+          calculateSubtotal();
+          calculateGrandTotal();
+        });
+      
+        $('#add-row').click(function () {
+          rowCount++; // Increment row counter
+          var newRow = `
+    <tr id="row1">
+                <td style="width: 10%;">
+                Select Employee
+                </td>
+                
+                
+                <td style="width: 40%;" class='text-right text-dark'> <select name="user_select[]" class="form-control bg-light text-dark">
+                  <option value=" ">Select Employee</option>
+                  {% for d in emp %}
+                  <option value="{{ d.id }}" data-email="{{ d.first_name }}">{{ d.first_name }} {{ d.last_name }}</option>
+                  {% endfor %}
+                </select>
+                        
+                </td>
+                <td style="width: 40%;" class='text-right text-dark'>   <input type="email" placeholder="Enter the email id" name="user_email[]" class="form-control bg-light text-dark">
+     
+                </td>
+                <td class='text-center'><button type='button' id='del_btn1'
+                        class='btn btn-transparent text-danger btn-sm btn-outline-danger rounded-circle delete-row'
+                        style='width:30px'>X</button></td>
+                        <td class='text-center'>
+                       
+                        </td>
+</tr>
+
+          `;
+        $('#item_table tbody').append(newRow);
+          toggleDateInput();
+          calculateSubtotal();
+          calculateGrandTotal();
+        });
+        $('#item_table').on('click', '.delete-row', function () {
+          $(this).closest('tr').remove();
+          calculateSubtotal();
+          calculateGrandTotal();
+          calculateTaxAmount();
+        });
+        $('#srcofsupply').on('change', function () {
+        var row = $(this).closest('tr');
+        calculateRowAmount(row);
+        calculateSubtotal();
+        calculateGrandTotal();
+        toggleDateInput();
+        calculateTaxAmount();
+      
+        // Calculate total tax amount and its IGST amount
+        var totalTaxAmount = 0;
+        var totalIGSTAmount = 0;
+      
+        $('#item_table tbody tr').each(function () {
+          var tax = $(this).find('.tax').val();
+          var amount = $(this).find('.amount').val();
+      
+          var taxAmount = amount * (tax / 100);
+          totalTaxAmount += taxAmount;
+      
+          if (tax.startsWith('IGST')) {
+            totalIGSTAmount += taxAmount;
+          }
+        });
+      
+        // Update the total tax amount and its IGST amount in the UI
+        $('#total_taxamount').val(totalTaxAmount.toFixed(2));
+        $('#total_igstamount').val(totalIGSTAmount.toFixed(2));
+      });
+      
+        $(document).ready(function() {
+          var row = $(this).closest('tr');
+          calculateRowAmount(row);
+          calculateSubtotal();
+          calculateGrandTotal();
+          toggleDateInput();
+          calculateTaxAmount();
+      });
+        // Input change event for quantity, rate, and discount
+        $('#item_table').on('input', '.qty, .rate, .discount,.tax', function () {
+          var row = $(this).closest('tr');
+          calculateRowAmount(row);
+          calculateSubtotal();
+          calculateGrandTotal();
+          toggleDateInput();
+          calculateTaxAmount();
+        });
+      
+        $('#shipping').on('input', function () {
+          var shippingAmount = parseFloat($(this).val());5
+          $('#shipping_charge').val(shippingAmount.toFixed(2));
+          calculateGrandTotal();
+        });
+      
+         $('#adjustment').on('change', function () {
+          calculateGrandTotal();
+        });
+      
+      
+      
+        // Add an event listener to the fields in the item table
+      $('#item_table').on('click', '.item_select, .acnt, .rate, .qty, .tax, .discount', function () {
+        var row = $(this).closest('tr');
+        var taxElement = row.find('.tax');
+      
+        var checkbox = document.getElementById("srcofsupply");
+        var vale = checkbox.value;
+      
+        if (vale === "[KL] Kerala") {
+          taxElement.find('optgroup[label="GST"]').show();
+          taxElement.find('optgroup[label="IGST"]').hide();
+        } else {
+          taxElement.find('optgroup[label="GST"]').hide();
+          taxElement.find('optgroup[label="IGST"]').show();
+        }
+      });
+      
+      // Event handler for clone button
+      $('#item_table').on('click', '.clone-row', function () {
+        var row = $(this).closest('tr');
+        var clonedRow = row.clone(); // Clone the current row
+        var newRowId = 'row' + rowCount; // Generate a new ID for the cloned row
+        clonedRow.attr('id', newRowId); // Set the new ID for the cloned row
+      
+        // Clone the options for tax, account, and item
+        var currentItem = row.find('.item_select').val();
+        clonedRow.find('.item_select').val(currentItem);
+        // var currentAccount = row.find('.acnt').val();
+        // clonedRow.find('.acnt').val(currentAccount);
+        var currentTax = row.find('.tax').val();
+        clonedRow.find('.tax').val(currentTax);
+      
+        rowCount++; // Increment row counter
+      
+        $('#item_table tbody').append(clonedRow);
+        var row = $(this).closest('tr');
+        calculateRowAmount(row);
+        calculateSubtotal();
+        calculateGrandTotal();
+        toggleDateInput();
+        calculateTaxAmount();
+        toggleDateInput();
+      });
+      
+      
+             
+      
+      });
+      function calculateTaxAmount() {
+              var checkbox = document.getElementById("srcofsupply");
+              var vale=checkbox.value;
+              var srcofsupply = vale; // Replace with the actual value of srcofsupply
+              var companyState = "[KL] Kerala"; // Replace with the actual value of company state
+      
+              var subtotal = parseFloat(document.getElementById("subtotal").value);
+              var shipping = parseFloat(document.getElementById("shipping").value);
+              var adjust = parseFloat(document.getElementById("adjustment").value);
+              var tax = parseFloat(document.getElementById("total_taxamount").value);
+              
+              var tax_rate = 0.0; // Default tax rate for IGST
+              if (srcofsupply === companyState) {
+                  tax_rate =tax; // Tax rate for CGST/SGST
+              }
+      
+              var total_taxamount = tax_rate;
+      
+              var cgst = 0.00;
+              var sgst = 0.00;
+              var igst = 0.00;
+      
+              if (srcofsupply === companyState) {
+                  cgst = total_taxamount / 2;
+                  sgst = total_taxamount / 2;
+              } else {
+                  igst = tax;
+              }
+      
+              document.getElementById("cgst").value = cgst.toFixed(2);
+              document.getElementById("sgst").value = sgst.toFixed(2);
+              document.getElementById("igst").value = igst.toFixed(2);
+      
+              if (srcofsupply === companyState) {
+                  document.getElementById("tr_igst").style.display = "none";
+                  document.getElementById("tr_cgst").style.display = "";
+                  document.getElementById("tr_sgst").style.display = "";
+              } else {
+                  document.getElementById("tr_igst").style.display = "";
+                  document.getElementById("tr_cgst").style.display = "none";
+                  document.getElementById("tr_sgst").style.display = "none";
+              }
+      
+              document.getElementById("total_taxamount").value = total_taxamount.toFixed(2);
+              var grandtotal = subtotal + total_taxamount + shipping ;
+              // grandtotal += adjust;
+      
+                if (adjust >= 0) {
+                    grandtotal += adjust;
+                } else {
+                    grandtotal -= Math.abs(adjust);
+                }
+              document.getElementById("grandtotal").value = grandtotal.toFixed(2);
+          }
+      
+          // Call the function initially on page load
+          
+      
+          // Add event listeners to update tax amounts when subtotal or shipping changes
+          document.getElementById("subtotal").addEventListener("input", calculateTaxAmount);
+          document.getElementById("shipping").addEventListener("input", calculateTaxAmount);
+          document.getElementById("adjustment").addEventListener("input", calculateTaxAmount);
+      
+      function toggleDateInput() {
+            var checkbox = document.getElementById("srcofsupply");
+            var vale=checkbox.value;
+            
+            for (var i = 1; i <= rowCount; i++) {
+              var taxElement = $('#tax' + i);
+      
+              if (vale === "[KL] Kerala") {
+                  taxElement.find('optgroup[label="GST"]').show();
+                  taxElement.find('optgroup[label="IGST"]').hide();
+              } else {
+                  taxElement.find('optgroup[label="GST"]').hide();
+                  taxElement.find('optgroup[label="IGST"]').show();
+              }
+          }
+        }
+      
+        function test(taxamount) {
+              console.log('test333');
+              console.log(taxamount)
+              d = 0;
+              var checkbox = document.getElementById("srcofsupply");
+              var vale=checkbox.value;
+              console.log(pos)
+              console.log('state')
+              console.log(state)
+              console.log('state')
+              console.log('----------')
+              if ( vale === "[KL] Kerala") {
+                  console.log(pos);
+                  console.log(state);
+                  console.log(taxamount);
+                  gst = taxamount / 2;
+                  console.log(gst);
+                  $('#cgst').val(parseFloat(gst.toFixed(2)));
+                  $('#sgst').val(parseFloat(gst.toFixed(2)));
+                  $('#igst').val(parseFloat(d.toFixed(2)));
+                  
+                  // document.getElementById('tr_cgst').style= ('display: flex');
+                  
+                  // document.getElementById('tr_sgst').style= ('display: flex');
+                  // document.getElementById('tr_igst').style= ('display: none');
+      
+                 
+              }
+              else{
+                  gst = taxamount ;
+                  console.log(gst);
+                  $('#cgst').val(parseFloat(d.toFixed(2)));
+                  $('#sgst').val(parseFloat(d.toFixed(2)));
+                  $('#igst').val(parseFloat(gst.toFixed(2)));
+              }
+              var checkbox = document.getElementById("srcofsupply");
+              var vale=checkbox.value;
+              var pos= "[KL] Kerala"
+              if (vale==pos){
+      
+              }
+      
+              if (vale !=  "[KL] Kerala") {
+                  console.log(pos);
+                  console.log(state);
+                  document.getElementById('tr_cgst').style=('display: none');
+                  document.getElementById('tr_sgst').style= ('display: none');
+                  document.getElementById('tr_igst').style= ('display: block');
+              }
+              else{
+                  document.getElementById('tr_cgst').style=('display: block');
+                  document.getElementById('tr_sgst').style= ('display: block');
+                  document.getElementById('tr_igst').style= ('display: none');
+              }
+          }
+      
+      </script>
+   <script>
       // Add serial numbers to each row
       $(document).ready(function () {
         updateSerialNumbers();
@@ -461,10 +984,12 @@
     
     <!-- <button type="button" class="btn btn-sm text-white" style="background-color: rgb(210, 132, 30);"
           id="add-user-row">Add User</button> -->
-    <button type="button" class="btn btn-sm text-white" style="background-color: rgb(210, 132, 30);"
-      id="create-user">Create User</button><br><br><br>
+    <!-- <button type="button" class="btn btn-sm text-white" style="background-color: rgb(210, 132, 30);"
+      id="create-user">Create User</button><br><br><br> -->
+      <br><br><br>
     <label for="">Tasks</label><br>
-    <table class="table text-black my-2" id="task_table">
+
+    <!-- <table class="table text-black my-2" id="task_table">
       <thead>
         <tr>
           <th>Task name</th>
@@ -495,7 +1020,396 @@
             </button></td>
         </tr>
       </tbody>
-    </table>
+    </table> -->
+    <table class="table  " id="item_table2" onclick='toggleDateInput()' >
+   
+      <tbody>
+        <tr id="row1">
+        
+            <td style="width: 10%;">
+              Task name
+            </td>
+            
+            
+            <td style="width: 50%;" class='text-right text-dark'> <input type="text" placeholder="Enter the Task" name="taskname[]"class="form-control bg-light text-dark">
+ 
+          
+                    
+            </td>
+            <td style="width: 50%;" class='text-right text-dark'>   <input type="email" placeholder="Task Discription"  name="taskdes[]" class="form-control bg-light text-dark">
+ 
+            </td>
+
+            <td class='text-center'><button type='button' id='del_btn1'
+                    class='btn btn-transparent text-danger btn-sm btn-outline-danger rounded-circle delete-row'
+                    style='width:30px'>X</button></td>
+                    <td class='text-center'>
+                      <!-- <button type='button' class='btn btn-transparent text-warning btn-sm btn-outline-warning rounded-circle clone-row' data-row=1 style='width:30px'><i class="fa fa-clone"></i>
+                      </button> -->
+                    </td>
+                    <td></td>
+                    <td><td></td>
+               
+</tr>
+</tbody>
+</table>
+<br>
+
+
+<button type="button" class="btn btn-sm text-white" style="background-color: rgb(210, 132, 30);margin-left: ;" id="add-row2">Add another line</button>
+
+    
+<script>
+  var rowCount = 1;
+  $(document).ready(function () {
+    // Counter for row IDs
+  
+    // Function to calculate the row amount
+    function calculateRowAmount(row) {
+      var qty = parseFloat(row.find('.qty').val());
+      var rate = parseFloat(row.find('.rate').val());
+      var tax = parseFloat(row.find('.tax').val());
+      var discount = parseFloat(row.find('.discount').val());
+  
+      var rowAmount = (qty * rate) - discount;
+      var taxAmount = (rowAmount * tax) / 100;
+  
+      row.find('.amount').val(rowAmount.toFixed(2));
+      row.find('.taxamount').val(taxAmount.toFixed(2));
+      
+      return rowAmount;
+      calculateTaxAmount();
+    }
+  
+    // Function to calculate the subtotal
+    function calculateSubtotal() {
+      var subtotal = 0;
+      $('#item_table2 tbody tr').each(function () {
+        subtotal += calculateRowAmount($(this));
+      });
+      $('#subtotal').val(subtotal.toFixed(2));
+    }
+  
+  // Function to calculate the grand total
+  function calculateGrandTotal() {
+    var grandTotal = 0;
+    var totalTaxAmount = 0;
+  
+    $('#item_table2 tbody tr').each(function () {
+      var rowAmount = calculateRowAmount($(this));
+      grandTotal += rowAmount;
+      var taxAmount = parseFloat($(this).find('.taxamount').val());
+      grandTotal += taxAmount;
+      totalTaxAmount += taxAmount;
+    });
+    var shippingCharges = parseFloat($('#shipping').val());
+    var adjust = parseFloat($('#adjustment').val());
+  
+    grandTotal += shippingCharges ;
+    if (adjust >= 0) {
+                grandtotal += adjust;
+            } else {
+                grandtotal -= Math.abs(adjust);
+            }
+  
+    $('#grandtotal').val(grandTotal.toFixed(2));
+    $('#total_taxamount').val(totalTaxAmount.toFixed(2));
+  }
+  
+    $('#item_table2').on('change', '.tax', function () {
+      var row = $(this).closest('tr');
+      calculateRowAmount(row);
+      calculateSubtotal();
+      calculateGrandTotal();
+    });
+  
+    $('#add-row2').click(function () {
+      rowCount++; // Increment row counter
+      var newRow = `
+      <tr id="row1">
+        
+        <td style="width: 15%;">
+          Task name
+        </td>
+        
+        
+        <td style="width: 40%;" class='text-right text-dark'> <input type="email" placeholder="Enter the email id" name="taskname[]"class="form-control bg-light text-dark">
+
+      
+                
+        </td>
+        <td style="width: 40%;" class='text-right text-dark'>   <input type="email" placeholder="Task Discription"  name="taskdes[]" class="form-control bg-light text-dark">
+
+        </td>
+
+        <td class='text-center'><button type='button' id='del_btn1'
+                class='btn btn-transparent text-danger btn-sm btn-outline-danger rounded-circle delete-row'
+                style='width:30px'>X</button></td>
+                <td class='text-center'>
+                  <!-- <button type='button' class='btn btn-transparent text-warning btn-sm btn-outline-warning rounded-circle clone-row' data-row=1 style='width:30px'><i class="fa fa-clone"></i>
+                  </button> -->
+                </td>
+                <td></td>
+                <td><td></td>
+           
+</tr>
+
+      `;
+    $('#item_table2 tbody').append(newRow);
+      toggleDateInput();
+      calculateSubtotal();
+      calculateGrandTotal();
+    });
+    $('#item_table2').on('click', '.delete-row', function () {
+      $(this).closest('tr').remove();
+      calculateSubtotal();
+      calculateGrandTotal();
+      calculateTaxAmount();
+    });
+    $('#srcofsupply').on('change', function () {
+    var row = $(this).closest('tr');
+    calculateRowAmount(row);
+    calculateSubtotal();
+    calculateGrandTotal();
+    toggleDateInput();
+    calculateTaxAmount();
+  
+    // Calculate total tax amount and its IGST amount
+    var totalTaxAmount = 0;
+    var totalIGSTAmount = 0;
+  
+    $('#item_table2 tbody tr').each(function () {
+      var tax = $(this).find('.tax').val();
+      var amount = $(this).find('.amount').val();
+  
+      var taxAmount = amount * (tax / 100);
+      totalTaxAmount += taxAmount;
+  
+      if (tax.startsWith('IGST')) {
+        totalIGSTAmount += taxAmount;
+      }
+    });
+  
+    // Update the total tax amount and its IGST amount in the UI
+    $('#total_taxamount').val(totalTaxAmount.toFixed(2));
+    $('#total_igstamount').val(totalIGSTAmount.toFixed(2));
+  });
+  
+    $(document).ready(function() {
+      var row = $(this).closest('tr');
+      calculateRowAmount(row);
+      calculateSubtotal();
+      calculateGrandTotal();
+      toggleDateInput();
+      calculateTaxAmount();
+  });
+    // Input change event for quantity, rate, and discount
+    $('#item_table2').on('input', '.qty, .rate, .discount,.tax', function () {
+      var row = $(this).closest('tr');
+      calculateRowAmount(row);
+      calculateSubtotal();
+      calculateGrandTotal();
+      toggleDateInput();
+      calculateTaxAmount();
+    });
+  
+    $('#shipping').on('input', function () {
+      var shippingAmount = parseFloat($(this).val());5
+      $('#shipping_charge').val(shippingAmount.toFixed(2));
+      calculateGrandTotal();
+    });
+  
+     $('#adjustment').on('change', function () {
+      calculateGrandTotal();
+    });
+  
+  
+  
+    // Add an event listener to the fields in the item table
+  $('#item_table2').on('click', '.item_select, .acnt, .rate, .qty, .tax, .discount', function () {
+    var row = $(this).closest('tr');
+    var taxElement = row.find('.tax');
+  
+    var checkbox = document.getElementById("srcofsupply");
+    var vale = checkbox.value;
+  
+    if (vale === "[KL] Kerala") {
+      taxElement.find('optgroup[label="GST"]').show();
+      taxElement.find('optgroup[label="IGST"]').hide();
+    } else {
+      taxElement.find('optgroup[label="GST"]').hide();
+      taxElement.find('optgroup[label="IGST"]').show();
+    }
+  });
+  
+  // Event handler for clone button
+  $('#item_table2').on('click', '.clone-row', function () {
+    var row = $(this).closest('tr');
+    var clonedRow = row.clone(); // Clone the current row
+    var newRowId = 'row' + rowCount; // Generate a new ID for the cloned row
+    clonedRow.attr('id', newRowId); // Set the new ID for the cloned row
+  
+    // Clone the options for tax, account, and item
+    var currentItem = row.find('.item_select').val();
+    clonedRow.find('.item_select').val(currentItem);
+    // var currentAccount = row.find('.acnt').val();
+    // clonedRow.find('.acnt').val(currentAccount);
+    var currentTax = row.find('.tax').val();
+    clonedRow.find('.tax').val(currentTax);
+  
+    rowCount++; // Increment row counter
+  
+    $('#item_table2 tbody').append(clonedRow);
+    var row = $(this).closest('tr');
+    calculateRowAmount(row);
+    calculateSubtotal();
+    calculateGrandTotal();
+    toggleDateInput();
+    calculateTaxAmount();
+    toggleDateInput();
+  });
+  
+  
+         
+  
+  });
+  function calculateTaxAmount() {
+          var checkbox = document.getElementById("srcofsupply");
+          var vale=checkbox.value;
+          var srcofsupply = vale; // Replace with the actual value of srcofsupply
+          var companyState = "[KL] Kerala"; // Replace with the actual value of company state
+  
+          var subtotal = parseFloat(document.getElementById("subtotal").value);
+          var shipping = parseFloat(document.getElementById("shipping").value);
+          var adjust = parseFloat(document.getElementById("adjustment").value);
+          var tax = parseFloat(document.getElementById("total_taxamount").value);
+          
+          var tax_rate = 0.0; // Default tax rate for IGST
+          if (srcofsupply === companyState) {
+              tax_rate =tax; // Tax rate for CGST/SGST
+          }
+  
+          var total_taxamount = tax_rate;
+  
+          var cgst = 0.00;
+          var sgst = 0.00;
+          var igst = 0.00;
+  
+          if (srcofsupply === companyState) {
+              cgst = total_taxamount / 2;
+              sgst = total_taxamount / 2;
+          } else {
+              igst = tax;
+          }
+  
+          document.getElementById("cgst").value = cgst.toFixed(2);
+          document.getElementById("sgst").value = sgst.toFixed(2);
+          document.getElementById("igst").value = igst.toFixed(2);
+  
+          if (srcofsupply === companyState) {
+              document.getElementById("tr_igst").style.display = "none";
+              document.getElementById("tr_cgst").style.display = "";
+              document.getElementById("tr_sgst").style.display = "";
+          } else {
+              document.getElementById("tr_igst").style.display = "";
+              document.getElementById("tr_cgst").style.display = "none";
+              document.getElementById("tr_sgst").style.display = "none";
+          }
+  
+          document.getElementById("total_taxamount").value = total_taxamount.toFixed(2);
+          var grandtotal = subtotal + total_taxamount + shipping ;
+          // grandtotal += adjust;
+  
+            if (adjust >= 0) {
+                grandtotal += adjust;
+            } else {
+                grandtotal -= Math.abs(adjust);
+            }
+          document.getElementById("grandtotal").value = grandtotal.toFixed(2);
+      }
+  
+      // Call the function initially on page load
+      
+  
+      // Add event listeners to update tax amounts when subtotal or shipping changes
+      document.getElementById("subtotal").addEventListener("input", calculateTaxAmount);
+      document.getElementById("shipping").addEventListener("input", calculateTaxAmount);
+      document.getElementById("adjustment").addEventListener("input", calculateTaxAmount);
+  
+  function toggleDateInput() {
+        var checkbox = document.getElementById("srcofsupply");
+        var vale=checkbox.value;
+        
+        for (var i = 1; i <= rowCount; i++) {
+          var taxElement = $('#tax' + i);
+  
+          if (vale === "[KL] Kerala") {
+              taxElement.find('optgroup[label="GST"]').show();
+              taxElement.find('optgroup[label="IGST"]').hide();
+          } else {
+              taxElement.find('optgroup[label="GST"]').hide();
+              taxElement.find('optgroup[label="IGST"]').show();
+          }
+      }
+    }
+  
+    function test(taxamount) {
+          console.log('test333');
+          console.log(taxamount)
+          d = 0;
+          var checkbox = document.getElementById("srcofsupply");
+          var vale=checkbox.value;
+          console.log(pos)
+          console.log('state')
+          console.log(state)
+          console.log('state')
+          console.log('----------')
+          if ( vale === "[KL] Kerala") {
+              console.log(pos);
+              console.log(state);
+              console.log(taxamount);
+              gst = taxamount / 2;
+              console.log(gst);
+              $('#cgst').val(parseFloat(gst.toFixed(2)));
+              $('#sgst').val(parseFloat(gst.toFixed(2)));
+              $('#igst').val(parseFloat(d.toFixed(2)));
+              
+              // document.getElementById('tr_cgst').style= ('display: flex');
+              
+              // document.getElementById('tr_sgst').style= ('display: flex');
+              // document.getElementById('tr_igst').style= ('display: none');
+  
+             
+          }
+          else{
+              gst = taxamount ;
+              console.log(gst);
+              $('#cgst').val(parseFloat(d.toFixed(2)));
+              $('#sgst').val(parseFloat(d.toFixed(2)));
+              $('#igst').val(parseFloat(gst.toFixed(2)));
+          }
+          var checkbox = document.getElementById("srcofsupply");
+          var vale=checkbox.value;
+          var pos= "[KL] Kerala"
+          if (vale==pos){
+  
+          }
+  
+          if (vale !=  "[KL] Kerala") {
+              console.log(pos);
+              console.log(state);
+              document.getElementById('tr_cgst').style=('display: none');
+              document.getElementById('tr_sgst').style= ('display: none');
+              document.getElementById('tr_igst').style= ('display: block');
+          }
+          else{
+              document.getElementById('tr_cgst').style=('display: block');
+              document.getElementById('tr_sgst').style= ('display: block');
+              document.getElementById('tr_igst').style= ('display: none');
+          }
+      }
+  
+  </script>
     <table class="table text-black my-2" id="task_table">
       <div class="form-group row mt-4">
         <!-- <label class="col-sm-12 col-md-3 col-lg-3 col-form-label" style="color: white;">Customer Type</label> -->
@@ -521,7 +1435,7 @@
           </td>
          
     </table><br>
-    <div class=" form-group row">
+    <!-- <div class=" form-group row">
       <div class="col-sm-12 col-md-3 col-lg-3 col-form-label">
         <label>Description</label>
       </div>
@@ -531,7 +1445,7 @@
 
       </div>
 
-    </div>
+    </div> -->
     <!-- <button type="button" class="btn btn-sm text-white" style="background-color: rgb(210, 132, 30);"
           id="add-task-row">Add Task</button><br><br> -->
     <script>

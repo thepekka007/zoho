@@ -369,7 +369,7 @@
                 <div>
                     <label for="actionFilter"></label>
                     <select id="actionFilter" onchange="filterProjects()" style="background-color: #213b52; color: #ccc; width: 100%;">
-                        <option value="all"><i class="fas fa-filter"></i> All</option>
+                        <option value="all"><i class="fas fa-filter"></i> Filter</option>
                         <option value="Billable"><i class="fas fa-dollar-sign"></i> Billable</option>
                         <option value="Non Billable"><i class="fas fa-times"></i> Non-Billable</option>
                     </select>
@@ -1016,13 +1016,13 @@
             <div class="mt-3 template2 whatToPrint2" style="height: auto;width: 100%; margin-left: -1vh">
 
               <section id="selected-area" style="background-color: rgb(255, 221, 176);height: auto;" class=" p-2 m-2">
-                <header style="	background-color: #8b3131;border-radius: 1rem;">
+                <header style="	border-radius: 1rem;background-color: #1c72b4;">
                   <div class="logo ">
-                  <H1>PROJECT DETAILS</H1>
+                  <H1 style="color: #000;background-color: #1c72b4;">PROJECT DETAILS</H1>
                   </div>
-                  <div style="background: #8b3131;color: white;" class="company-info">
-                    <h2 class="text-white">{{company.company_name}}</h2>
-                    <p class="text-white"> {{company.address}}<br>{{company.city}}</p>
+                  <div style="color: rgb(0, 0, 0);" class="company-info">
+                    <h2 >{{company.company_name}}</h2>
+                    <p > {{company.address}}<br>{{company.city}}</p>
                     <p> {{company.contact_number}}</p>
                     <p>{{company.company_email}}</p>
                   </div>
@@ -1080,9 +1080,8 @@
                         <th id="th" style="text-align: center;">Billing Method</th>
                         <!-- <th id="th" style="text-align: center;">Quantity</th> -->
                         <th id="th" style="text-align: center;">Amount</th>
-                        <th id="th" style="text-align: center;">Start Date</th>
-                        <th id="th" style="text-align: center;">Due Date</th>
-                        <th id="th" style="text-align: center;"> Action</th>
+                
+       
                       </tr>
                     </thead>
                     <tbody>
@@ -1092,14 +1091,13 @@
                         <td style="text-align: center;">{{project.billing}}</td>
                         <!-- <td style="text-align: center;">{{i.quantity}}</td> -->
                         <td style="text-align: center;">{{project.rateperhour}}</td>
-                        <td style="text-align: center;">{{project.start}}</td>
-                        <td style="text-align: center;">{{project.end}}</td>
-                        <td style="text-align: center;">{{project.action}}</td>
+               
+              
                       </tr>
   
 
                     </tbody>
-                  </table><br>
+                  </table><br><br><br><br><br>
                   <div class="invoice-details text-dark">
                     <table>
                       <tr>
@@ -1185,6 +1183,7 @@
                   </div> -->
 
                 </div>
+                <br><br><br><br><br>
 
                 <footer class="mb-5">
                   <p class="text-dark">&copy; Zho Books 2023 | Info park kakkanad kochi, Ernamkulam, kerala India 12345
@@ -1277,7 +1276,7 @@
             <div id="template1" class="printTemplates template1">
               <div class="my-3 page" style="background-color: rgb(255, 221, 176);" id="selected-area2">
                 <div class="p-5">
-                  <div style="background-color: #8b3131;border-radius: 1rem;padding: 20px;">
+                  <div style="border-radius: 1rem;padding: 20px;color: #000;background-color: #1c72b4;">
                     <center class="h3"><b>PROJECT DETAILS</b></center>
                   </div>
                   <div class="row mt-5">
@@ -1355,9 +1354,8 @@
                               <th id="th" style="text-align: center;">Billing Method</th>
                               <!-- <th id="th" style="text-align: center;">Quantity</th> -->
                               <th id="th" style="text-align: center;">Amount</th>
-                              <th id="th" style="text-align: center;">Start Date</th>
-                              <th id="th" style="text-align: center;">Due Date</th>
-                              <th id="th" style="text-align: center;"> Action</th>
+                     
+             
                             </tr>
                           </thead>
                           <tbody>
@@ -1367,9 +1365,7 @@
                               <td style="text-align: center;">{{project.billing}}</td>
                               <!-- <td style="text-align: center;">{{i.quantity}}</td> -->
                               <td style="text-align: center;">{{project.rateperhour}}</td>
-                              <td style="text-align: center;">{{project.start}}</td>
-                              <td style="text-align: center;">{{project.end}}</td>
-                              <td style="text-align: center;">{{project.action}}</td>
+             
                             </tr>
         
       
@@ -1537,9 +1533,8 @@
                               <th id="th" style="text-align: center;">Billing Method</th>
                               <!-- <th id="th" style="text-align: center;">Quantity</th> -->
                               <th id="th" style="text-align: center;">Amount</th>
-                              <th id="th" style="text-align: center;">Start Date</th>
-                              <th id="th" style="text-align: center;">Due Date</th>
-                              <th id="th" style="text-align: center;"> Action</th>
+                  
+        
                             </tr>
                           </thead>
                           <tbody>
@@ -1549,9 +1544,8 @@
                               <td style="text-align: center;">{{project.billing}}</td>
                               <!-- <td style="text-align: center;">{{i.quantity}}</td> -->
                               <td style="text-align: center;">{{project.rateperhour}}</td>
-                              <td style="text-align: center;">{{project.start}}</td>
-                              <td style="text-align: center;">{{project.end}}</td>
-                              <td style="text-align: center;">{{project.action}}</td>
+             
+          
                             </tr>
         
       
