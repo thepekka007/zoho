@@ -405,7 +405,9 @@
           
           
           </select>
-          <a href="" data-toggle="modal" data-target="#create_account">+ Add New Account </a>
+        </div>
+          <div class="input-group-append">
+            <button type="button" class="btn " data-toggle="modal" data-target="#create_account" style="background-color: chocolate;;width: 20px; height: 38px;"><p style="font-size: 23px; margin-left: -8px;"> + </p></button>
         </div>
       </div>
            
@@ -711,7 +713,10 @@ document.getElementById("hsn_code").addEventListener("input", function() {
         
          {% endfor %} 
       </select>
-      <a href="" data-toggle="modal" data-target="#newvendor">+ Add New Vendor</a>
+      </div>
+
+      <div class="input-group-append">
+        <button type="button" class="btn " data-toggle="modal" data-target="#newvendor" style="background-color: chocolate;;width: 20px; height: 38px;"><p style="font-size: 23px; margin-left: -8px;"> + </p></button>
     </div>
 
   </div>
@@ -936,8 +941,11 @@ document.getElementById("hsn_code").addEventListener("input", function() {
                {% endfor %}
             
             </select>
-            <a href="" data-toggle="modal" data-target="#newcustomer">+ Add New Customer</a>
+            <!-- <a href="" data-toggle="modal" data-target="#newcustomer">+ Add New Customer</a> -->
           </div>
+          <div class="input-group-append">
+            <button type="button" class="btn " data-toggle="modal" data-target="#newcustomer" style="background-color: chocolate;;width: 20px; height: 38px;"><p style="font-size: 23px; margin-left: -8px;"> + </p></button>
+        </div>
         </div>
 
         <div class="row " id="cgsttreat_field" >

@@ -2,45 +2,11 @@
 {% block content %}
 {% load static %}
 
-
+<!-- <link rel="stylesheet" href="{% static 'assets/css/search.css' %}"> -->
 
 <!-- class="row fixed-top " -->
 <!-- style=" position: fixed;" -->
-<style>
-  /* Style the Select2 container */
 
-
-  /* Style the Select2 dropdown trigger */
-  .select2-selection {
-    height: 50px; /* Set the height as needed */
-   /* Add border color */
-    border-radius: 4px; /* Add border-radius for rounded corners */
-  }
-
-  /* Style the Select2 dropdown arrow */
-  .select2-selection__arrow {
-    top: 10px; /* Adjust arrow position as needed */
-  }
-
-  /* Style the Select2 options */
-  .select2-results__option {
-    padding: 2px; /* Adjust padding as needed */
-  }
-
-  /* Style the Select2 highlighted option */
-  .select2-results__option--highlighted {
-    background-color: #000000; /* Change the background color of the highlighted option */
-    color: #fff; /* Change the text color of the highlighted option */
-  }
-
-  .select2-container--default .select2-selection--single .select2-selection__rendered {
-    color: #f3eded;
-    line-height: 2px;
-    background-color: #f1f1f1;
-    border: #f3eded;
-    padding-top: -19px;
-} 
-</style>
 <style>
   /* Style the Select2 search input */
   .select2-search__field {
@@ -51,6 +17,23 @@
     outline: none; /* Remove the outline */
     color: #000;
   }
+/*   
+  .select2-container .select2-selection--single{box-sizing:border-box;cursor:pointer;display:block;height:35px;user-select:none;color: black;
+    -webkit-user-select:none;background-color: #fff;} */
+.select2-container .select2-selection--single .select2-selection__rendered{display:block;padding-left:20px;padding-right:20px; height: 25px;color: rgb(0, 0, 0);background-color: #fff;border-radius: 2px;box-shadow: #f1f1f1;}
+    .select2-dropdown{background-color:white;color: black;position:absolute;left:-100000px;width:100%;z-index:1051;color: black}
+    .select2-results{display:block}
+    .select2-results__options{list-style:none;margin:0;padding:0;color: black;background-color: #fff;} 
+    .select2-results__option[aria-selected]{cursor:pointer;color: black;background-color: #fff;}
+    .select2-container--open .select2-dropdown{left:0;color: rgb(240, 231, 231);background-color: #fff;}
+
+    .select2-hidden-accessible{background-color: #fff;border:0 !important;clip:rect(0 0 0 0) !important;-webkit-clip-path:inset(50%) !important;clip-path:inset(50%) !important;height:0px !important;padding:0 !important;position:absolute !important;width:1px !important;white-space:nowrap !important;color: black} 
+    .select2-container--default .select2-selection--single{background-color:#fff;border:1px solid #000000;border-radius:4px;color: rgb(0, 0, 0);background-color: #fff;}
+/* .select2-hidden-accessible{background-color: #fff;border:0 !important;clip:rect(0 0 0 0) !important;-webkit-clip-path:inset(50%) !important;clip-path:inset(50%) !important;height:1px !important;overflow:hidden !important;padding:0 !important;position:absolute !important;width:1px !important;white-space:nowrap !important;color: black}  */
+.select2-container--default .select2-selection--single:focus, .select2-container--default .select2-selection--single .select2-search__field:focus, .typeahead:focus, .tt-query:focus, .tt-hint:focus {
+    border: 1px solid rgba(255, 255, 255, 0.5);
+    background-color: #f1f1f1;
+}
 </style>
 
 <style>
@@ -286,7 +269,7 @@
       </div>
       <div class="col-sm-12 col-md-6 col-lg-6 d-flex align-items-center">
         <!-- Add the "d-flex" and "align-items-center" classes -->
-        <select name="c_name" id="selected" class="form-control bg-light text-dark select" style="color: #000;">
+        <select name="c_name" id="selected" class="form-control bg-light text-dark select" style="color: #000;background-color: #909091;" placeholder="Select Customer">
          
           {% for d in data %}
           <option value="{{d.id}}" data-email="{{ d.customerEmail }}">{{d.customerName}}</option>
@@ -356,8 +339,11 @@
             datagst =response.gst;
             datagstin =response.gstin;
             address2 = response.billingAddress;
-  
-            document.getElementById('customer-address').value = address2;
+            if(address2 != 'null' && address2.trim() != '')
+            {
+              document.getElementById('customer-address').value = address2;
+            }
+            // document.getElementById('customer-address').value = address2;
             document.getElementById('customer-email').value = dataemail;
             document.getElementById('customer-gst').value = datagst;
   
@@ -373,17 +359,12 @@
       });
     });
   </script>
-  
-    <script src="https://code.jquery.com/jquery-3.6.4.min.js" ></script>
-    <!-- Include Select2 -->
-   <link href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/css/select2.min.css" rel="stylesheet" />
+
+
   <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/js/select2.min.js" defer ></script>
   
   
   
-  <script src="https://code.jquery.com/jquery-3.6.4.min.js" ></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/js/select2.min.js" ></script>
-   
 
 
     <div class="form-group row mt-4">
@@ -403,23 +384,7 @@
         <textarea  class="form-control text-dark bg-light" style="height: 10rem;" id="customer-address" name="address"></textarea>
       </div>
     </div>  
-  
-    <!-- <div class="form-group row mt-4">
-      <div class="col-sm-12 col-md-3 col-lg-3 col-form-label">
-        <label>GST Treatment</label>
-      </div>
-      <div class="col-sm-12 col-md-6 col-lg-6">
-        <input type="text" id="customer-gst" class="form-control bg-light text-dark">
-      </div>
-    </div>
-    <div class="form-group row mt-4" id="gstin" style="display: none;">
-      <div class="col-sm-12 col-md-3 col-lg-3 col-form-label">
-        <label>GSTIN</label>
-      </div>
-      <div class="col-sm-12 col-md-6 col-lg-6">
-        <input type="text" id="customer-gstin" class="form-control bg-light text-dark" >
-      </div>
-    </div> -->
+
 
     <div class="form-group row mt-4">
       <div class="col-sm-12 col-md-3 col-lg-3 col-form-label"><label>Billing Method*</label></div>
@@ -448,18 +413,7 @@
         </div>
       </div>
     </div>
-    <!-- <div class="form-group row mt-4">
-      <div class="col-sm-12 col-md-3 col-lg-3 col-form-label"><label>Budget Type*</label></div>
-      <div class="col-sm-12 col-md-6 col-lg-6">
-        <select name="budget" id="budgetMethodSelect" class="form-control bg-light text-dark">
-          <option value=""></option>
-          <option value="Total budget cost">Total budget cost</option>
-          <option value="Total project hours">Total project hours(HH:MM)</option>
-          <option value="Hours per task">Hours per task</option>
-          <option value="Hours per staff">Hours per staff</option>
-        </select>
-      </div>
-    </div> -->
+
 
     <div class="form-group row mt-4">
       <div class="col-sm-12 col-md-3 col-lg-3 col-form-label">
@@ -519,39 +473,8 @@
 
 
     <label for="">Users</label><br>
-    <!-- <table class="table text-black" id="tab_logic">
-      <thead>
-        <tr>
-          <th>No.</th>
-          <th>User</th>
-          <th class="text-right">E-mail</th>
-          <th class="text-center">Actions</th>
-        </tr>
-      </thead>
-      <tbody id="items-table-body">
-        <tr id="addr0">
-          <td class="serial-number">1</td>
-          <td>
-            <select name="user_select[]" class="form-control bg-light text-dark">
-              <option value=" ">Select Employee</option>
-              {% for d in emp %}
-              <option value="{{ d.id }}" data-email="{{ d.first_name }}">{{ d.first_name }} {{ d.last_name }}</option>
-              {% endfor %}
-            </select>
-          </td>
-          <td class="text-right">
-            <input type="email" class="form-control bg-light text-dark" name="email[]">
-          </td>
-          <td class="text-center">
-            <button type="button" class="btn btn-transparent text-danger btn-sm btn-outline-danger rounded-circle delete-row"
-              style="width:30px">
-              <i class="fa fa-times"></i>
-            </button>
-          </td>
-        </tr>
-      </tbody>
-    </table>
-      -->
+ 
+
     <div class="row mt-2">
       <div class="col-md-12 table-responsive-md mt-3">
         <table class="table  " id="item_table" onclick='toggleDateInput()' >
@@ -565,18 +488,57 @@
                 </td>
                 
                 
-                <td style="width: 40%;" class='text-right text-dark'> <select name="user_select[]" class="form-control bg-light text-dark">
+                <td style="width: 40%;" class='text-right text-dark'> <select name="user_select[]" id="empid" class="form-control bg-light text-dark">
                   <option value=" ">Select Employee</option>
                   {% for d in emp %}
                   <option value="{{ d.id }}" data-email="{{ d.first_name }}">{{ d.first_name }} {{ d.last_name }}</option>
-                  {% endfor %}
+                  {% endfor %}  
                 </select>
                         
                 </td>
-                <td style="width: 40%;" class='text-right text-dark'>   <input type="email" placeholder="Enter the email id" name="user_email[]" class="form-control bg-light text-dark">
+                <td style="width: 40%;" class='text-right text-dark'>   <input type="email" id="mo" placeholder="Enter the email id" name="user_email[]" class="form-control bg-light text-dark">
      
                 </td>
-
+                <script>
+                  $(document).ready(function(){
+                  $('#empid').change(function(){
+                    var name = $("#empid").val();
+                    console.log("helooooooooooooooooooo")
+                    console.log(name)
+                    $.ajax({
+                      url: "{% url 'exp_get_employeedet' %}", 
+                            data: { 
+                                    id : name,
+                                    csrfmiddlewaretoken: '{{ csrf_token }}' 
+                                },
+                
+                            type : 'POST',
+                            success: function(data) {
+                              
+                                    var email = data.email;
+                   
+                                   
+                        
+                                    console.log("helloooooooooooooooooooooooooooooooo");
+                                    console.log(email);
+                
+                                  
+                                    if(email != 'null' && email.trim() !== '' )
+                                    {
+                                      $("#mo").val(email);
+                
+                                    
+                                     
+                                    }
+                                    
+                                 
+                            }
+                    });
+                  });
+                });
+                 
+                
+                  </script>
                 <td class='text-center'><button type='button' id='del_btn1'
                         class='btn btn-transparent text-danger btn-sm btn-outline-danger rounded-circle delete-row'
                         style='width:30px'>X</button></td>
@@ -1036,7 +998,7 @@
           
                     
             </td>
-            <td style="width: 50%;" class='text-right text-dark'>   <input type="email" placeholder="Task Discription"  name="taskdes[]" class="form-control bg-light text-dark">
+            <td style="width: 50%;" class='text-right text-dark'>   <input type="text" placeholder="Task Discription"  name="taskdes[]" class="form-control bg-light text-dark">
  
             </td>
 
@@ -1056,7 +1018,7 @@
 <br>
 
 
-<button type="button" class="btn btn-sm text-white" style="background-color: rgb(210, 132, 30);margin-left: ;" id="add-row2">Add another line</button>
+<button type="button" class="btn btn-sm text-white" style="background-color: rgb(210, 132, 30);" id="add-row2">Add another line</button>
 
     
 <script>
@@ -3857,7 +3819,7 @@ function reloadPayment() {
               <span aria-hidden="true">&times;</span>
           </button>
       </div>
-      <div class="modal-body" style="background: rgb(32, 35, 37);height: 500px; overflow-y: scroll;">
+      <div class="modal-body" style="background: rgb(32, 35, 37);height: 100%; overflow-y: scroll;">
         <div class="card p-3 m-3">
           <form action="{% url 'entr_custmrA2' %}" method="post" class="needs-validation" novalidate autocomplete="off" id="modalCustomer">
     
@@ -4127,7 +4089,7 @@ function reloadPayment() {
                 <label for="c_open">Opening Balance</label>
               </div>
               <div class="col-md-6 mt-2 d-flex">
-                <select name="bal" id="bal" style="width: 24%; height: 50%;" class="form-gr form-select text-dark bg-light" >
+                <select name="bal" id="bal" style="width: 24%; height: 100%;" class="form-gr form-select text-dark bg-light" >
                   <option value="credit">Credit</option>
                   <option value="debit">Debit</option>
                 </select>
@@ -4717,10 +4679,11 @@ function reloadPayment() {
                 <label for="c_open">Opening Balance</label>
               </div>
               <div class="col-md-6 mt-2 d-flex">
-                <select name="bal" id="bal" style="width: 24%; height: 50%;" class="form-gr form-select text-dark bg-light" >
-                  <option value="credit">Credit</option>
+                <select name="bal" id="bal" style="width: 24%; padding-top: 10px; height: 50px;">
+                  <option value="credit" selected>Credit</option>
                   <option value="debit">Debit</option>
-                </select>
+              </select>
+              
                 <input type="text" class="form-control text-dark bg-light" id="c_open" name="c_open">
               </div>       
             </div>
@@ -4736,7 +4699,7 @@ function reloadPayment() {
                     <option value="{{p.Terms}} {{p.id}}">{{p.Terms}}</option>
                     {% endfor %}
                   </select>                
-                  <a href="#" class="btn btn-outline-secondary py-2 my-1" data-target="#newpayment" data-toggle="modal">+</a>   
+                  <!-- <a href="#" classs="btn btn-outline-secondary py-2 my-1" data-target="#newpayment" data-toggle="modal">+</a>    -->
                 </div>
               </div>       
             </div>

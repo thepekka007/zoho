@@ -1180,7 +1180,9 @@ urlpatterns = [
 
 
 
-    
+# path('vendordata', views.vendordata, name='vendordata'),
+      path('exp_get_vendordet',views.exp_get_vendordet,name='exp_get_vendordet'),
+       path('exp_get_employeedet', views.exp_get_employeedet, name='exp_get_employeedet'),
     
 ]
 urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)

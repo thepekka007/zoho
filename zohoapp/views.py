@@ -26717,11 +26717,11 @@ def add_vendort(request):
     if request.method=='POST':
 
         vendor_data=vendor_table()
-        vendor_data.salutation = request.POST.get('salutation')
+        # vendor_data.salutation = request.POST.get('salutation')
         vendor_data.first_name=request.POST['first_name']
-        # vendor_data.last_name=request.POST['last_name']
+        vendor_data.last_name=request.POST.get('last_name')
         vendor_data.company_name=request.POST['company_name']
-        # vendor_data.vendor_display_name=request.POST['v_display_name']
+        # # vendor_data.vendor_display_name=request.POST['v_display_name']
         vendor_data.vendor_email=request.POST['vendor_email']
         vendor_data.vendor_wphone=request.POST['w_phone']
         vendor_data.vendor_mphone=request.POST['m_phone']
@@ -26730,20 +26730,20 @@ def add_vendort(request):
         vendor_data.department=request.POST['department']
         vendor_data.website=request.POST['website']
         vendor_data.gst_treatment=request.POST['gst']
-        vendor_data.status="Active"
+        # vendor_data.status="Active"
 
-        x=request.POST['gst']
-        if x=="Unregistered Business-not Registered under GST":
-            vendor_data.pan_number=request.POST['pan_number']
-            vendor_data.gst_number="null"
-        else:
-            vendor_data.gst_number=request.POST['gst_number']
-            vendor_data.pan_number=request.POST['pan_number']
+        # x=request.POST['gst']
+        # if x==" Unregistered Business (Business that has not been registeredunder gst)":
+        #     vendor_data.pan_number=request.POST['pan_number']
+        #     vendor_data.gst_number="null"
+        # else:
+        vendor_data.gst_number=request.POST['gst_number']
+        vendor_data.pan_number=request.POST['pan_number']
 
         vendor_data.source_supply=request.POST['source_supply']
         vendor_data.currency=request.POST['currency']
         vendor_data.opening_bal=request.POST['opening_bal']
-        # vendor_data.payment_terms=request.POST['payment_terms']
+        vendor_data.payment_terms=request.POST['payment_terms']
 
         user_id=request.user.id
         udata=User.objects.get(id=user_id)
@@ -26764,9 +26764,9 @@ def add_vendort(request):
         vendor_data.sstate=request.POST['sstate']
         vendor_data.szip=request.POST['szip']
         vendor_data.sphone=request.POST['sphone']
-        # vendor_data.sfax=request.POST['sfax']
+        vendor_data.sfax=request.POST['vsfax']
         vendor_data.save()
-        return render(request,"add_expense.html")
+        return render(request,"save_expense")
 
 
 
@@ -26789,10 +26789,10 @@ def save_expense(request):
         if request.method == 'POST':
             date = request.POST.get('date')
             stat=request.POST['sub']
-            if stat == 'draft':
-                status='draft'
-            else:
-                status='save'
+            # if stat == 'draft':
+            #     status='draft'
+            # else:
+            #     status='save'
             
             expense_account = request.POST.get('expense_account')
             expense_type = request.POST.get('expense_type')
@@ -26829,10 +26829,10 @@ def save_expense(request):
             v= request.POST.get('vendor')
             vendor=vendor_table.objects.get(id=v)
             vend_name=vendor.vendor_display_name 
-            c_placesupply=request.POST['place_of_supply2']
-            v_placesupply=request.POST['source_of_supply2']
+            c_placesupply=request.POST.get('source_of_supply5')
+            v_placesupply=request.POST.get('source_of_supply6')
             if c_placesupply == v_placesupply:
-                tax = request.POST.get('tax')
+                tax = request.POST.get('tax1')
             else:
                 tax = request.POST.get('tax2')
 
@@ -26874,7 +26874,7 @@ def save_expense(request):
                 vendor=vendor,
                 company=company,
                 vendor_name=vend_name1,
-                status=status,
+                status=stat,
                 reference_number=reference,
                 # igst=igst,
                 # cgst=cgst,
@@ -26919,3 +26919,114 @@ def save_expense(request):
                            new_number+=1
             return render(request, 'addexpense.html', {'payment':payment,'banks':banks,'pay':paym,'company':cp,'vendor':v,'customer': c,'payments':p,'accounts': accounts, 'account_types': account_types,'count':new_number,'view':view,'exp':exp})
    
+def deletp(request,id):
+    items=project1.objects.filter(id=id)
+    items.delete()
+    
+    return render(request,'projlist.html')
+
+
+
+def exp_get_vendordet(request):
+    print("hellooooooooooooooooooooooooooooooooooo")
+    company= company_details.objects.get(user = request.user)
+    id=request.POST.get('id')
+    print(id)
+    cust=vendor_table.objects.get(id=id)
+    address=cust.baddress
+    # city=cust.city
+    # cus_state=cust.state
+    # country=cust.country
+    # pincode=cust.zipcode
+    email=cust.vendor_email
+    # cust_place_supply=placeofsupply
+    gstin = cust.gst_number
+    gsttr = cust.gst_treatment
+    return JsonResponse({'email':email,'gstin':gstin,'gsttr':gsttr,'baddress':address},safe=False)
+                
+# cus_state':cus_state,'country':country,'address':address,'city':city,'pincode':pincode,'gst_treatment':gsttr, 'gstin': gstin ,'cust_place_supply':cust_place_supply,
+
+
+
+
+# def empdata(request):
+#     emp_id = request.GET.get('id')
+#     # cust = customer.objects.get(id=customer_id)
+#     Payroll =  Payroll.objects.get(id=emp_id)
+#     data8 = {'Eemail': Payroll.email}
+#     return JsonResponse(data8)
+
+def add_vendort(request):
+    
+    if request.method=='POST':
+
+        vendor_data=vendor_table()
+        vendor_data.salutation = request.POST.get('salutation')
+        vendor_data.first_name=request.POST['first_name']
+        vendor_data.last_name=request.POST.get('last_name')
+        vendor_data.company_name=request.POST['company_name']
+        # # vendor_data.vendor_display_name=request.POST['v_display_name']
+        vendor_data.vendor_email=request.POST['vendor_email']
+        vendor_data.vendor_wphone=request.POST['w_phone']
+        vendor_data.vendor_mphone=request.POST['m_phone']
+        vendor_data.skype_number=request.POST['skype_number']
+        vendor_data.designation=request.POST['designation']
+        vendor_data.department=request.POST['department']
+        vendor_data.website=request.POST['website']
+        vendor_data.gst_treatment=request.POST['gst']
+        # vendor_data.status="Active"
+
+        # x=request.POST['gst']
+        # if x==" Unregistered Business (Business that has not been registeredunder gst)":
+        #     vendor_data.pan_number=request.POST['pan_number']
+        #     vendor_data.gst_number="null"
+        # else:
+        vendor_data.gst_number=request.POST['gst_number']
+        vendor_data.pan_number=request.POST['pan_number']
+
+        vendor_data.source_supply=request.POST['source_supply']
+        vendor_data.currency=request.POST['currency']
+        vendor_data.opening_bal=request.POST['opening_bal']
+        vendor_data.payment_terms=request.POST['payment_terms']
+
+        user_id=request.user.id
+        udata=User.objects.get(id=user_id)
+        vendor_data.user=udata
+        # vendor_data.battention=reque  st.POST['battention']
+        vendor_data.bcountry=request.POST['bcountry']
+        vendor_data.baddress=request.POST['baddress']
+        vendor_data.bcity=request.POST['bcity']
+        vendor_data.bstate=request.POST['bstate']
+        vendor_data.bzip=request.POST['bzip']
+        vendor_data.bphone=request.POST['bphone']
+        # vendor_data.bfax=request.POST['bfax']
+
+        # vendor_data.sattention=request.POST['sattention']
+        vendor_data.scountry=request.POST['scountry']
+        vendor_data.saddress=request.POST['saddress']
+        vendor_data.scity=request.POST['scity']
+        vendor_data.sstate=request.POST['sstate']
+        vendor_data.szip=request.POST['szip']
+        vendor_data.sphone=request.POST['sphone']
+        vendor_data.sfax=request.POST['vsfax']
+        vendor_data.save()
+        return redirect('save_expense')
+
+
+def exp_get_employeedet(request):
+    print("hellooooooooooooooooooooooooooooooooooo")
+    company= company_details.objects.get(user = request.user)
+    id=request.POST.get('id')
+    print(id)
+    # cust=vendor_table.objects.get(id=id)
+    Pay= Payroll.objects.get(id=id)
+    email=Pay.email
+    # city=cust.city
+    # cus_state=cust.state
+    # country=cust.country
+    # pincode=cust.zipcode
+    # email=cust.vendor_email
+    # # cust_place_supply=placeofsupply
+    # gstin = cust.gst_number
+    # gsttr = cust.gst_treatment
+    return JsonResponse({'email':email},safe=False)
