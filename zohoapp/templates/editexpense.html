@@ -266,7 +266,7 @@
             
             <option value="">-- Select Expense Account --</option>
             
-            <optgroup label="Accounts Payable">
+            <!-- <optgroup label="Accounts Payable">
               <option value="Accounts Payable" {% if expense.expense_account == "Accounts Payable" %}selected{% endif %}>Accounts Payable</option>
           </optgroup>
           
@@ -290,7 +290,7 @@
              
           
              
-            </optgroup>
+            </optgroup> -->
 
             <optgroup label="Expense">
               <option value="Advertising and Marketing" {% if expense.expense_account == "Advertising and Marketing" %}selected{% endif %}>Advertising and Marketing</option>
@@ -318,10 +318,17 @@
               <option value="Merchandise" {% if expense.expense_account == "Merchandise" %}selected{% endif %}>Merchandise</option>
               <option value="Raw Materials and Consumables" {% if expense.expense_account == "Raw Materials and Consumables" %}selected{% endif %}>Raw Materials and Consumables</option>
               <option value="Transportation Expense" {% if expense.expense_account == "Transportation Expense" %}selected{% endif %}>Transportation Expense</option>
-          </optgroup>
+            
+                {% for i in view %}
+                {% if i.account_type == 'Expense' %}
+                  <option value="{{ i.account_name}}">{{ i.account_name }}</option>
+                  {% endif %}
+              {% endfor %}
+        
+            </optgroup>
           
 
-          <optgroup label="Cost of Goods Sold">
+          <!-- <optgroup label="Cost of Goods Sold">
             <option value="Cost of Goods Sold" {% if expense.expense_account == "Cost of Goods Sold" %}selected{% endif %}>Cost of Goods Sold</option>
             <option value="Job Costing" {% if expense.expense_account == "Job Costing" %}selected{% endif %}>Job Costing</option>
             <option value="Labor" {% if expense.expense_account == "Labor" %}selected{% endif %}>Labor</option>
@@ -339,8 +346,8 @@
           <option value="Sales" {% if expense.expense_account == "Sales" %}selected{% endif %}>Sales</option>
           <option value="Shipping Charge" {% if expense.expense_account == "Shipping Charge" %}selected{% endif %}>Shipping Charge</option>
       </optgroup>
-      
-
+       -->
+<!-- 
       <optgroup label="Equity">
         <option value="Drawings" {% if expense.expense_account == "Drawings" %}selected{% endif %}>Drawings</option>
         <option value="Opening Balance Offset" {% if expense.expense_account == "Opening Balance Offset" %}selected{% endif %}>Opening Balance Offset</option>
@@ -363,12 +370,16 @@
       <option value="Output IGST" {% if expense.expense_account == "Output IGST" %}selected{% endif %}>Output IGST</option>
       <option value="Output SGST" {% if expense.expense_account == "Output SGST" %}selected{% endif %}>Output SGST</option>
       <option value="TDS Payable" {% if expense.expense_account == "TDS Payable" %}selected{% endif %}>TDS Payable</option>
+  </optgroup> -->
+  <optgroup class=""label="Other Expense">
+    {% for i in view %}
+    {% if i.account_type == 'Other Expense' %}
+      <option value="{{ i.account_name}}">{{ i.account_name }}</option>
+      {% endif %}
+  {% endfor %}
   </optgroup>
-  <optgroup label="Other Expense">
-    <option value="Exchange Gain or Loss" {% if expense.expense_account == "Exchange Gain or Loss" %}selected{% endif %}>Exchange Gain or Loss</option>
-</optgroup>
 
-<optgroup label="Fixed Asset">
+<!-- <optgroup label="Fixed Asset">
     <option value="Furniture and Equipment" {% if expense.expense_account == "Furniture and Equipment" %}selected{% endif %}>Furniture and Equipment</option>
 </optgroup>
 
@@ -389,7 +400,7 @@
     <option value="Construction Loans" {% if expense.expense_account == "Construction Loans" %}selected{% endif %}>Construction Loans</option>
     <option value="Mortgages" {% if expense.expense_account == "Mortgages" %}selected{% endif %}>Mortgages</option>
 </optgroup>
-  
+   -->
 
             
 
@@ -405,10 +416,13 @@
           
           
           </select>
+          
         </div>
           <div class="input-group-append">
-            <button type="button" class="btn " data-toggle="modal" data-target="#create_account" style="background-color: chocolate;;width: 20px; height: 38px;"><p style="font-size: 23px; margin-left: -8px;"> + </p></button>
-        </div>
+            <a href=""  data-toggle="modal" data-target="#create_account">
+              <i class="fas fa-plus p-2 rounded " style="color: white; background-color: rgb(210, 132, 30);height: 30px;margin-top: 80%;margin-left: 1%; "
+                  data-toggle="tooltip" title="Create Vendor"></i>
+          </a>     </div>
       </div>
            
     
@@ -716,7 +730,11 @@ document.getElementById("hsn_code").addEventListener("input", function() {
       </div>
 
       <div class="input-group-append">
-        <button type="button" class="btn " data-toggle="modal" data-target="#newvendor" style="background-color: chocolate;;width: 20px; height: 38px;"><p style="font-size: 23px; margin-left: -8px;"> + </p></button>
+           <a href=""  data-toggle="modal" data-target="#newvendor">
+              <i class="fas fa-plus p-2 rounded " style="color: white; background-color: rgb(210, 132, 30);height: 30px;margin-top: 80%;margin-left: 1%; "
+                  data-toggle="tooltip" title="Create Vendor"></i>
+          </a>     
+        <!-- <button type="button" class="btn " data-toggle="modal" data-target="#newvendor" style="background-color: chocolate;;width: 20px; height: 38px;"><p style="font-size: 23px; margin-left: -8px;"> + </p></button> -->
     </div>
 
   </div>
@@ -747,44 +765,44 @@ document.getElementById("hsn_code").addEventListener("input", function() {
       <label class="col-md-3">Source Of Supply</label>
       <div class="col-md-6 p-3">
         <select class="form-control text-dark bg-light form-select" id="source_of_supply" onchange="show_tax()" name="source_of_supply">
-          <option value="[AN]-Andaman and Nicobar Islads">[AN]-Andaman and Nicobar Islads</option>
-          <option value="[AD]-Andhra Predhesh">[AD]-Andhra Predhesh</option>
-          <option value="[AR]-Arunachal Predesh">[AR]-Arunachal Predesh</option>
-          <option value="[AS]-Assam">[AS]-Assam</option>
-          <option value="[BR]-Bihar">[BR]-Bihar</option>
-          <option value="[CH]-Chandigarh">[CH]-Chandigarh</option>
-          <option value="[CG]-Chhattisgarh">[CG]-Chhattisgarh</option>
-          <option value="[DNH]-Dadra and Nagar Haveli">[DNH]-Dadra and Nagar Haveli</option>
-          <option value="[DD]-Damn anad Diu">[DD]-Damn anad Diu</option>
-          <option value="[DL]-Delhi">[DL]-Delhi</option>
-          <option value="[GA]-Goa">[GA]-Goa</option>
-          <option value="[GJ]-Gujarat">[GJ]-Gujarat</option>
-          <option value="[HR]-Haryana">[HR]-Haryana</option>
-          <option value="[HP]-Himachal Predesh">[HP]-Himachal Predesh</option>
-          <option value="[JK]-Jammu and Kashmir">[JK]-Jammu and Kashmir</option>
-          <option value="[JH]-Jharkhand">[JH]-Jharkhand</option>
-          <option value="[KA]-Karnataka">[KA]-Karnataka</option>
-          <option value="[KL]-Kerala">[KL]-Kerala</option>
-          <option value="[LA]-Ladakh">[LA]-Ladakh</option>
-          <option value="[LD]-Lakshadweep">[LD]-Lakshadweep</option>
-          <option value="[MP]-Madhya Predesh">[MP]-Madhya Predesh</option>
-          <option value="[MH]-Maharashtra">[MH]-Maharashtra</option>
-          <option value="[MN]-Manipur">[MN]-Manipur</option>
-          <option value="[ML]-Meghalaya">[ML]-Meghalaya</option>
-          <option value="[MZ]-Mizoram">[MZ]-Mizoram</option>
-          <option value="[NL]-Nagaland">[NL]-Nagaland</option>
-          <option value="[OD]-Odisha">[OD]-Odisha</option>
-          <option value="[PY]-Puducherry">[PY]-Puducherry</option>
-          <option value="[PB]-Punjab">[PB]-Punjab</option>
-          <option value="[RJ]-Rajasthan">[RJ]-Rajasthan</option>
-          <option value="[SK]-Sikkim">[SK]-Sikkim</option>
-          <option value="[TN]-Tamil Nadu">[TN]-Tamil Nadu</option>
-          <option value="[TS]-Telangana">[TS]-Telangana</option>
-          <option value="[TR]-Tripura">[TR]-Tripura</option>
-          <option value="[UP]-Uttar Predesh">[UP]-Uttar Predesh</option>
-          <option value="[UK]-Uttarakhand">[UK]-Uttarakhand</option>
-          <option value="[WB]-West Bengal">[WB]-West Bengal</option>
-          <option value="[OT]-Other Territory">[OT]-Other Territory</option>
+          <option value="[AN]-Andaman and Nicobar Islads" {% if expense.vendor_place_supply == "[AN]-Andaman and Nicobar Islads" %} selected {% endif %}>[AN]-Andaman and Nicobar Islads</option>
+          <option value="[AD]-Andhra Predhesh"  {% if expense.vendor_place_supply == "[AD]-Andhra Predhesh" %} selected {% endif %}>[AD]-Andhra Predhesh</option>
+          <option value="[AR]-Arunachal Predesh"  {% if expense.vendor_place_supply == "[AR]-Arunachal Predesh" %} selected {% endif %}>[AR]-Arunachal Predesh</option>
+          <option value="[AS]-Assam"  {% if expense.vendor_place_supply == "[AS]-Assam" %} selected {% endif %}>[AS ]-Assam</option>
+          <option value="[BR]-Bihar"  {% if expense.vendor_place_supply == "[BR]-Bihar" %} selected {% endif %}>[BR]-Bihar</option>
+          <option value="[CH]-Chandigarh"  {% if expense.vendor_place_supply == "[CH]-Chandigarh" %} selected {% endif %}>[CH]-Chandigarh</option>
+          <option value="[CG]-Chhattisgarh"  {% if expense.vendor_place_supply == "[CG]-Chhattisgarh" %} selected {% endif %}>[CG]-Chhattisgarh</option>
+          <option value="[DNH]-Dadra and Nagar Haveli"  {% if expense.vendor_place_supply == "[DNH]-Dadra and Nagar Haveli" %} selected {% endif %}>[DNH]-Dadra and Nagar Haveli</option>
+          <option value="[DD]-Damn anad Diu"  {% if expense.vendor_place_supply == "[DD]-Damn anad Diu" %} selected {% endif %}>[DD]-Damn anad Diu</option>
+          <option value="[DL]-Delhi"  {% if expense.vendor_place_supply == "[DL]-Delhi" %} selected {% endif %}>[DL]-Delhi</option>
+          <option value="[GA]-Goa"  {% if expense.vendor_place_supply == "[GA]-Goa" %} selected {% endif %}>[GA]-Goa</option>
+          <option value="[GJ]-Gujarat"  {% if expense.vendor_place_supply == "[GJ]-Gujarat" %} selected {% endif %}>[GJ]-Gujarat</option>
+          <option value="[HR]-Haryana"  {% if expense.vendor_place_supply == "[HR]-Haryana" %} selected {% endif %}>[HR]-Haryana</option>
+          <option value="[HP]-Himachal Predesh"  {% if expense.vendor_place_supply == "[AN]-Andaman and Nicobar Islads" %} selected {% endif %}>[AN]-Andaman and Nicobar Islads</option>
+          <option value="[JK]-Jammu and Kashmir"  {% if expense.vendor_place_supply == "[JK]-Jammu and Kashmir" %} selected {% endif %}>[JK]-Jammu and Kashmir</option>
+          <option value="[JH]-Jharkhand"  {% if expense.vendor_place_supply == "[JH]-Jharkhand" %} selected {% endif %}>[JH]-Jharkhand</option>
+          <option value="[KA]-Karnataka"  {% if expense.vendor_place_supply == "[KA]-Karnataka" %} selected {% endif %}>[KA]-Karnataka</option>
+          <option value="[KL]-Kerala"  {% if expense.vendor_place_supply == "[KL]-Kerala" %} selected {% endif %}>[KL]-Kerala</option>
+          <option value="[LA]-Ladakh"  {% if expense.vendor_place_supply == "[LA]-Ladakh" %} selected {% endif %}>[LA]-Ladakh</option>
+          <option value="[LD]-Lakshadweep"  {% if expense.vendor_place_supply == "[LD]-Lakshadweep" %} selected {% endif %}>[LD]-Lakshadweep</option>
+          <option value="[MP]-Madhya Predesh"  {% if expense.vendor_place_supply == "[MP]-Madhya Predesh" %} selected {% endif %}>[MP]-Madhya Predesh</option>
+          <option value="[MH]-Maharashtra"  {% if expense.vendor_place_supply == "[MH]-Maharashtra" %} selected {% endif %}>[MH]-Maharashtra</option>
+          <option value="[MN]-Manipur"  {% if expense.vendor_place_supply == "[MN]-Manipur" %} selected {% endif %}>[MN]-Manipur</option>
+          <option value="[ML]-Meghalaya"  {% if expense.vendor_place_supply == "[AN]-Andaman and Nicobar Islads" %} selected {% endif %}>[ML]-Meghalaya</option>
+          <option value="[MZ]-Mizoram"  {% if expense.vendor_place_supply == "[MZ]-Mizoram" %} selected {% endif %}>[MZ]-Mizoram</option>
+          <option value="[NL]-Nagaland"  {% if expense.vendor_place_supply == "[NL]-Nagaland" %} selected {% endif %}>[NL]-Nagaland</option>
+          <option value="[OD]-Odisha"  {% if expense.vendor_place_supply == "[OD]-Odisha" %} selected {% endif %}>[OD]-Odisha</option>
+          <option value="[PY]-Puducherry"  {% if expense.vendor_place_supply == "[PY]-Puducherry" %} selected {% endif %}>[PY]-Puducherry</option>
+          <option value="[PB]-Punjab"  {% if expense.vendor_place_supply == "[PB]-Punjab" %} selected {% endif %}>[PB]-Punjab</option>
+          <option value="[RJ]-Rajasthan"  {% if expense.vendor_place_supply == "[RJ]-Rajasthan" %} selected {% endif %}>[RJ]-Rajasthan</option>
+          <option value="[SK]-Sikkim"  {% if expense.vendor_place_supply == "[SK]-Sikkim" %} selected {% endif %}>[SK]-Sikkim</option>
+          <option value="[TN]-Tamil Nadu"  {% if expense.vendor_place_supply == "[TN]-Tamil Nadu" %} selected {% endif %}>[TN]-Tamil Nadu</option>
+          <option value="[TS]-Telangana"  {% if expense.vendor_place_supply == "[TS]-Telangana" %} selected {% endif %}>[TS]-Telangana</option>
+          <option value="[TR]-Tripura"  {% if expense.vendor_place_supply == "[TR]-Tripura" %} selected {% endif %}>[TR]-Tripura</option>
+          <option value="[UP]-Uttar Predesh"  {% if expense.vendor_place_supply == "[UP]-Uttar Predesh" %} selected {% endif %}>[UP]-Uttar Predesh</option>
+          <option value="[UK]-Uttarakhand"  {% if expense.vendor_place_supply == "[UK]-Uttarakhand" %} selected {% endif %}>[UK]-Uttarakhand</option>
+          <option value="[WB]-West Bengal"  {% if expense.vendor_place_supply == "[WB]-West Bengal" %} selected {% endif %}>[WB]-West Bengal</option>
+          <option value="[OT]-Other Territory"  {% if expense.vendor_place_supply == "[OT]-Other Territory" %} selected {% endif %}>[OT]-Other Territory</option>
         </select>
         <input type="text" id="source_of_supply2" name="source_of_supply2" style="display: none;">
       </div>
@@ -793,127 +811,127 @@ document.getElementById("hsn_code").addEventListener("input", function() {
  
   
       
-     <div class="row">
-    <label for="destination_of_supply" class="col-md-3 col-form-label text-white">Destination of Supply</label>
+     <!-- <div class="row">
+    <label for="destination_of_supply" class="col-md-3 col-form-label text-white">Source of Supply</label>
     <div class="col-md-6 p-3">
       <select class="form-control form-select text-dark bg-light" id="destination_of_supply" name="destination_of_supply">
         <option value="">-- Select Destination State --</option>
-        <option value="Andaman and Nicobar Islands (AN)" {% if expense.destination_of_supply == "Andaman and Nicobar Islands (AN)" %} selected {% endif %}>
+        <option value="Andaman and Nicobar Islands (AN)" {% if expense.vendor_place_supply == "Andaman and Nicobar Islands (AN)" %} selected {% endif %}>
           Andaman and Nicobar Islands (AN)
         </option>
-        <option value="Andhra Pradesh (AP)" {% if expense.destination_of_supply == "Andhra Pradesh (AP)" %} selected {% endif %}>
+        <option value="Andhra Pradesh (AP)" {% if expense.vendor_place_supply == "Andhra Pradesh (AP)" %} selected {% endif %}>
           Andhra Pradesh (AP)
         </option>
-        <option value="Arunachal Pradesh (AR)" {% if expense.destination_of_supply == "Arunachal Pradesh (AR)" %} selected {% endif %}>
+        <option value="Arunachal Pradesh (AR)" {% if expense.vendor_place_supply == "Arunachal Pradesh (AR)" %} selected {% endif %}>
           Arunachal Pradesh (AR)
         </option>
-        <option value="Assam (AS)" {% if expense.destination_of_supply == "Assam (AS)" %} selected {% endif %}>
+        <option value="Assam (AS)" {% if expense.vendor_place_supply == "Assam (AS)" %} selected {% endif %}>
           Assam (AS)
         </option>
-        <option value="Bihar (BR)" {% if expense.destination_of_supply == "Bihar (BR)" %} selected {% endif %}>
+        <option value="Bihar (BR)" {% if expense.vendor_place_supply == "Bihar (BR)" %} selected {% endif %}>
           Bihar (BR)
         </option>
-        <option value="Chandigarh (CH)" {% if expense.destination_of_supply == "Chandigarh (CH)" %} selected {% endif %}>
+        <option value="Chandigarh (CH)" {% if expense.vendor_place_supply == "Chandigarh (CH)" %} selected {% endif %}>
           Chandigarh (CH)
         </option>
-        <option value="Chhattisgarh (CT)" {% if expense.destination_of_supply == " Chhattisgarh (CT)" %} selected {% endif %}>
+        <option value="Chhattisgarh (CT)" {% if expense.vendor_place_supply == " Chhattisgarh (CT)" %} selected {% endif %}>
           Chhattisgarh (CT)
         </option>
-        <option value="Dadra and Nagar Haveli and Daman and Diu (DN)" {% if expense.destination_of_supply == "Dadra and Nagar Haveli and Daman and Diu (DN)" %} selected {% endif %}>
+        <option value="Dadra and Nagar Haveli and Daman and Diu (DN)" {% if expense.vendor_place_supply == "Dadra and Nagar Haveli and Daman and Diu (DN)" %} selected {% endif %}>
           Dadra and Nagar Haveli and Daman and Diu (DN)
         </option>
-        <option value="Delhi (DL)" {% if expense.destination_of_supply == "Delhi (DL)" %} selected {% endif %}>
+        <option value="Delhi (DL)" {% if expense.vendor_place_supply == "Delhi (DL)" %} selected {% endif %}>
           Delhi (DL)
         </option>
-        <option value="Goa (GA)" {% if expense.destination_of_supply == "Goa (GA)" %} selected {% endif %}>
+        <option value="Goa (GA)" {% if expense.vendor_place_supply == "Goa (GA)" %} selected {% endif %}>
           Goa (GA)
         </option>
-        <option value="Gujarat (GJ)" {% if expense.destination_of_supply == "Gujarat (GJ)" %} selected {% endif %}>
+        <option value="Gujarat (GJ)" {% if expense.vendor_place_supply == "Gujarat (GJ)" %} selected {% endif %}>
           Gujarat (GJ)
         </option>
-        <option value="Haryana (HR)" {% if expense.destination_of_supply == "Haryana (HR)" %} selected {% endif %}>
+        <option value="Haryana (HR)" {% if expense.vendor_place_supply == "Haryana (HR)" %} selected {% endif %}>
           Haryana (HR)
         </option>
-        <option value="Himachal Pradesh (HP)" {% if expense.destination_of_supply == "Himachal Pradesh (HP)" %} selected {% endif %}>
+        <option value="Himachal Pradesh (HP)" {% if expense.vendor_place_supply == "Himachal Pradesh (HP)" %} selected {% endif %}>
           Himachal Pradesh (HP)
         </option>
-        <option value="Jammu and Kashmir (JK)" {% if expense.destination_of_supply == "Jammu and Kashmir (JK)" %} selected {% endif %}>
+        <option value="Jammu and Kashmir (JK)" {% if expense.vendor_place_supply == "Jammu and Kashmir (JK)" %} selected {% endif %}>
           Jammu and Kashmir (JK)
         </option>
-        <option value="Jharkhand (JH)" {% if expense.destination_of_supply == "Jharkhand (JH)" %} selected {% endif %}>
+        <option value="Jharkhand (JH)" {% if expense.vendor_place_supply == "Jharkhand (JH)" %} selected {% endif %}>
           Jharkhand (JH)
         </option>
-        <option value="Karnataka (KA)" {% if expense.destination_of_supply == "Karnataka (KA)" %} selected {% endif %}>
+        <option value="Karnataka (KA)" {% if expense.vendor_place_supply == "Karnataka (KA)" %} selected {% endif %}>
           Karnataka (KA)
         </option>
-        <option value="Kerala (KL)" {% if expense.destination_of_supply == "Kerala (KL)" %} selected {% endif %}>
+        <option value="Kerala (KL)" {% if expense.vendor_place_supply == "Kerala (KL)" %} selected {% endif %}>
           Kerala (KL)
         </option>
-        <option value="Lakshadweep (LD)" {% if expense.destination_of_supply == "Lakshadweep (LD)" %} selected {% endif %}>
+        <option value="Lakshadweep (LD)" {% if expense.vendor_place_supply == "Lakshadweep (LD)" %} selected {% endif %}>
           Lakshadweep (LD)
         </option>
-        <option value="Madhya Pradesh (MP)" {% if expense.destination_of_supply == "Madhya Pradesh (MP)" %} selected {% endif %}>
+        <option value="Madhya Pradesh (MP)" {% if expense.vendor_place_supply == "Madhya Pradesh (MP)" %} selected {% endif %}>
           Madhya Pradesh (MP)
         </option>
-        <option value="Maharashtra (MH)" {% if expense.destination_of_supply == "Maharashtra (MH)" %} selected {% endif %}>
+        <option value="Maharashtra (MH)" {% if expense.vendor_place_supply == "Maharashtra (MH)" %} selected {% endif %}>
           Maharashtra (MH)
         </option>
-        <option value="Manipur (MN)" {% if expense.destination_of_supply == "Manipur (MN)" %} selected {% endif %}>
+        <option value="Manipur (MN)" {% if expense.vendor_place_supply == "Manipur (MN)" %} selected {% endif %}>
           Manipur (MN)
         </option>
-        <option value="Meghalaya (ML)" {% if expense.destination_of_supply == "Meghalaya (ML)" %} selected {% endif %}>
+        <option value="Meghalaya (ML)" {% if expense.vendor_place_supply == "Meghalaya (ML)" %} selected {% endif %}>
           Meghalaya (ML)
         </option>
-        <option value="Mizoram (MZ)" {% if expense.destination_of_supply == "Mizoram (MZ)" %} selected {% endif %}>
+        <option value="Mizoram (MZ)" {% if expense.vendor_place_supply == "Mizoram (MZ)" %} selected {% endif %}>
           Mizoram (MZ)
         </option>
-        <option value="Nagaland (NL)" {% if expense.destination_of_supply == "Nagaland (NL)" %} selected {% endif %}>
+        <option value="Nagaland (NL)" {% if expense.vendor_place_supply == "Nagaland (NL)" %} selected {% endif %}>
           Nagaland (NL)
         </option>
-        <option value="Odisha (OR)" {% if expense.destination_of_supply == "Odisha (OR)" %} selected {% endif %}>
+        <option value="Odisha (OR)" {% if expense.vendor_place_supply == "Odisha (OR)" %} selected {% endif %}>
           Odisha (OR)
         </option>
-        <option value="Puducherry (PY)" {% if expense.destination_of_supply == "Puducherry (PY)" %} selected {% endif %}>
+        <option value="Puducherry (PY)" {% if expense.vendor_place_supply == "Puducherry (PY)" %} selected {% endif %}>
           Puducherry (PY)
         </option>
-        <option value="Punjab (PB)" {% if expense.destination_of_supply == "Punjab (PB)" %} selected {% endif %}>
+        <option value="Punjab (PB)" {% if expense.vendor_place_supply == "Punjab (PB)" %} selected {% endif %}>
           Punjab (PB)
         </option>
-        <option value="Rajasthan (RJ)" {% if expense.destination_of_supply == "Rajasthan (RJ)" %} selected {% endif %}>
+        <option value="Rajasthan (RJ)" {% if expense.vendor_place_supply == "Rajasthan (RJ)" %} selected {% endif %}>
           Rajasthan (RJ)
         </option>
-        <option value="Sikkim (SK)" {% if expense.destination_of_supply == "Sikkim (SK)" %} selected {% endif %}>
+        <option value="Sikkim (SK)" {% if expense.vendor_place_supply == "Sikkim (SK)" %} selected {% endif %}>
           Sikkim (SK)
         </option>
-        <option value="Tamil Nadu (TN)" {% if expense.destination_of_supply == "Tamil Nadu (TN)" %} selected {% endif %}>
+        <option value="Tamil Nadu (TN)" {% if expense.vendor_place_supply == "Tamil Nadu (TN)" %} selected {% endif %}>
           Tamil Nadu (TN)
         </option>
-        <option value="Telangana (TG)" {% if expense.destination_of_supply == "Telangana (TG)" %} selected {% endif %}>
+        <option value="Telangana (TG)" {% if expense.vendor_place_supply == "Telangana (TG)" %} selected {% endif %}>
           Telangana (TG)
         </option>
-        <option value="Tripura (TR)" {% if expense.destination_of_supply == "Tripura (TR)" %} selected {% endif %}>
+        <option value="Tripura (TR)" {% if expense.vendor_place_supply == "Tripura (TR)" %} selected {% endif %}>
           Tripura (TR)
         </option>
-        <option value="Uttar Pradesh (UP)" {% if expense.destination_of_supply == "Uttar Pradesh (UP)" %} selected {% endif %}>
+        <option value="Uttar Pradesh (UP)" {% if expense.vendor_place_supply == "Uttar Pradesh (UP)" %} selected {% endif %}>
           Uttar Pradesh (UP)
         </option>
-        <option value="Uttarakhand (UK)" {% if expense.destination_of_supply == "Uttarakhand (UK)" %} selected {% endif %}>
+        <option value="Uttarakhand (UK)" {% if expense.vendor_place_supply == "Uttarakhand (UK)" %} selected {% endif %}>
           Uttarakhand (UK)
         </option>
-        <option value="West Bengal (WB)" {% if expense.destination_of_supply == "West Bengal (WB)" %} selected {% endif %}>
+        <option value="West Bengal (WB)" {% if expense.vendor_place_supply == "West Bengal (WB)" %} selected {% endif %}>
           West Bengal (WB)
         </option>
       </select>
     </div>
   </div>
-     
+      -->
   
   <div class="row">
-    <label class="col-md-3">Reverse Charge</label>
+    <label class="col-md-3">Reference Number </label>
     <div class="col-md-6 p-3">
-    <input type="checkbox" name="reverse_charge" id="reverse_charge" value="True" {% if expense.reverse_charge == 'True' %}checked="checked"{% endif %}>
+    <input type="number" name="reverse_charge" class="form-control text-dark bg-light"  id="reverse_charge" value={{expense.reference_number}} >
   
-    <p class="text-white">This transaction is applicable for reverse charge</p>
+
       
       </div>
 </div>
@@ -944,7 +962,11 @@ document.getElementById("hsn_code").addEventListener("input", function() {
             <!-- <a href="" data-toggle="modal" data-target="#newcustomer">+ Add New Customer</a> -->
           </div>
           <div class="input-group-append">
-            <button type="button" class="btn " data-toggle="modal" data-target="#newcustomer" style="background-color: chocolate;;width: 20px; height: 38px;"><p style="font-size: 23px; margin-left: -8px;"> + </p></button>
+            <a href=""  data-toggle="modal" data-target="#newcustomer">
+              <i class="fas fa-plus p-2 rounded " style="color: white; background-color: rgb(210, 132, 30);height: 30px;margin-top: 80%;margin-left: 1%; "
+                  data-toggle="tooltip" title="Create Vendor"></i>
+          </a>     
+            <!-- <button type="button" class="btn " data-toggle="modal" data-target="#newcustomer" style="background-color: chocolate;;width: 20px; height: 38px;"><p style="font-size: 23px; margin-left: -8px;"> + </p></button> -->
         </div>
         </div>
 
@@ -1065,7 +1087,7 @@ document.getElementById("hsn_code").addEventListener("input", function() {
       <label for="image" class="col-md-3">Attach Receipt</label>
       <div class="col-md-6 p-3">
         {% if expense.image %}
-            <img src="{{ expense.image.url }}" alt="Expense Receipt" style="max-width: 100px; max-height: 100px;" class="p-2" >
+            <!-- <img src="{{ expense.image.url }}" alt="Expense Receipt" style="max-width: 100px; max-height: 100px;" class="p-2" > -->
             <br>
         {% endif %}
       <input type="file" class="form-control text-dark bg-light" name="image">

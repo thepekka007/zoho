@@ -18,6 +18,16 @@
 <!-- <link rel="stylesheet" href="{% static 'assets/css/search.css' %}"> -->
 <style>
   /* Style the Select2 container */
+  /* .input-group {
+    position: relative;
+}
+
+.input-group-append {
+    position: absolute;
+    top: 0;
+    right: 0;
+    height: 20px;
+} */
 
 
   /* Style the Select2 dropdown trigger */
@@ -349,12 +359,15 @@
                   {% endif %}
               {% endfor %}
               </optgroup>
-</datalist>
-            </select>
-            <div class="input-group-append">
-              &nbsp;<button type="button" class="btn " data-toggle="modal" data-target="#create_account" style="background-color: chocolate;;width: 20px; height: 39px;"><p style="font-size: 23px; margin-left: -8px;"> + </p></button>
-          </div>
 
+            </select> <a href="" class="p-2" data-toggle="modal" data-target="#create_account">
+              <i class="fas fa-plus p-2 rounded " style="color: white; background-color: rgb(210, 132, 30);height: 30px; "
+                  data-toggle="tooltip" title="Create Vendor"></i>
+          </a>
+            <!-- <div class="input-group-append">
+              &nbsp;<button type="button" class="btn" data-toggle="modal" data-target="#create_account" style="background-color: chocolate;;width: 20px; height: 39px;"><p style="font-size: 23px; margin-left: -8px;height: 50px;padding-bottom: 0px;"> + </p></button>
+          </div> -->
+    
           <script>
             $(document).ready(function() {
               // Initialize select2
@@ -407,16 +420,16 @@
         <div class="col-md-3">
           <label id="hsn_label" for="hsn_code" >HSN</label>
         </div>
-        <div class="col-md-6  mt-3">
-          <input type="text" id="hsn_code" name="hsn_code" class="form-control text-dark bg-light " placeholder="6-digit number" >
+        <div class="col-md-6  mt-3">&nbsp;
+          <input type="text" id="hsn_code" name="hsn_code" class="form-control text-dark bg-light " placeholder="6-digit number" style="margin-left: 10px;" >
         </div>
       </div>
       <div class="row" id="sac_div" style="display:flex;">
         <div class="col-md-3 col-lg-3 ">
           <label id="sac_label" for="sac">SAC</label>
         </div>
-        <div class="col-md-6  mt-3">
-          <input type="text" id="sac" name="sac" class="form-control text-dark bg-light" placeholder="6-digit number"  >
+        <div class="col-md-6  mt-3">&nbsp;
+          <input type="text" id="sac" name="sac" class="form-control text-dark bg-light" placeholder="6-digit number"  style="margin-left: 10px;">
         </div>
       </div>
       
@@ -478,13 +491,13 @@ document.getElementById("hsn_code").addEventListener("input", function() {
 });
 
       </script>
-      
+      <br>
       <div class="row">
         <label for="amount" class="col-md-3">Amount</label>
         <div class="col-md-6 p-3">
           <div class="input-group">
             <div class="input-group-append">
-              <select class="form-control  text-dark bg-light" id="currency" name="currency" style="background-color: #888;">
+              <select class="form-control  text-dark bg-light" id="currency" name="currency" style="background-color: #888;margin-left: 8px;" >
               
               
                 <option value="INR">INR</option>
@@ -502,7 +515,7 @@ document.getElementById("hsn_code").addEventListener("input", function() {
 
           </div>
           <div class="col-md-6 mt-3" >
-            <select name="select_payment" id="select_payment" onclick="show_fields()"  class="form-control text-dark">
+            <select name="select_payment" id="select_payment" onclick="show_fields()"  class="form-control text-dark" style="margin-left: 8px;">
               <option value="no_option">select</option>
               <option value="Cash">Cash</option>
               <option value="Cheque">Cheque</option>
@@ -521,7 +534,7 @@ document.getElementById("hsn_code").addEventListener("input", function() {
             <label  id="cheque_no_label" style="display: none;" >Cheque Number</label>
           </div>
           <div class="col-md-6 mt-3">
-            <input type="number" class="form-control text-dark  " style="display: none;" name="cheque_no" id="cheque_no" style="color: #000;" >
+            <input type="number" class="form-control text-dark  " style="display: none;" name="cheque_no" id="cheque_no" style="color: #000;margin-left: 8px;" >
           </div>
         </div>
 
@@ -530,7 +543,7 @@ document.getElementById("hsn_code").addEventListener("input", function() {
             <label for="validationCustom02" id="upi_id_label" style="display: none;" name="credit_note_no">UPI ID</label>
           </div>
           <div class="col-md-6 mt-3">
-            <input type="text" class="form-control text-dark" style="display: none;" name="upi_id" id="upi_id"  >
+            <input type="text" class="form-control text-dark" style="display: none;margin-left: 8px;" name="upi_id" id="upi_id"  >
           </div>
         </div>
 
@@ -539,7 +552,7 @@ document.getElementById("hsn_code").addEventListener("input", function() {
             <label for="validationCustom02" id="acc_no_label"  style="display: none;" >Ac/Number</label>
           </div>
           <div class="col-md-6 mt-3 ">
-            <input type="text" class="form-control text-dark" id="acc_no" name="acc_no" style="display: none;"  >
+            <input type="text" class="form-control text-dark" id="acc_no" name="acc_no" style="display: none;margin-left: 8px;"  >
           </div>
         </div>
        
@@ -551,21 +564,25 @@ document.getElementById("hsn_code").addEventListener("input", function() {
         </div>
         <div class="col-md-6 p-3">
             <div class="input-group" id="Select2">
-            <select class="form-control text-dark bg-light form-select" id="vendor" name="vendor" style="background-color: #000;" style="margin-left: -1%;" >
+            <select class="form-control text-dark bg-light form-select" id="vendor" name="vendor" style="background-color: #000;" style="margin-left: 10px;" >
               <option value="" >-- Select vendor --</option>
               {% for v in vendor %}
               <option value="{{ v.id }}">{{v.first_name }} &nbsp; {{v.last_name }}</option>
               <!-- <option value="{{v.id}} {{ v.first_name }} {{ v.last_name }}" class="text-dark bg-light">{{ v.first_name }} {{ v.last_name }}</option> -->
               {% endfor %}  
             </select>
-            <div class="input-group-append">
+            <a href="" class="p-2" data-toggle="modal" data-target="#newvendor">
+              <i class="fas fa-plus p-2 rounded " style="color: white; background-color: rgb(210, 132, 30);height: 30px; "
+                  data-toggle="tooltip" title="Create Vendor"></i>
+          </a>
+            <!-- <div class="input-group-append">
               &nbsp;<button type="button" class="btn"  data-toggle="modal" data-target="#newvendor" style="width: 20px; height: 38px;background-color: chocolate;"><p style="font-size: 23px; margin-left: -8px;"> + </p></button>
-          </div>
+          </div> -->
           </div>
      
         </div>
      
-        <script>
+        <!-- <script>
           $(document).ready(function() {
             // Initialize select2
             $('#vendor').select2();
@@ -601,7 +618,7 @@ document.getElementById("hsn_code").addEventListener("input", function() {
               });
             });
           });
-        </script>
+        </script> -->
         
           <script src="https://code.jquery.com/jquery-3.6.4.min.js" ></script>
           <!-- Include Select2 -->
@@ -668,7 +685,7 @@ document.getElementById("hsn_code").addEventListener("input", function() {
       <option value="[JK]-Jammu and Kashmir">[JK]-Jammu and Kashmir</option>
       <option value="[JH]-Jharkhand">[JH]-Jharkhand</option>
       <option value="[KA]-Karnataka">[KA]-Karnataka</option>
-      <option value="[KL]-Kerala">[KL]-Kerala</option>
+      <option value="[KL]-Kerala"  {% if 1 == 1 %}selected{% endif %}>[KL]-Kerala</option>
       <option value="[LA]-Ladakh">[LA]-Ladakh</option>
       <option value="[LD]-Lakshadweep">[LD]-Lakshadweep</option>
       <option value="[MP]-Madhya Predesh">[MP]-Madhya Predesh</option>
@@ -699,36 +716,36 @@ document.getElementById("hsn_code").addEventListener("input", function() {
             // Initialize select2
             $('#vendor').select2();
         
-            // Handle change event for the 'selected' element
-            $(document).on('change', '#selected', function () {
-              var customer = $('#selected').val();
-              $.ajax({
-                type: "GET",
-                url: "{% url 'customerdata' %}",
-                data: {
-                  id: customer
-                },
-                success: function (response) {
-                  // console.log(response.email)
-                  dataemail = response.email;
-                  datagst =response.gst;
-                  datagstin =response.gstin;
-                  address2 = response.billingAddress;
+            // // Handle change event for the 'selected' element
+            // $(document).on('change', '#selected', function () {
+            //   var customer = $('#selected').val();
+            //   $.ajax({
+            //     type: "GET",
+            //     url: "{% url 'customerdata' %}",
+            //     data: {
+            //       id: customer
+            //     },
+            //     success: function (response) {
+            //       // console.log(response.email)
+            //       dataemail = response.email;
+            //       datagst =response.gst;
+            //       datagstin =response.gstin;
+            //       address2 = response.billingAddress;
         
-                  document.getElementById('customer-address').value = address2;
-                  document.getElementById('customer-email').value = dataemail;
-                  document.getElementById('customer-gst').value = datagst;
+            //       document.getElementById('customer-address').value = address2;
+            //       document.getElementById('customer-email').value = dataemail;
+            //       document.getElementById('customer-gst').value = datagst;
         
-                  if(datagst !='Unregistered Business-not Registered under GST' ){
-                    document.getElementById('gstin').style.display='flex';
-                    document.getElementById('customer-gstin').value = datagstin;
-                  }
-                  else{
-                    document.getElementById('gstin').style.display='none';
-                  }
-                }
-              });
-            });
+            //       if(datagst !='Unregistered Business-not Registered under GST' ){
+            //         document.getElementById('gstin').style.display='flex';
+            //         document.getElementById('customer-gstin').value = datagstin;
+            //       }
+            //       else{
+            //         document.getElementById('gstin').style.display='none';
+            //       }
+            //     }
+            //   });
+            // });
           });
         </script>
         
@@ -885,9 +902,14 @@ function validateExpenseNumber() {
                  {% endfor %}
               
               </select>
-              <div class="input-group-append">
+              <a href="" class="p-2" data-toggle="modal" data-target="#newcustomer">
+                <i class="fas fa-plus p-2 rounded " style="color: white; background-color: rgb(210, 132, 30); "
+                    data-toggle="tooltip" title="Create Vendor"></i>
+            </a>
+              
+              <!-- <div class="input-group-append">
                 &nbsp; <button type="button" class="btn"  data-toggle="modal" data-target="#newcustomer" style="width: 20px; height: 38px;background-color: chocolate;"><p style="font-size: 23px; margin-left: -8px;"> + </p></button>
-            </div>
+            </div> -->
               <!-- <a href="" data-toggle="modal" data-target="#newcustomer">+ Add New Customer</a> -->
             </div>
           </div>

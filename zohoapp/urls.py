@@ -1183,6 +1183,24 @@ urlpatterns = [
 # path('vendordata', views.vendordata, name='vendordata'),
       path('exp_get_vendordet',views.exp_get_vendordet,name='exp_get_vendordet'),
        path('exp_get_employeedet', views.exp_get_employeedet, name='exp_get_employeedet'),
+
+
+
+
+
+
+
+
+      #  ====new====
+
+       path('create_emp1', views.create_emp1, name='create_emp1'),
+
+      #  path('proj_view_sort_by_date/<int:pk>',views.proj_view_sort_by_account,name='proj_view_sort_by_date'),
+           path('overviewbillable/<int:id>',views.overviewbillable,name='overviewbillable'),
+            path('overviewnonbillable/<int:id>',views.overviewnonbillable,name='overviewnonbillable'),
+             path('entr_custmrApro',views.entr_custmrApro,name='entr_custmrApro'),
+
+
     
 ]
 urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)

@@ -779,7 +779,7 @@ class Chart_of_Account_Upload(models.Model):
     
 class project1(models.Model):
     user=models.ForeignKey(User,on_delete=models.CASCADE,null=True,blank=True)
-    
+    # payroll=models.ForeignKey(Payroll,on_delete=models.CASCADE,default='')
     name=models.CharField(max_length=255,null=True,blank=True)
     desc=models.CharField(max_length=255,null=True,blank=True)
     c_name=models.ForeignKey(customer,on_delete=models.CASCADE,null=True,blank=True)
@@ -793,7 +793,8 @@ class project1(models.Model):
     mode=models.CharField(max_length=200,default='Active')
     action=models.CharField(max_length=200,null=True,blank=True)
     attachment= models.FileField(upload_to='attachment/', blank=True, null=True)
-    project_code = models.IntegerField(null=True,blank=True) 
+    project_code = models.IntegerField(null=True,blank=True)
+    
     
 class task(models.Model):
     user=models.ForeignKey(User,on_delete=models.CASCADE,null=True,blank=True)
@@ -903,6 +904,7 @@ class Payroll(models.Model):
     salaryrange = models.CharField(max_length=10, choices=[('1-10', '1-10'), ('10-15', '10-15'), ('15-31', '15-31')], default='1-10')
     amountperhr = models.CharField(max_length=100,null=True)
     workhr = models.CharField(max_length=100,null=True)
+    proj =models.ForeignKey(project1,on_delete=models.CASCADE,null=True,blank=True)
     
     
 class Bankdetails(models.Model):
