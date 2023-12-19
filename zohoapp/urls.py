@@ -1195,7 +1195,7 @@ urlpatterns = [
 
        path('create_emp1', views.create_emp1, name='create_emp1'),
 
-      #  path('proj_view_sort_by_date/<int:pk>',views.proj_view_sort_by_account,name='proj_view_sort_by_date'),
+    
            path('overviewbillable/<int:id>',views.overviewbillable,name='overviewbillable'),
             path('overviewnonbillable/<int:id>',views.overviewnonbillable,name='overviewnonbillable'),
              path('entr_custmrApro',views.entr_custmrApro,name='entr_custmrApro'),

@@ -11469,7 +11469,7 @@ def get_vendor_data_bill(request):
     gst_number = vendorobject.gst_number  
     return JsonResponse({"status": " not", 'email': email, 'sos': sos,'gst_number': gst_number,'gst_treatment': gst_treatment})
 
-@login_required(login_url='login')
+# @login_required(login_url='login')
 def add_vendor_bills(request):
     company = company_details.objects.get(user = request.user)
 
@@ -11529,7 +11529,7 @@ def add_vendor_bills(request):
 
         return JsonResponse(response_data)
 
-@login_required(login_url='login')
+# @login_required(login_url='login')
 def entr_custmr_for_bills(request):
     
     company = company_details.objects.get(user = request.user)
@@ -27334,3 +27334,38 @@ def edit_expensee(request,expense_id):
                                                         'cust_state':cust_state,'cust:country':cust_country,'cust_place_supply':cust_place_supply,
                                                         'cust_gsttreatment':cust_gsttreatment,'cust_gstno':cust_gstno,
                                                         'banks':banks,'igst':igst,'cgst':cgst,'sgst':sgst,'view':view,'e_account':e_account})
+
+
+
+
+
+def get_vendor_gst_treatment(request):
+    v_user = request.user
+    user = User.objects.get(id=v_user.id)
+
+    vendor_name = request.GET.get('vendor') 
+    if vendor_name: 
+        try:
+            vendor = vendor_table.objects.get(id=vendor_name, user=user)
+            gst_treatment = vendor.gst_treatment
+            email = vendor.vendor_email 
+            gstin = vendor.gst_number 
+            sourcesupply=vendor.source_supply 
+            address=vendor.baddress
+            city=vendor.bcity
+            state=vendor.bstate
+            country=vendor.bcountry
+            print(" source ........................ of ....................... supply")
+            
+
+        except vendor_table.DoesNotExist:
+            gst_treatment = None
+            gstin = None
+
+        print(f"Vendor Name: {vendor_name}, GST Treatment: {gst_treatment}, GSTIN: {gstin}")
+
+        return JsonResponse({'gst_treatment': gst_treatment, 'gstin': gstin,'sourcesupply':sourcesupply,'address':address,'city':city,'state':state,'country':country,'email':email})
+    
+    else:
+     
+        return JsonResponse({'gst_treatment': None, 'gstin': None})

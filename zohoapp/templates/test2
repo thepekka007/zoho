@@ -1,4 +1,263 @@
+<div class="modal fade" id="newvendor" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel1" aria-hidden="true">
+  <div class="modal-dialog modal-xl" role="document">
+    <div class="modal-content" style="background: rgb(32, 35, 37); border-radius: 20px">
+      <div class="modal-header" style="background: rgb(32, 35, 37)">
+        <h3 class="modal-title m-3 text-uppercase" id="exampleModalLabel">New Vendor</h3>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div class="card p-3 m-3">
+          <form action="" method="post" id="newvendor">
+            {% csrf_token %}
 
+            <div class="row">
+              <div class="col-md-3 mt-2">
+                <label for="validationCustom01">Title</label>
+              </div>
+              <div class="col-md-3 mt-2">
+                <select
+                  name="salutation"
+                  id="title"
+                  class="form-control text-dark bg-light"
+                 >
+                  <option value="Mr.">Mr.</option>
+                  <option value="Mrs.">Mrs.</option>
+                  <option value="Miss">Miss.</option>
+                  <option value="Ms.">Ms.</option>
+                </select>
+              </div>
+            </div>
+            <div class="row">
+              <div class="col-md-3 mt-2">
+                <label for="first_name">First name</label>
+              </div>
+              <div class="col-md-6 mt-2">
+                <input
+                  type="text"
+                  class="form-control text-dark bg-light"
+                  id="fname"
+                  name="first_name"
+                  
+                />
+              </div>
+            </div>
+            <div class="row">
+              <div class="col-md-3 mt-2">
+                <label for="lname">Last name</label>
+                <label id="vdisplayname" name="last_name" hidden></label>
+              </div>
+              <div class="col-md-6 mt-2">
+                <input
+                  type="text"
+                  class="form-control text-dark bg-light"
+                  id="lname"
+                  name="last_name"
+                  >
+              </div>
+            </div>
+
+            <div class="row">
+              <div class="col-md-3 mt-2">
+                <label for="company">Company Name</label>
+              </div>
+              <div class="col-md-6 mt-2">
+                <input
+                  type="text"
+                  class="form-control text-dark bg-light"
+                  id="vcompany"
+                  name="company_name"
+                  >
+              </div>
+            </div>
+
+            <div class="row">
+              <div class="col-md-3 mt-2">
+                <label for="email">Email</label>
+              </div>
+              <div class="col-md-6 mt-2">
+                <input
+                  type="email"
+                  class="form-control text-dark bg-light"
+                  id="vemail"
+                  name="vendor_email"
+                  placeholder="example@gmail.com"
+                  >
+              </div>
+            </div>
+            <div class="row">
+              <div class="col-md-3 mt-2">
+                <label for="email">Vendor Phone</label>
+              </div>
+              <div class="col-md-3 mt-2">
+                <input
+                  type="text"
+                  class="form-control text-dark bg-light"
+                  id="vw_mobile"
+                  placeholder="Work Number"
+                  maxlength="10"
+                  name="w_phone"
+                  >
+              </div>
+              <div class="col-md-3 mt-2">
+                <input
+                  type="text"
+                  class="form-control text-dark bg-light"
+                  id="vp_mobile"
+                  placeholder="Personal Number"
+                  maxlength="10"
+                  name="m_phone"
+              >
+              </div>
+            </div>
+           
+  <hr />
+  <center>
+    <h4 class="text-uppercase mb-3"><b>Other Details</b></h4>
+  </center>
+
+  <div class="row mt-5">
+    <div class="col-md-3 mt-2">
+      <label for="wsite">Website</label>
+    </div>
+    <div class="col-md-6 mt-2">
+      <input
+        type="text"
+        class="form-control text-dark bg-light"
+        id="wsite"
+        placeholder="www.example.com"
+        name="website"
+        >
+    </div>
+  </div>
+  
+  <div class="row">
+    <div class="col-md-3 mt-2">
+      <label for="vskype">Skype name/Number</label>
+    </div>
+    <div class="col-md-6 mt-2">
+      <input
+        type="text"
+        class="form-control text-dark bg-light"
+        id="vskype"
+        name="skype_number"
+       >
+    </div>
+  </div>
+  
+  <div class="row">
+    <div class="col-md-3 mt-2">
+      <label for="v_desg">Designation</label>
+    </div>
+    <div class="col-md-6 mt-2">
+      <input
+        type="text"
+        class="form-control text-dark bg-light"
+        id="v_desg"
+        name="designation"
+        >
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="col-md-3 mt-2">
+      <label for="v_dpt">Department</label>
+    </div>
+    <div class="col-md-6 mt-2">
+      <input
+        type="text"
+        class="form-control text-dark bg-light"
+        id="v_dpt"
+        name="department"
+        >
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="col-md-3 mt-2">
+      <label for="v_gsttype" style="color: rgb(190, 88, 88)"
+        >GST Treatment *</label
+      >
+    </div>
+    <div class="col-md-6 mt-2">
+      <select
+        class="form-control text-dark bg-light"
+        id="v_gsttype"
+        name="gst"
+        
+      >
+        <option selected disabled value="">Choose..</option>
+        <option value="Registered Business - Regular">
+          Registered Business - Regular
+          <span><i>(Business that is registered under gst)</i></span>
+        </option>
+        <option value="Registered Business - Composition">
+          Registered Business - Composition (Business that is
+          registered under composition scheme in gst)
+        </option>
+        <option value="unregistered Business">
+          Unregistered Business (Business that has not been registered
+          under gst)
+        </option>
+        <option value="Overseas">
+          Overseas (Import/Export of supply outside india)
+        </option>
+        <option value="Special Economic Zone (SEZ)">
+          Special Economic Zone (SEZ) (Business that is located in a
+          special economic zone of india or a SEZ developer)
+        </option>
+        <option value="Demed Exports">
+          Demed Exports (Supply of woods to an exports oriented unit
+          or againsed advanced authorization or export promotion
+          capital woods)
+        </option>
+        <option value="Tax Deductor">
+          Tax Deductor (State of central gov,government agencies or
+          local authority)
+        </option>
+        <option value="SEZ Developer">
+          SEZ Developer (A person or organization who owns atleast 26%
+          eqaulity in creating business units in special economic
+          zone)
+        </option>
+      </select>
+    </div>
+  </div>
+  <div class="row gstrow d-none">
+    <div class="col-md-3 mt-2">
+      <label id="glbl" style="color: rgb(190, 88, 88)"
+        >GSTIN/UIN *</label
+      >
+    </div>
+    <div class="col-md-6 mt-2">
+      <input
+        type="text"
+        class="form-control text-dark bg-light"
+        id="v_gstin"
+        name="gst_number"
+        placeholder="29APPCK7465F1Z1"
+        >
+      <label id="gst_label"></label>
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="col-md-3 mt-2">
+      <label for="v_pan">PAN Number</label>
+    </div>
+    <div class="col-md-6 mt-2">
+      <input
+        type="text"
+        class="form-control text-dark bg-light"
+        id="v_pan"
+        name="pan_number"
+        placeholder="APPCK7465F"
+        >
+      <label id="pan_label"></label>
+    </div>
+  </div>
+  
 
   <div class="row">
     <div class="col-md-3 mt-2">
@@ -11,7 +270,7 @@
         class="form-control text-dark bg-light"
         id="v_srcsupply"
         name="source_supply"
-        required>
+        >
         <option value="Nill"></option>
         <option value="[AN]-Andaman And Nicobar Islands">
           [AN]-Andaman And Nicobar Islands
@@ -76,7 +335,8 @@
         class="form-control text-dark bg-light"
         id="v_curn"
         name="currency"
-        required
+        
+        
       >
         <option selected disabled value="">Choose..</option>
         <option value="INR">INR</option>
@@ -94,7 +354,7 @@
         class="form-control text-dark bg-light"
         id="v_open"
         name="opening_bal"
-        required>
+        >
     </div>
   </div>
 
@@ -146,7 +406,7 @@
         onclick="addressSame()"
         id="vokay"
         name="vokay"
-        required>
+        >
       <label for="vokay" style="color: #909091"
         >Same As Billing Address</label
       >
@@ -174,7 +434,7 @@
         class="form-control street text-dark bg-light"
         id="vsstreet"
         name="saddress"
-        required></textarea>
+        ></textarea>
     </div>
     <div class="col-md-1"></div>
   </div>
@@ -190,7 +450,7 @@
         id="vcity"
         name="bcity"
         placeholder="City"
-        required>
+        >
     </div>
     <div class="col-md-1"></div>
     <div class="col-md-1">
@@ -203,7 +463,7 @@
         id="vscity"
         name="scity"
         placeholder="City"
-        required>
+        >
     </div>
     <div class="col-md-1"></div>
   </div>
@@ -218,7 +478,7 @@
         class="form-control text-dark bg-light"
         id="vstate"
         name="bstate"
-        required>
+        >
         <option value="" selected>Choose</option>
         <option value="None Of This">None Of This</option>
         <option value="Andaman and Nicobar Islads">
@@ -276,7 +536,7 @@
         class="form-control text-dark bg-light"
         id="vsstate"
         name="sstate"
-        required>
+        >
         <option value="" selected>Choose</option>
         <option value="None Of This">None Of This</option>
         <option value="Andaman and Nicobar Islads">
@@ -338,7 +598,7 @@
         id="vcountry"
         name="bcountry"
         placeholder="Country"
-        required>
+>
     </div>
     <div class="col-md-1"></div>
 
@@ -352,7 +612,7 @@
         id="vscountry"
         name="scountry"
         placeholder="Country"
-        required>
+    >
     </div>
     <div class="col-md-1"></div>
   </div>
@@ -369,7 +629,7 @@
         name="bzip"
         maxlength="6"
         placeholder="PIN Code"
-        required>
+      >
     </div>
     <div class="col-md-1"></div>
 
@@ -384,7 +644,7 @@
         name="szip"
         maxlength="6"
         placeholder="PIN Code"
-        required>
+   >
     </div>
     <div class="col-md-1"></div>
   </div>
@@ -400,7 +660,7 @@
         id="vphone"
         name="bphone"
         placeholder="Phone"
-        required>
+>
     </div>
     <div class="col-md-1"></div>
 
@@ -414,7 +674,7 @@
         id="vsphone"
         name="sphone"
         placeholder="Phone"
-        required>
+      >
     </div>
     <div class="col-md-1"></div>
   </div>
@@ -430,7 +690,7 @@
         id="vfax" 
         name="vfax"
         placeholder="FAX"
-        required>
+>
     </div>
     <div class="col-md-1"></div>
 
@@ -444,9 +704,25 @@
         id="vsfax"
         name="vsfax"
         placeholder="FAX"
-        required>
+        >
     </div>
     <div class="col-md-1"></div>
   </div>
 
-  <!-- Add the rest of your form fields here -->
+
+            <div class="row">
+              <div class="col-md-4">
+                <input type="submit" class="btn save_btn rounded-pill text-grey w-100 my-4"  >
+              </div>
+              <div class="col-md-4">
+                <button type="button" class="close btn save_btn rounded-pill text-grey w-100 my-4" data-dismiss="modal" aria-label="Close">
+                  <span aria-hidden="true">Cancel</span>
+                </button>
+              </div>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

@@ -542,9 +542,9 @@
                   </div>
                 </div>
                 <div class="row mt-3">
-                  <div class="col-5"><label class="text-dark" for="">Destination of Supply:</label></div>
+                  <div class="col-5"><label class="text-dark" for="">Source of Supply:</label></div>
                   <div class="col-7">
-                    <p class="bold text-dark" style="max-width: 15rem;word-wrap: break-word;">{{expense.destination_of_supply}}</p>
+                    <p class="bold text-dark" style="max-width: 15rem;word-wrap: break-word;">{{expense.vendor_place_supply}}</p>
                   </div>
                 </div>
                 <div class="row mt-3">
@@ -643,9 +643,32 @@
                       <p class="bold">{{company.company_email}}</p>
                     </div>
                   </div>
-
-                  
-           
+<br>
+                  <div class="row text-center">
+                    <h2>VENDOR DETAILS
+                      <hr>
+                    </h2>
+                  </div>
+                  <div class="row mt-2">
+                    <div class="col-5"><label for="">Vendor Name :</label></div>
+                    <div class="col-7">
+                      <p class="bold">{{expense.vendor_name}}</p>
+                    </div>
+                  </div>
+                  <div class="row mt-2">
+                    <div class="col-5"><label for=""> place of supply</label></div>
+                    <div class="col-7">
+                      <p class="bold">{{expense.vendor_place_supply}} <br>
+                        
+                    </div>
+                  </div>
+                  <div class="row mt-2">
+                    <div class="col-5"><label for=""> Gst Treatment</label></div>
+                    <div class="col-7">
+                      <p class="bold">{{expense.gst_treatment} <br>
+                        
+                    </div>
+                  </div>
                 </div><br>
               </div>
             </div>
