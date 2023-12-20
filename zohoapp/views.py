@@ -10604,7 +10604,7 @@ def vendor_dropdownE(request):
     option_objects = vendor_table.objects.filter(user=user)
     for option in option_objects:
         display_name = f"{option.salutation} {option.first_name} {option.last_name}"
-        options[option.id] = [display_name, display_name]
+        options[option.id] = [display_name, display_name, display_name]
     return JsonResponse(options)
     
     
@@ -12068,35 +12068,36 @@ def pay_dropdownE(request):
 #     return JsonResponse({'gst_treatment': gst_treatment})
 
 
-def get_vendor_gst_treatment(request):
-    v_user = request.user
-    user = User.objects.get(id=v_user.id)
+# def get_vendor_gst_treatment(request):
+#     v_user = request.user
+#     user = User.objects.get(id=v_user.id)
 
-    vendor_name = request.GET.get('vendor') 
-    if vendor_name: 
-        try:
-            vendor = vendor_table.objects.get(id=vendor_name, user=user)
-            gst_treatment = vendor.gst_treatment
-            email = vendor.vendor_email 
-            gstin = vendor.gst_number 
-            sourcesupply=vendor.source_supply 
-            address=vendor.baddress
-            city=vendor.bcity
-            state=vendor.bstate
-            country=vendor.bcountry
-            print(" source ........................ of ....................... supply")
+#     vendor_name = request.GET.get('vendor') 
+#     if vendor_name: 
+#         try:
+#             vendor = vendor_table.objects.get(id=vendor_name, user=user)
+#             gst_treatment = vendor.gst_treatment
+#             email = vendor.vendor_email 
+#             gstin = vendor.gst_number 
+#             sourcesupply=vendor.source_supply 
+#             print(sourcesupply)
+#             address=vendor.baddress
+#             city=vendor.bcity
+#             state=vendor.bstate
+#             country=vendor.bcountry
+#             print(" source ........................ of ....................... supply")
             
 
-        except vendor_table.DoesNotExist:
-            gst_treatment = None
-            gstin = None
+#         except vendor_table.DoesNotExist:
+#             gst_treatment = None
+#             gstin = None
 
-        print(f"Vendor Name: {vendor_name}, GST Treatment: {gst_treatment}, GSTIN: {gstin}")
+#         print(f"Vendor Name: {vendor_name}, GST Treatment: {gst_treatment}, GSTIN: {gstin}")
 
-        return JsonResponse({'gst_treatment': gst_treatment, 'gstin': gstin,'sourcesupply':sourcesupply,'address':address,'city':city,'state':state,'country':country,'email':email})
-    else:
+#         return JsonResponse({'gst_treatment': gst_treatment, 'gstin': gstin,'sourcesupply':sourcesupply,'address':address,'city':city,'state':state,'country':country,'email':email})
+#     else:
      
-        return JsonResponse({'gst_treatment': None, 'gstin': None})
+#         return JsonResponse({'gst_treatment': None, 'gstin': None})
     
     
 def get_company_state(request):
@@ -26503,7 +26504,7 @@ def save_expense(request):
             p = payment_termsE.objects.filter(user=request.user)
             cp= company_details.objects.get(user = request.user)
             paym = payment_terms.objects.filter(user=request.user.id)
-            banks=Bankcreation.objects.all()
+            banks=Bankcreation.objects.filter(user=request.user.id)
             if ExpenseE.objects.filter(company = cp).exists():
                 latest_bill = ExpenseE.objects.filter(company = cp).order_by('-reference_number').first()
                 if latest_bill:
@@ -26542,10 +26543,11 @@ def exp_get_vendordet(request):
     # country=cust.country
     # pincode=cust.zipcode
     email=cust.vendor_email
-    # cust_place_supply=placeofsupply
+    place_supply=cust.source_supply
+    print(place_supply)
     gstin = cust.gst_number
     gsttr = cust.gst_treatment
-    return JsonResponse({'email':email,'gstin':gstin,'gsttr':gsttr,'baddress':address},safe=False)
+    return JsonResponse({'email':email,'gstin':gstin,'gsttr':gsttr,'baddress':address,'place_supply2':place_supply},safe=False)
                 
 # cus_state':cus_state,'country':country,'address':address,'city':city,'pincode':pincode,'gst_treatment':gsttr, 'gstin': gstin ,'cust_place_supply':cust_place_supply,
 
@@ -26622,7 +26624,7 @@ def exp_get_employeedet(request):
     id=request.POST.get('id')
     print(id)
     # cust=vendor_table.objects.get(id=id)
-    Pay= Payroll.objects.get(id=id)
+    Pay= Payroll.objects.get(first_name=id)
     email=Pay.email
     # city=cust.city
     # cus_state=cust.state
@@ -27369,3 +27371,261 @@ def get_vendor_gst_treatment(request):
     else:
      
         return JsonResponse({'gst_treatment': None, 'gstin': None})
+
+
+
+
+
+
+# new
+
+
+
+
+
+def new_emp(request):
+    # company = company_details.objects.get(user = request.user)
+
+    if request.method=='POST':
+
+        # title=request.POST.get('title')
+        # first_name=request.POST.get('firstname')
+        # last_name=request.POST.get('lastname')
+        # comp=request.POST.get('company_name')
+        title = request.POST.get('title')
+        fname = request.POST.get('fname')
+        lname = request.POST.get('lname')
+        # name=name1.upper()
+        alias = request.POST.get('alias')
+        joindate=request.POST.get('joindate')
+        sal=request.POST.get('sal')
+        fsalary=request.POST.get('fsalary')
+        # amnt=request.POST.get('amnt')
+        # hours = request.POST.get('hours')
+        # vsalary = request.POST.get('vsalary')
+        empnum = request.POST.get('empnum')
+        location = request.POST.get('location')
+        dropId3 = request.POST.get('dropId3')
+        dob=request.POST.get('dob')
+        blood=request.POST.get('blood')
+        # panno=request.POST.get('panno')
+        faname=request.POST.get('faname')
+        spname = request.POST.get('spname')
+        padrs1=request.POST.get('padrs1')
+        padrs2=request.POST.get('padrs2')
+        adrs1=request.POST.get('adrs1')
+        adrs2=request.POST.get('adrs2')
+        phone=request.POST.get('phone')
+        ephone=request.POST.get('ephone')
+        email=request.POST.get('email')
+        # file=request.POST.get('file')
+        acc_no=request.POST.get('acc_no')
+        ifsc=request.POST.get('ifsc')
+        b_name=request.POST.get('b_name')
+        branch=request.POST.get('branch')
+        ttype=request.POST.get('ttype')
+        tds=request.POST.get('tds')
+        pora=request.POST.get('pora')
+        pcnt=request.POST.get('pcnt')
+        amnt=request.POST.get('amnt')
+        itn=request.POST.get('itn')
+        an=request.POST.get('an')
+        # status="active"
+
+        uan=request.POST.get('uan')
+        pfn=request.POST.get('pfn')
+        pran=request.POST.get('pran')
+       
+
+        u = User.objects.get(id = request.user.id)
+        print("helloooooooooooooooooooo")
+        print(lname)
+        cust = Payroll(title=title,first_name=fname,last_name=lname,alias=alias,joindate=joindate,salary_type=sal,user=u,email=email)
+        cust.save()
+# ,salary=fsalary,emp_number=empnum,location=location,
+#                          gender=dropId3,dob=dob,blood=blood,parent=faname,spouse_name=spname,address=padrs1,permanent_address=padrs2,Phone=phone,emergency_phone=ephone,
+#                          email=email,ITN=itn,Aadhar=an,UAN=uan,PFN=pfn,PRAN=pran,isTDS=itn,TDS=tds,
+        return HttpResponse({"messages": "success"})
+
+
+        
+def emp_dropdownE(request):
+    user = User.objects.get(id=request.user.id)
+
+    options = {}
+    option_objects = Payroll.objects.filter(user=user)
+    for option in option_objects:
+        display_name = option.first_name
+        options[option.id] = [display_name, f"{display_name}"]
+        
+    return JsonResponse(options)
+
+
+
+
+
+#fresh update
+
+def save_expense(request):
+    company = company_details.objects.get(user = request.user)
+    exp = ExpenseE.objects.filter(user=request.user).order_by('expense_number').last()
+
+# Now, latest_expense contains the latest ExpenseE object for the user, or None if no entry exists.
+
+    cur_user = request.user
+    usr = User.objects.get(id=cur_user.id)
+    # view=Chart_of_Account.objects.filter(user=user)
+    view=Chart_of_Account.objects.all()
+    payment=payment_terms.objects.filter(user=usr)
+    if request.user.is_authenticated:
+        if request.method == 'POST':
+            date = request.POST.get('date')
+            stat=request.POST['sub']
+            # if stat == 'draft':
+            #     status='draft'
+            # else:
+            #     status='save'
+            
+            expense_account = request.POST.get('expense_account')
+            expense_type = request.POST.get('expense_type')
+            amount = request.POST.get('amount')
+            currency = request.POST.get('currency')
+            expense_number = request.POST.get('expense_number')
+            paid = request.POST.get('select_payment')
+            accno=request.POST.get('acc_no')
+            upiid=request.POST.get('upi_id')
+            chequeno=request.POST.get('cheque_no')
+            if accno and accno != '0':
+                bank=Bankcreation.objects.get(ac_no=accno)
+                bankid=bank.id
+            else:
+                bankid=""
+
+
+            notes = request.POST.get('notes')
+            if request.POST.get('expense_type') == 'goods':
+                hsn_code = request.POST.get('sac')
+                sac = request.POST.get('hsn_code')
+            else:
+                hsn_code = request.POST.get('hsn_code')
+                sac = request.POST.get('sac')
+    
+            gst_treatment = request.POST.get('gst_treatment')
+            gstin=request.POST.get('gstin',None)
+            destination_of_supply = request.POST.get('destination_of_supply')
+            reverse_charge = request.POST.get('reverse_charge')
+            invoice = request.POST.get('invoice')
+            c = request.POST.get('customer')
+            customere = customer.objects.get(id=c)
+            custo_name=customere.customerName
+            v= request.POST.get('vendor')
+            vendor=vendor_table.objects.get(id=v)
+            vend_name=vendor.vendor_display_name 
+            c_placesupply=request.POST.get('source_of_supply5')
+            v_placesupply=request.POST.get('source_of_supply6')
+            if c_placesupply == v_placesupply:
+                tax = request.POST.get('tax1')
+            else:
+                tax = request.POST.get('tax2')
+
+            # igst=request.POST['igst']
+            # cgst=request.POST['cgst']
+            # sgst=request.POST['sgst']
+            reference=request.POST['reference_number']
+            print("hellooooooooooooooooooooooooooooo")
+            print(vend_name)
+            vend_name1=vend_name.upper()
+
+          
+            taxamt = request.POST.get('taxamt',False)
+           
+            image = request.FILES.get('image')
+
+
+            expense = ExpenseE.objects.create(
+                user=request.user,
+                date=date,
+                image=image,
+                expense_account=expense_account,
+                expense_number=expense_number,
+                amount=amount,
+                currency=currency,
+                taxamt=taxamt,
+                sac=sac,
+                expense_type=expense_type,
+                paid=paid,
+                notes=notes,
+                hsn_code=hsn_code,
+                gst_treatment=gst_treatment,
+                gstin=gstin,
+                destination_of_supply=destination_of_supply,
+                reverse_charge=reverse_charge,
+                tax=tax,
+                invoice=invoice,
+                customer_name= customere,
+                vendor=vendor,
+                company=company,
+                vendor_name=vend_name1,
+                status=stat,
+                reference_number=reference,
+                # igst=igst,
+                # cgst=cgst,
+                # sgst=sgst,
+                customer_place_supply= c_placesupply,
+                vendor_place_supply=v_placesupply,
+                accno=accno,
+                bankid=bankid,
+                upiid=upiid,
+                chequeno=chequeno,
+                customername=custo_name
+            )
+
+            expense.save()
+
+            return redirect('expensepage')
+        else:
+          
+            c = customer.objects.filter(user=request.user)
+            v = vendor_table.objects.filter(user=request.user)
+            accounts = AccountE.objects.filter(user=request.user)
+            account_types = set(AccountE.objects.filter(user=request.user).values_list('account_type', flat=True))
+            p = payment_termsE.objects.filter(user=request.user)
+            cp= company_details.objects.get(user = request.user)
+            paym = payment_terms.objects.filter(user=request.user.id)
+            banks=Bankcreation.objects.filter(user=request.user.id)
+            if ExpenseE.objects.filter(company = cp).exists():
+                latest_bill = ExpenseE.objects.filter(company = cp).order_by('-reference_number').first()
+                if latest_bill:
+                    print("ssssssssssssssssssssssssssssssssssssssss") 
+                    last_number = int(latest_bill.reference_number)
+                    print(last_number)
+                    new_number = last_number + 1
+                    print(new_number)
+            else:
+                new_number=1
+
+            if deletedexpenses.objects.filter(cid=cp).exists():
+                   deleted=deletedexpenses.objects.get(cid = cp)
+                   if deleted:
+                       while int(deleted.reference_number) >= new_number:
+                           new_number+=1
+            return render(request, 'addexpense.html', {'payment':payment,'banks':banks,'pay':paym,'company':cp,'vendor':v,'customer': c,'payments':p,'accounts': accounts, 'account_types': account_types,'count':new_number,'view':view,'exp':exp})
+   
+
+
+
+
+
+#    update new
+
+
+@login_required(login_url='login')
+def vendor_dropdown(request):
+    id=request.user.id
+
+    options = {}
+    option_objects = vendor_table.objects.filter(user = id)
+    for option in option_objects:
+        
+        options[option.id] = [option.salutation, option.first_name, option.last_name, option.id]
+    return JsonResponse(options)

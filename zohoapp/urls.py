@@ -1202,6 +1202,19 @@ urlpatterns = [
 
 
     
+
+
+
+
+
+
+
+
+# new
+
+      path('new_emp',views.new_emp,name='new_emp'),
+
+        path('emp_dropdownE/', views.emp_dropdownE, name='emp_dropdownE'),
 ]
 urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
 urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

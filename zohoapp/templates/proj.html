@@ -1424,7 +1424,7 @@
       </div>
       <div class="modal-body" style="background: rgb(32, 35, 37);">
         <div class="card p-3 m-3">
-          <div class="modal fade" id="newpayment">
+          <!-- <div class="modal fade" id="newpayment">
             <div class="modal-dialog modal-xl">
               <div class="modal-content" style="background: rgb(32, 35, 37);border-radius: 20px;">
                 <div class="modal-header " style="background: rgb(32, 35, 37);">
@@ -1485,10 +1485,10 @@
                 </div>
               </div>
             </div>  
-          </div> 
+          </div>  -->
           
  <script>
-    $(document).on("click","#paySave",function(){
+    $(document).on("click","#paySave2",function(){
     console.log($("#tname").val())
     console.log($("#tdays").val())
 
@@ -2650,7 +2650,7 @@
             <h3>CREATE EMPLOYEE</h3>
             <hr>
           </div>
-          <form method="POST" action="{% url 'create_emp1' %}" enctype="multipart/form-data" >
+          <form method="POST" action="" enctype="multipart/form-data"  id="newemp2">
             {% csrf_token %}
             <div class="row">
               <div class="data col-6 col-lg-6 col-md-6 col-sm-12">
@@ -2799,7 +2799,7 @@
                   <div class="col-6">
                     <label for="">Designation</label>
                   </div>
-                  <div class="col-6"><input type="text" class="form-control text-dark" name="designation" required>
+                  <div class="col-6"><input type="text" class="form-control text-dark" name="designation" id="des" required>
                   </div>
                 </div>
                 <div class="row pb-3">
@@ -2826,7 +2826,7 @@
                   <div class="col-6">
                     <label for="">Date of Birth</label>
                   </div>
-                  <div class="col-6"><input type="date" class="form-control text-dark" name="dob" required></div>
+                  <div class="col-6"><input type="date" class="form-control text-dark" name="dob" id= required></div>
                 </div>
                 <div class="row pb-3">
                   <div class="col-6">
@@ -2903,8 +2903,8 @@
                   <div class="col-6">
                     <label for="">Email</label>
                   </div>
-                  <div class="col-6"><input type="email" class="form-control text-dark" name="email" id="email" required
-                      onkeyup="emailvalidate()">
+                  <div class="col-6"><input type="email" class="form-control text-dark" name="email" id="eemail" required
+                      onkeyup="">
                     <div id="error" class="text-danger"></div>
                   </div>
                 </div>
@@ -3065,7 +3065,7 @@
 
             <hr>
             <div class="action-button">
-              <button class="btn btn-primary" type="submit">Add</button>
+              <button class="btn btn-primary" type="submit" id="empsave2">Add</button>
               <button class="btn btn-danger" type="reset">Cancel</button>
             </div>
             <div class="text-center">
@@ -4062,7 +4062,7 @@ function reloadPayment() {
               <div class="col-md-6 mt-2">
                 <div class="d-flex">
                   <select class="form-control text-dark bg-light" id="c_terms" name="c_terms" required>
-                    {% for p in payments %}
+                    {% for p in pay %}
                     <option value="{{p.Terms}} {{p.id}}">{{p.Terms}}</option>
                     {% endfor %}
                   </select>                
@@ -4769,7 +4769,7 @@ function reloadPayment() {
               <div class="col-md-4">
                 <div class="d-flex">
                   <button class="btn save_btn rounded-pill text-grey w-50 my-4 mx-3"
-                  type="submit" data-dismiss="modal" id="paySave">Save
+                  type="submit" data-dismiss="modal" id="paySave2">Save
                   </button> 
                   
   
@@ -5001,4 +5001,116 @@ $(document).ready(function() {
 
 
   </script>
+
+
+<script>
+
+// new emp
+
+
+$(document).on("click","#empsave2",function(){
+$.ajax({
+  
+  type : 'POST',
+  url:"{% url 'new_emp' %}",
+
+  data:{
+      // customer_type : custType,
+      title : $('#title').val(),
+      fname : $('#fname').val(),
+      lname : $("#lname").val(),
+      
+      alias :$("#alias").val(),
+      joindate :$("#joindate").val(),
+      sal :$("#sal").val(),
+      fsalary :$("#fsalary").val(),
+      amnt :$("#amnt").val(),
+      hours :$("#hours").val(),
+      vsalary :$("#vsalary").val(),
+      // img :$("#img").val(),
+      empnum :$("#empnum").val(),
+      des:$("#des").val(),
+      location :$("#location").val(),
+      // tax_preference :cust_tax,
+      dropId3 : $("#dropId3").val(),
+      // openingbalance : openbal,
+      dob : $("#dob").val(),
+
+      blood : $("#blood").val(),
+      faname : $("#faname").val(),
+      spname : $("#spname").val(),
+      padrs1 : $("#padrs1").val(),
+      padrs2 : $("#padrs2").val(),
+      adrs1 : $("#adrs1").val(),
+      adrs2 : $("#adrs2").val(),
+      phone : $("#phone").val(),
+      ephone : $("#ephone").val(),
+      email : $("#eemail").val(),
+      // file : $("#file").val(),
+      dropId : $("#dropId").val(),
+      acc_no : $("#acc_no").val(),
+      ifsc : $("#ifsc").val(),
+      b_name: $("#b_name").val(),
+      branch: $("#branch").val(),
+
+      ttype : $("#ttype").val(),
+      tds : $("#tds").val(),
+      pora : $("#pora").val(),
+      pcnt: $("#pcnt").val(),
+      amnt: $("#amnt").val(),
+
+      itn : $("#itn").val(),
+      an : $("#an").val(),
+      uan : $("#uan").val(),
+      pfn: $("#pfn").val(),
+      pran: $("#pran").val(),
+      csrfmiddlewaretoken: '{{ csrf_token }}'
+    },
+  
+    success: function(response) {
+      document.getElementById("newemp2").reset();
+      reloadEmp();
+    },
+});        
+});
+
+
+function reloadEmp() {
+
+$.ajax({
+  url: "{% url 'emp_dropdownE' %}",
+  type: "GET",
+  dataType: "json",
+  data: $(this).serialize(),
+  data:enteredCName,
+  csrfmiddlewaretoken: '{{ csrf_token }}',
+
+  success: function(data) {
+    console.log("AJAX Success Data:", data);
+    var dropdown = $('#empid');
+    dropdown.empty();
+    $.each(data, function(key, value) {
+        // dropdown.append($('<option></option>').attr('value', key).text(value[1]).val(value[0]));
+        dropdown.append($('<option></option>').attr('value', key).text(value[1]).val(key));
+    });
+    if (enteredCName) {
+        dropdown.find('option').filter(function() {
+          return $(this).text() === enteredCName;
+        }).prop('selected', true);
+      }
+   
+
+    // if (enteredCName) {
+    //             dropdown.val(enteredCName);
+    //         }
+      
+  },
+  error: function(xhr, status, error) {
+  console.error(xhr.responseText);
+  }
+});
+
+}
+
+</script>
 {% endblock %}
