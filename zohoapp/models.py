@@ -779,6 +779,8 @@ class Chart_of_Account_Upload(models.Model):
     
 class project1(models.Model):
     user=models.ForeignKey(User,on_delete=models.CASCADE,null=True,blank=True)
+    # emp = models.ForeignKey(Payroll,on_delete=models.CASCADE,null=True,blank=True)
+    
     # payroll=models.ForeignKey(Payroll,on_delete=models.CASCADE,default='')
     name=models.CharField(max_length=255,null=True,blank=True)
     desc=models.CharField(max_length=255,null=True,blank=True)
@@ -814,6 +816,7 @@ class task(models.Model):
 
 class usercreate(models.Model):
     projnn=models.ForeignKey(project1,on_delete=models.CASCADE,null=True,blank=True)
+    
     userss=models.ForeignKey(User,on_delete=models.CASCADE,null=True,blank=True)
     usernamezz=models.CharField(max_length=255, null=True,blank=True)
     emailzz=models.CharField(max_length=255, null=True,blank=True)
@@ -905,6 +908,7 @@ class Payroll(models.Model):
     amountperhr = models.CharField(max_length=100,null=True)
     workhr = models.CharField(max_length=100,null=True)
     proj =models.ForeignKey(project1,on_delete=models.CASCADE,null=True,blank=True)
+    projcode =models.IntegerField(null=True,default=0)
     
     
 class Bankdetails(models.Model):
@@ -1042,6 +1046,7 @@ class ExpenseE(models.Model):
     destination_of_supply=models.TextField(max_length=255,null=True, blank=True)
     reverse_charge=models.TextField(max_length=255,null=True, blank=True)
     tax=models.TextField(max_length=255,null=True, blank=True)
+    tax2=models.TextField(max_length=255,null=True, blank=True)
     invoice=models.TextField(max_length=255,null=True, blank=True)
     vendor_name=models.CharField(max_length=100,null=True, blank=True)
     customername=models.CharField(max_length=100,null=True, blank=True)
@@ -1076,6 +1081,7 @@ class Payrollfiles(models.Model):
 class usernamez(models.Model):
     projn=models.ForeignKey(project1,on_delete=models.CASCADE,null=True,blank=True)
     users=models.ForeignKey(User,on_delete=models.CASCADE,null=True,blank=True)
+    emp=models.ForeignKey(Payroll,on_delete=models.CASCADE,null=True,blank=True)
     usernamez=models.CharField(max_length=255, null=True,blank=True)
     emailz=models.CharField(max_length=255, null=True,blank=True)
     

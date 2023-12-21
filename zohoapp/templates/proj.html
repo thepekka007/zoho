@@ -229,7 +229,7 @@
         <label>Project name*</label>
       </div>
       <div class="col-sm-12 col-md-6 col-lg-6">
-        <input type="text" class="form-control bg-light text-dark" name="name" required>
+        <input type="text" class="form-control bg-light text-dark" name="pname" required>
         <div class="invalid-feedback">Please fill out this field.</div>
 
       </div>
@@ -402,7 +402,7 @@
         <label>Description</label>
       </div>
       <div class="col-sm-12 col-md-6 col-lg-6">
-        <input type="text" class="form-control bg-light text-dark" name="name" required>
+        <input type="text" class="form-control bg-light text-dark" name="name" >
         <div class="invalid-feedback">Please fill out this field.</div>
 
       </div>
@@ -450,13 +450,13 @@
             <tr id="row1">
                 <td style="width: 10%;">
                 Select Employee
-                </td>
+                </td> 
                 
                 
                 <td style="width: 40%;" class='text-right text-dark'> <select name="user_select[]" id="empid" class="form-control bg-light text-dark">
                   <option value=" ">Select Employee</option>
                   {% for d in emp %}
-                  <option value="{{ d.first_name }}" data-email="{{ d.first_name }}">{{ d.first_name }} {{ d.last_name }}</option>
+                  <option value="{{ d.id }} " data-email="{{ d.first_name }}">{{ d.first_name }} {{ d.last_name }}</option>
                   {% endfor %}  
                 </select>
                         
@@ -481,7 +481,7 @@
                             success: function(data) {
                               
                                     var email = data.email;
-                   
+                                    console.log(email)
                                    
                         
                                     console.log("helloooooooooooooooooooooooooooooooo");
@@ -594,21 +594,21 @@
           <tr id="row1">
                 <td style="width: 10%;">
                 Select Employee
-                </td>
+                </td> 
                 
                 
-                <td style="width: 40%;" class='text-right text-dark'> <select name="user_select[]" id="empid" class="form-control bg-light text-dark">
+                <td style="width: 40%;" class='text-right text-dark'> <select name="user_select[]" id="empid2" class="form-control bg-light text-dark">
                   <option value=" ">Select Employee</option>
                   {% for d in emp %}
-                  <option value="{{ d.id }}" data-email="{{ d.first_name }}">{{ d.first_name }} {{ d.last_name }}</option>
+                  <option value="{{ d.id }} " data-email="{{ d.first_name }}">{{ d.first_name }} {{ d.last_name }}</option>
                   {% endfor %}  
                 </select>
                         
                 </td>
-                <td style="width: 40%;" class='text-right text-dark'>   <input type="email" id="mo" placeholder="Enter the email id" name="user_email[]" class="form-control bg-light text-dark">
+                <td style="width: 40%;" class='text-right text-dark'>   <input type="email" id="mo2" placeholder="Enter the email id" name="user_email[]" class="form-control bg-light text-dark">
      
                 </td>
-           
+             
                 <td class='text-center'><button type='button' id='del_btn1'
                         class='btn btn-transparent text-danger btn-sm btn-outline-danger rounded-circle delete-row'
                         style='width:30px'>X</button></td>
@@ -625,8 +625,8 @@
 </tr>
           `;
           $(document).ready(function(){
-                  $('#empid').change(function(){
-                    var name = $("#empid").val();
+                  $('#empid2').change(function(){
+                    var name = $("#empid2").val();
                     console.log("helooooooooooooooooooo")
                     console.log(name)
                     $.ajax({
@@ -640,7 +640,7 @@
                             success: function(data) {
                               
                                     var email = data.email;
-                   
+                                    console.log(email)
                                    
                         
                                     console.log("helloooooooooooooooooooooooooooooooo");
@@ -649,7 +649,7 @@
                                   
                                     if(email != 'null' && email.trim() !== '' )
                                     {
-                                      $("#mo").val(email);
+                                      $("#mo2").val(email);
                 
                                     
                                      
@@ -660,6 +660,7 @@
                     });
                   });
                 });
+                 
                  
         $('#item_table tbody').append(newRow);
           toggleDateInput();
@@ -5067,7 +5068,7 @@ $.ajax({
       csrfmiddlewaretoken: '{{ csrf_token }}'
     },
   
-    success: function(response) {
+    success: function(response) {debugger
       document.getElementById("newemp2").reset();
       reloadEmp();
     },
@@ -5085,20 +5086,16 @@ $.ajax({
   data:enteredCName,
   csrfmiddlewaretoken: '{{ csrf_token }}',
 
-  success: function(data) {
-    console.log("AJAX Success Data:", data);
+  success: function(data) {debugger
+    // console.log("AJAX Success Data:", data);
     var dropdown = $('#empid');
     dropdown.empty();
+    dropdown.append($('<option></option>').text('Select Employee'));
     $.each(data, function(key, value) {
         // dropdown.append($('<option></option>').attr('value', key).text(value[1]).val(value[0]));
-        dropdown.append($('<option></option>').attr('value', key).text(value[1]).val(key));
-    });
-    if (enteredCName) {
-        dropdown.find('option').filter(function() {
-          return $(this).text() === enteredCName;
-        }).prop('selected', true);
-      }
-   
+        dropdown.append($('<option></option>').attr('value', key).text(value[0] + ' ' + value[1]+ ' ' + value[2]).val(key));
+   });
+
 
     // if (enteredCName) {
     //             dropdown.val(enteredCName);

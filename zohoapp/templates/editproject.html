@@ -187,6 +187,80 @@
       </div>
     </div>
     <script>
+      window.onload = function() {
+    // Your existing function
+    var customer = $('#customer').val();
+    // New function to run on window load
+    function yourNewFunction() {
+        // Your new code here
+        $.ajax({
+          type: "GET",
+          url: "{% url 'customerdata' %}",
+          data: {
+            id: customer
+          },
+          success: function (response) {
+            console.log(response.email)
+            dataemail = response.email;
+            datagst =response.gst;
+            datagstin =response.gstin;
+            address2 = response.billingAddress;
+            // document.getElementById('customer-address').value = address2;
+            // document.getElementById('customer-email').value = dataemail;
+            // document.getElementById('customer-gst').value = datagst;
+            if(address2 !== null && address2.trim() !== '' )
+                    {
+                      $("#caddress_field").show();
+                      // $("#s_supply_field").show();
+                      $("#customer-address").val(address2);
+                    }
+                    else 
+                    {
+                        $("#caddress_field").hide();
+                    }
+                    if(dataemail !== null && dataemail.trim() !== '' )
+                    {
+                      $("#cemail").show();
+                      // $("#s_supply_field").show();
+                      $("#customer-email").val(dataemail);
+                    }
+                    else 
+                    {
+                        $("#cemail").hide();
+                    }
+                    if(datagst !== null && datagst.trim() !== '' )
+                    {
+                      $("#gstTreatment").show();
+                      // $("#s_supply_field").show();
+                      $("#customer-gst").val(datagst);
+                    }
+                    else 
+                    {
+                        $("#gstTreatment").hide();
+                    }
+                    
+            // if(datagst !='Unregistered Business-not Registered under GST' ){
+            //   document.getElementById('gstin').style.display='flex';
+            //   document.getElementById('customer-gstin').value = datagstin;
+            // }
+            // else{
+            //   document.getElementById('gstin').style.display='none';
+            // }
+
+          }
+        });
+    }
+
+    // Call your existing function
+   
+
+    // Call your new function
+    yourNewFunction();
+
+    // Call the function when the vendor selection changes
+  
+};
+
       $(document).on('change', '#customer', function () {
         var customer = $('#customer').val();
         $.ajax({
@@ -201,17 +275,36 @@
             datagst =response.gst;
             datagstin =response.gstin;
             address2 = response.billingAddress;
-            document.getElementById('customer-address').value = address2;
-            document.getElementById('customer-email').value = dataemail;
-            document.getElementById('customer-gst').value = datagst;
-       
-            if(datagst !='Unregistered Business-not Registered under GST' ){
-              document.getElementById('gstin').style.display='flex';
-              document.getElementById('customer-gstin').value = datagstin;
-            }
-            else{
-              document.getElementById('gstin').style.display='none';
-            }
+            if(address2 !== null && address2.trim() !== '' )
+                    {
+                      $("#caddress_field").show();
+                      // $("#s_supply_field").show();
+                      $("#customer-address").val(address2);
+                    }
+                    else 
+                    {
+                        $("#caddress_field").hide();
+                    }
+                    if(dataemail !== null && dataemail.trim() !== '' )
+                    {
+                      $("#cemail").show();
+                      // $("#s_supply_field").show();
+                      $("#customer-email").val(dataemail);
+                    }
+                    else 
+                    {
+                        $("#cemail").hide();
+                    }
+                    if(datagst !== null && datagst.trim() !== '' )
+                    {
+                      $("#gstTreatment").show();
+                      // $("#s_supply_field").show();
+                      $("#customer-gst").val(datagst);
+                    }
+                    else 
+                    {
+                        $("#gstTreatment").hide();
+                    }
 
           }
         });
@@ -219,16 +312,16 @@
     </script>
 
 
-    <div class="form-group row mt-4">
+    <div class="form-group row mt-4" id="cemail">
       <div class="col-sm-12 col-md-3 col-lg-3 col-form-label">
         <label>Email</label>
       </div>
       <div class="col-sm-12 col-md-6 col-lg-6">
-        <input type="text" id="customer-email" value="{{cemail}}" class="form-control bg-light text-dark">
+        <input type="text" id="customer-email" class="form-control bg-light text-dark">
       </div>
     </div>  
  
-    <div class="form-group row mt-4">
+    <div class="form-group row mt-4" id="caddress_field">
       <div class="col-sm-12 col-md-3 col-lg-3 col-form-label">
         <label>Billing Address </label>
       </div>
@@ -237,14 +330,14 @@
       </div>
     </div>  
   
-    <!-- <div class="form-group row mt-4">
+<!--   <div class="form-group row mt-4" id="gstTreatment">
       <div class="col-sm-12 col-md-3 col-lg-3 col-form-label">
         <label>GST Treatment</label>
-      </div>
+      </div>  
       <div class="col-sm-12 col-md-6 col-lg-6">
         <input type="text" id="customer-gst" class="form-control bg-light text-dark">
       </div>
-    </div>
+    </div>  
     <div class="form-group row mt-4" id="gstin" style="display: none;">
       <div class="col-sm-12 col-md-3 col-lg-3 col-form-label">
         <label>GSTIN</label>
@@ -340,7 +433,17 @@
       });
     </script>
     
+    <div class=" form-group row">
+      <div class="col-sm-12 col-md-3 col-lg-3 col-form-label">
+        <label>Description</label>
+      </div>
+      <div class="col-sm-12 col-md-6 col-lg-6">
+        <input type="text" class="form-control bg-light text-dark" name="desc" value="{{desc}}"  >
+        <div class="invalid-feedback">Please fill out this field.</div>
 
+      </div>
+
+    </div>
 
 
     <label for="">Users</label><br>
@@ -353,84 +456,484 @@
         
           </thead>
           <tbody>
-
+            {% for c in users %}
             <tr id="row1">
-                <td style="width: 10%;">
-                Select Employee
-                </td>
+
+              <td style="width: 10%;">
+              Select Employee
+              </td> 
+              
+              
+              <td style="width: 40%;" class='text-right text-dark'> <select name="user_select[]" id="empid" class="form-control bg-light text-dark">
+               
+             
+                <option value="{{ c.id }} " >{{ c.usernamez }}</option>
+             
+                <option value=" ">Select Employee</option>
                 
-                
-                <td style="width: 40%;" class='text-right text-dark'> <select name="user_select[]" id="empid" class="form-control bg-light text-dark">
-                  <option value=" ">Select Employee</option>
-                  {% for d in emp %}
-                  <option value="{{ d.first_name }}" data-email="{{ d.first_name }}" >{{ d.first_name }} {{ d.last_name }}</option>
-                  {% endfor %}  
-                </select>
-                        
-                </td>
-                <td style="width: 40%;" class='text-right text-dark'>   <input type="email" id="mo" placeholder="Enter the email id" name="user_email[]" class="form-control bg-light text-dark">
-     
-                </td>
-                <script>
-                  $(document).ready(function(){
-                  $('#empid').change(function(){
-                    var name = $("#empid").val();
-                    console.log("helooooooooooooooooooo")
-                    console.log(name)
-                    $.ajax({
-                      url: "{% url 'exp_get_employeedet' %}", 
-                            data: { 
-                                    id : name,
-                                    csrfmiddlewaretoken: '{{ csrf_token }}' 
-                                },
-                
-                            type : 'POST',
-                            success: function(data) {
-                              
-                                    var email = data.email;
-                   
-                                   
-                        
-                                    console.log("helloooooooooooooooooooooooooooooooo");
-                                    console.log(email);
-                
-                                  
-                                    if(email != 'null' && email.trim() !== '' )
-                                    {
-                                      $("#mo").val(email);
-                
-                                    
-                                     
-                                    }
-                                    
+                {% for d in emp %}
+                <option value="{{ d.id }} " data-email="{{ d.first_name }}">{{ d.first_name }} {{ d.last_name }}</option>
+                {% endfor %}  
+              </select>
+                      
+              </td>
+              <td style="width: 40%;" class='text-right text-dark'>   <input type="email" id="mo" placeholder="Enter the email id" name="user_email[]" class="form-control bg-light text-dark" value="{{c.emailz}}">
+   
+              </td>
+           
+              <script>
+                $(document).ready(function(){
+                $('#empid').change(function(){
+                  var name = $("#empid").val();
+                  console.log("helooooooooooooooooooo")
+                  console.log(name)
+                  $.ajax({
+                    url: "{% url 'exp_get_employeedet' %}", 
+                          data: { 
+                                  id : name,
+                                  csrfmiddlewaretoken: '{{ csrf_token }}' 
+                              },
+              
+                          type : 'POST',
+                          success: function(data) {
+                            
+                                  var email = data.email;
+                                  console.log(email)
                                  
-                            }
-                    });
+                      
+                                  console.log("helloooooooooooooooooooooooooooooooo");
+                                  console.log(email);
+              
+                                
+                                  if(email != 'null' && email.trim() !== '' )
+                                  {
+                                    $("#mo").val(email);
+              
+                                  
+                                   
+                                  }
+                                  
+                               
+                          }
                   });
                 });
-                 
-                
-                  </script>
-                <td class='text-center'><button type='button' id='del_btn1'
-                        class='btn btn-transparent text-danger btn-sm btn-outline-danger rounded-circle delete-row'
-                        style='width:30px'>X</button></td>
-                        <td class='text-center'>
-                          <!-- <button type='button' class='btn btn-transparent text-warning btn-sm btn-outline-warning rounded-circle clone-row' data-row=1 style='width:30px'><i class="fa fa-clone"></i>
-                          </button> -->
-                        </td>
-                        <td>
-                          <a href="" class="p-2" data-toggle="modal"   data-target="#newemp">
-                            <i class="fas fa-plus p-2 rounded " style="color: white; background-color: rgb(210, 132, 30); "
-                                data-toggle="tooltip" title="Create Vendor"></i>
-                        </a>
-                        </td>
+              });
+               
+              
+                </script>
+              <td class='text-center'><button type='button' id='del_btn1'
+                      class='btn btn-transparent text-danger btn-sm btn-outline-danger rounded-circle delete-row'
+                      style='width:30px'>X</button></td>
+                      <td class='text-center'>
+                        <!-- <button type='button' class='btn btn-transparent text-warning btn-sm btn-outline-warning rounded-circle clone-row' data-row=1 style='width:30px'><i class="fa fa-clone"></i>
+                        </button> -->
+                      </td>
+                      <td>
+                        <a href="" class="p-2" data-toggle="modal"   data-target="#newemp">
+                          <i class="fas fa-plus p-2 rounded " style="color: white; background-color: rgb(210, 132, 30); "
+                              data-toggle="tooltip" title="Create Vendor"></i>
+                      </a>
+                      </td>
 </tr>
-
+{% endfor %} 
     </tbody>
   </table>
   <button type="button" class="btn btn-sm text-white" style="background-color: rgb(210, 132, 30);" id="add-row">Add another line</button>
 </div >
 </div>
+<script>
+  var rowCount = 1;
+  $(document).ready(function () {
+    // Counter for row IDs
+  
+    // Function to calculate the row amount
+    function calculateRowAmount(row) {
+      var qty = parseFloat(row.find('.qty').val());
+      var rate = parseFloat(row.find('.rate').val());
+      var tax = parseFloat(row.find('.tax').val());
+      var discount = parseFloat(row.find('.discount').val());
+  
+      var rowAmount = (qty * rate) - discount;
+      var taxAmount = (rowAmount * tax) / 100;
+  
+      row.find('.amount').val(rowAmount.toFixed(2));
+      row.find('.taxamount').val(taxAmount.toFixed(2));
+      
+      return rowAmount;
+      calculateTaxAmount();
+    }
+  
+    // Function to calculate the subtotal
+    function calculateSubtotal() {
+      var subtotal = 0;
+      $('#item_table tbody tr').each(function () {
+        subtotal += calculateRowAmount($(this));
+      });
+      $('#subtotal').val(subtotal.toFixed(2));
+    }
+  
+  // Function to calculate the grand total
+  function calculateGrandTotal() {
+    var grandTotal = 0;
+    var totalTaxAmount = 0;
+  
+    $('#item_table tbody tr').each(function () {
+      var rowAmount = calculateRowAmount($(this));
+      grandTotal += rowAmount;
+      var taxAmount = parseFloat($(this).find('.taxamount').val());
+      grandTotal += taxAmount;
+      totalTaxAmount += taxAmount;
+    });
+    var shippingCharges = parseFloat($('#shipping').val());
+    var adjust = parseFloat($('#adjustment').val());
+  
+    grandTotal += shippingCharges ;
+    if (adjust >= 0) {
+                grandtotal += adjust;
+            } else {
+                grandtotal -= Math.abs(adjust);
+            }
+  
+    $('#grandtotal').val(grandTotal.toFixed(2));
+    $('#total_taxamount').val(totalTaxAmount.toFixed(2));
+  }
+  
+    $('#item_table').on('change', '.tax', function () {
+      var row = $(this).closest('tr');
+      calculateRowAmount(row);
+      calculateSubtotal();
+      calculateGrandTotal();
+    });
+  
+    $('#add-row').click(function () {
+      rowCount++; // Increment row counter
+      var newRow = `
+      <tr id="row1">
+            <td style="width: 10%;">
+            Select Employee
+            </td> 
+            
+            
+            <td style="width: 40%;" class='text-right text-dark'> <select name="user_select[]" id="empid2" class="form-control bg-light text-dark">
+              <option value=" ">Select Employee</option>
+              {% for d in emp %}
+              <option value="{{ d.id }} " data-email="{{ d.first_name }}">{{ d.first_name }} {{ d.last_name }}</option>
+              {% endfor %}  
+            </select>
+                    
+            </td>
+            <td style="width: 40%;" class='text-right text-dark'>   <input type="email" id="mo2" placeholder="Enter the email id" name="user_email[]" class="form-control bg-light text-dark">
+ 
+            </td>
+         
+            <td class='text-center'><button type='button' id='del_btn1'
+                    class='btn btn-transparent text-danger btn-sm btn-outline-danger rounded-circle delete-row'
+                    style='width:30px'>X</button></td>
+                    <td class='text-center'>
+                      <!-- <button type='button' class='btn btn-transparent text-warning btn-sm btn-outline-warning rounded-circle clone-row' data-row=1 style='width:30px'><i class="fa fa-clone"></i>
+                      </button> -->
+                    </td>
+                    <td>
+                      <a href="" class="p-2" data-toggle="modal"   data-target="#newemp">
+                        <i class="fas fa-plus p-2 rounded " style="color: white; background-color: rgb(210, 132, 30); "
+                            data-toggle="tooltip" title="Create Vendor"></i>
+                    </a>
+                    </td>
+</tr>
+      `;
+      $(document).ready(function(){
+              $('#empid2').change(function(){
+                var name = $("#empid2").val();
+                console.log("helooooooooooooooooooo")
+                console.log(name)
+                $.ajax({
+                  url: "{% url 'exp_get_employeedet' %}", 
+                        data: { 
+                                id : name,
+                                csrfmiddlewaretoken: '{{ csrf_token }}' 
+                            },
+            
+                        type : 'POST',
+                        success: function(data) {
+                          
+                                var email = data.email;
+                                console.log(email)
+                               
+                    
+                                console.log("helloooooooooooooooooooooooooooooooo");
+                                console.log(email);
+            
+                              
+                                if(email != 'null' && email.trim() !== '' )
+                                {
+                                  $("#mo2").val(email);
+            
+                                
+                                 
+                                }
+                                
+                             
+                        }
+                });
+              });
+            });
+             
+             
+    $('#item_table tbody').append(newRow);
+      toggleDateInput();
+      calculateSubtotal();
+      calculateGrandTotal();
+    });
+    $('#item_table').on('click', '.delete-row', function () {
+      $(this).closest('tr').remove();
+      calculateSubtotal();
+      calculateGrandTotal();
+      calculateTaxAmount();
+    });
+    $('#srcofsupply').on('change', function () {
+    var row = $(this).closest('tr');
+    calculateRowAmount(row);
+    calculateSubtotal();
+    calculateGrandTotal();
+    toggleDateInput();
+    calculateTaxAmount();
+  
+    // Calculate total tax amount and its IGST amount
+    var totalTaxAmount = 0;
+    var totalIGSTAmount = 0;
+  
+    $('#item_table tbody tr').each(function () {
+      var tax = $(this).find('.tax').val();
+      var amount = $(this).find('.amount').val();
+  
+      var taxAmount = amount * (tax / 100);
+      totalTaxAmount += taxAmount;
+  
+      if (tax.startsWith('IGST')) {
+        totalIGSTAmount += taxAmount;
+      }
+    });
+  
+    // Update the total tax amount and its IGST amount in the UI
+    $('#total_taxamount').val(totalTaxAmount.toFixed(2));
+    $('#total_igstamount').val(totalIGSTAmount.toFixed(2));
+  });
+  
+    $(document).ready(function() {
+      var row = $(this).closest('tr');
+      calculateRowAmount(row);
+      calculateSubtotal();
+      calculateGrandTotal();
+      toggleDateInput();
+      calculateTaxAmount();
+  });
+    // Input change event for quantity, rate, and discount
+    $('#item_table').on('input', '.qty, .rate, .discount,.tax', function () {
+      var row = $(this).closest('tr');
+      calculateRowAmount(row);
+      calculateSubtotal();
+      calculateGrandTotal();
+      toggleDateInput();
+      calculateTaxAmount();
+    });
+  
+    $('#shipping').on('input', function () {
+      var shippingAmount = parseFloat($(this).val());5
+      $('#shipping_charge').val(shippingAmount.toFixed(2));
+      calculateGrandTotal();
+    });
+  
+     $('#adjustment').on('change', function () {
+      calculateGrandTotal();
+    });
+  
+  
+  
+    // Add an event listener to the fields in the item table
+  $('#item_table').on('click', '.item_select, .acnt, .rate, .qty, .tax, .discount', function () {
+    var row = $(this).closest('tr');
+    var taxElement = row.find('.tax');
+  
+    var checkbox = document.getElementById("srcofsupply");
+    var vale = checkbox.value;
+  
+    if (vale === "[KL] Kerala") {
+      taxElement.find('optgroup[label="GST"]').show();
+      taxElement.find('optgroup[label="IGST"]').hide();
+    } else {
+      taxElement.find('optgroup[label="GST"]').hide();
+      taxElement.find('optgroup[label="IGST"]').show();
+    }
+  });
+  
+  // Event handler for clone button
+  $('#item_table').on('click', '.clone-row', function () {
+    var row = $(this).closest('tr');
+    var clonedRow = row.clone(); // Clone the current row
+    var newRowId = 'row' + rowCount; // Generate a new ID for the cloned row
+    clonedRow.attr('id', newRowId); // Set the new ID for the cloned row
+  
+    // Clone the options for tax, account, and item
+    var currentItem = row.find('.item_select').val();
+    clonedRow.find('.item_select').val(currentItem);
+    // var currentAccount = row.find('.acnt').val();
+    // clonedRow.find('.acnt').val(currentAccount);
+    var currentTax = row.find('.tax').val();
+    clonedRow.find('.tax').val(currentTax);
+  
+    rowCount++; // Increment row counter
+  
+    $('#item_table tbody').append(clonedRow);
+    var row = $(this).closest('tr');
+    calculateRowAmount(row);
+    calculateSubtotal();
+    calculateGrandTotal();
+    toggleDateInput();
+    calculateTaxAmount();
+    toggleDateInput();
+  });
+  
+  
+         
+  
+  });
+  function calculateTaxAmount() {
+          var checkbox = document.getElementById("srcofsupply");
+          var vale=checkbox.value;
+          var srcofsupply = vale; // Replace with the actual value of srcofsupply
+          var companyState = "[KL] Kerala"; // Replace with the actual value of company state
+  
+          var subtotal = parseFloat(document.getElementById("subtotal").value);
+          var shipping = parseFloat(document.getElementById("shipping").value);
+          var adjust = parseFloat(document.getElementById("adjustment").value);
+          var tax = parseFloat(document.getElementById("total_taxamount").value);
+          
+          var tax_rate = 0.0; // Default tax rate for IGST
+          if (srcofsupply === companyState) {
+              tax_rate =tax; // Tax rate for CGST/SGST
+          }
+  
+          var total_taxamount = tax_rate;
+  
+          var cgst = 0.00;
+          var sgst = 0.00;
+          var igst = 0.00;
+  
+          if (srcofsupply === companyState) {
+              cgst = total_taxamount / 2;
+              sgst = total_taxamount / 2;
+          } else {
+              igst = tax;
+          }
+  
+          document.getElementById("cgst").value = cgst.toFixed(2);
+          document.getElementById("sgst").value = sgst.toFixed(2);
+          document.getElementById("igst").value = igst.toFixed(2);
+  
+          if (srcofsupply === companyState) {
+              document.getElementById("tr_igst").style.display = "none";
+              document.getElementById("tr_cgst").style.display = "";
+              document.getElementById("tr_sgst").style.display = "";
+          } else {
+              document.getElementById("tr_igst").style.display = "";
+              document.getElementById("tr_cgst").style.display = "none";
+              document.getElementById("tr_sgst").style.display = "none";
+          }
+  
+          document.getElementById("total_taxamount").value = total_taxamount.toFixed(2);
+          var grandtotal = subtotal + total_taxamount + shipping ;
+          // grandtotal += adjust;
+  
+            if (adjust >= 0) {
+                grandtotal += adjust;
+            } else {
+                grandtotal -= Math.abs(adjust);
+            }
+          document.getElementById("grandtotal").value = grandtotal.toFixed(2);
+      }
+  
+      // Call the function initially on page load
+      
+  
+      // Add event listeners to update tax amounts when subtotal or shipping changes
+      document.getElementById("subtotal").addEventListener("input", calculateTaxAmount);
+      document.getElementById("shipping").addEventListener("input", calculateTaxAmount);
+      document.getElementById("adjustment").addEventListener("input", calculateTaxAmount);
+  
+  function toggleDateInput() {
+        var checkbox = document.getElementById("srcofsupply");
+        var vale=checkbox.value;
+        
+        for (var i = 1; i <= rowCount; i++) {
+          var taxElement = $('#tax' + i);
+  
+          if (vale === "[KL] Kerala") {
+              taxElement.find('optgroup[label="GST"]').show();
+              taxElement.find('optgroup[label="IGST"]').hide();
+          } else {
+              taxElement.find('optgroup[label="GST"]').hide();
+              taxElement.find('optgroup[label="IGST"]').show();
+          }
+      }
+    }
+  
+    function test(taxamount) {
+          console.log('test333');
+          console.log(taxamount)
+          d = 0;
+          var checkbox = document.getElementById("srcofsupply");
+          var vale=checkbox.value;
+          console.log(pos)
+          console.log('state')
+          console.log(state)
+          console.log('state')
+          console.log('----------')
+          if ( vale === "[KL] Kerala") {
+              console.log(pos);
+              console.log(state);
+              console.log(taxamount);
+              gst = taxamount / 2;
+              console.log(gst);
+              $('#cgst').val(parseFloat(gst.toFixed(2)));
+              $('#sgst').val(parseFloat(gst.toFixed(2)));
+              $('#igst').val(parseFloat(d.toFixed(2)));
+              
+              // document.getElementById('tr_cgst').style= ('display: flex');
+              
+              // document.getElementById('tr_sgst').style= ('display: flex');
+              // document.getElementById('tr_igst').style= ('display: none');
+  
+             
+          }
+          else{
+              gst = taxamount ;
+              console.log(gst);
+              $('#cgst').val(parseFloat(d.toFixed(2)));
+              $('#sgst').val(parseFloat(d.toFixed(2)));
+              $('#igst').val(parseFloat(gst.toFixed(2)));
+          }
+          var checkbox = document.getElementById("srcofsupply");
+          var vale=checkbox.value;
+          var pos= "[KL] Kerala"
+          if (vale==pos){
+  
+          }
+  
+          if (vale !=  "[KL] Kerala") {
+              console.log(pos);
+              console.log(state);
+              document.getElementById('tr_cgst').style=('display: none');
+              document.getElementById('tr_sgst').style= ('display: none');
+              document.getElementById('tr_igst').style= ('display: block');
+          }
+          else{
+              document.getElementById('tr_cgst').style=('display: block');
+              document.getElementById('tr_sgst').style= ('display: block');
+              document.getElementById('tr_igst').style= ('display: none');
+          }
+      }
+  
+  </script>
     <!-- <button type="button" class="btn btn-sm text-white" style="background-color: rgb(210, 132, 30);"
           id="add-user-row">Add User</button> -->
     <!-- <button type="button" class="btn btn-sm text-white" style="background-color: rgb(210, 132, 30);"
@@ -617,17 +1120,7 @@
           </td>
          
     </table><br>
-    <div class=" form-group row">
-      <div class="col-sm-12 col-md-3 col-lg-3 col-form-label">
-        <label>Description</label>
-      </div>
-      <div class="col-sm-12 col-md-6 col-lg-6">
-        <input type="text" class="form-control bg-light text-dark" name="name" required>
-        <div class="invalid-feedback">Please fill out this field.</div>
-
-      </div>
-
-    </div>
+ 
     <!-- <button type="button" class="btn btn-sm text-white" style="background-color: rgb(210, 132, 30);"
           id="add-task-row">Add Task</button><br><br> -->
     <script>
@@ -3036,15 +3529,15 @@
             {
               document.getElementById('customer-address').value = address2;
             }
-            if (dataemail !== 'null' && dataemail.trim() !== '') 
-                    {
-                        $("#emg").show();
-                        $("#customer-email").val(dataemail);
-                    } 
-                    else 
-                    {
-                        $("#emg").hide();
-                    }
+            // if (dataemail !== 'null' && dataemail.trim() !== '') 
+            //         {
+            //             $("#emg").show();
+            //             $("#customer-email").val(dataemail);
+            //         } 
+            //         else 
+            //         {
+            //             $("#emg").hide();
+            //         }
             if (address2 !== 'null' && address2.trim() !== '') 
                     {
                         $("#badrs").show();
@@ -3055,7 +3548,7 @@
                         $("#badrs").hide();
                     }
             // document.getElementById('customer-address').value = address2;
-            document.getElementById('customer-email').value = dataemail;
+            // document.getElementById('customer-email').value = dataemail;
             document.getElementById('customer-gst').value = datagst;
   
             if(datagst !='Unregistered Business-not Registered under GST' ){
@@ -3419,9 +3912,740 @@
       }
   
   </script>
+<script>
 
-
+  // new emp
+  
+  
+  $(document).on("click","#empsave2",function(){
+  $.ajax({
+    
+    type : 'POST',
+    url:"{% url 'new_emp' %}",
+  
+    data:{
+        // customer_type : custType,
+        title : $('#title').val(),
+        fname : $('#fname').val(),
+        lname : $("#lname").val(),
+        
+        alias :$("#alias").val(),
+        joindate :$("#joindate").val(),
+        sal :$("#sal").val(),
+        fsalary :$("#fsalary").val(),
+        amnt :$("#amnt").val(),
+        hours :$("#hours").val(),
+        vsalary :$("#vsalary").val(),
+        // img :$("#img").val(),
+        empnum :$("#empnum").val(),
+        des:$("#des").val(),
+        location :$("#location").val(),
+        // tax_preference :cust_tax,
+        dropId3 : $("#dropId3").val(),
+        // openingbalance : openbal,
+        dob : $("#dob").val(),
+  
+        blood : $("#blood").val(),
+        faname : $("#faname").val(),
+        spname : $("#spname").val(),
+        padrs1 : $("#padrs1").val(),
+        padrs2 : $("#padrs2").val(),
+        adrs1 : $("#adrs1").val(),
+        adrs2 : $("#adrs2").val(),
+        phone : $("#phone").val(),
+        ephone : $("#ephone").val(),
+        email : $("#eemail").val(),
+        // file : $("#file").val(),
+        dropId : $("#dropId").val(),
+        acc_no : $("#acc_no").val(),
+        ifsc : $("#ifsc").val(),
+        b_name: $("#b_name").val(),
+        branch: $("#branch").val(),
+  
+        ttype : $("#ttype").val(),
+        tds : $("#tds").val(),
+        pora : $("#pora").val(),
+        pcnt: $("#pcnt").val(),
+        amnt: $("#amnt").val(),
+  
+        itn : $("#itn").val(),
+        an : $("#an").val(),
+        uan : $("#uan").val(),
+        pfn: $("#pfn").val(),
+        pran: $("#pran").val(),
+        csrfmiddlewaretoken: '{{ csrf_token }}'
+      },
+    
+      success: function(response) {debugger
+        document.getElementById("newemp2").reset();
+        reloadEmp();
+      },
+  });        
+  });
+  
+  
+  function reloadEmp() {
+  
+  $.ajax({
+    url: "{% url 'emp_dropdownE' %}",
+    type: "GET",
+    dataType: "json",
+    data: $(this).serialize(),
+    data:enteredCName,
+    csrfmiddlewaretoken: '{{ csrf_token }}',
+  
+    success: function(data) {debugger
+      // console.log("AJAX Success Data:", data);
+      var dropdown = $('#empid');
+      dropdown.empty();
+      dropdown.append($('<option></option>').text('Select Employee'));
+      $.each(data, function(key, value) {
+          // dropdown.append($('<option></option>').attr('value', key).text(value[1]).val(value[0]));
+          dropdown.append($('<option></option>').attr('value', key).text(value[0] + ' ' + value[1]+ ' ' + value[2]).val(key));
+     });
+  
+  
+      // if (enteredCName) {
+      //             dropdown.val(enteredCName);
+      //         }
+        
+    },
+    error: function(xhr, status, error) {
+    console.error(xhr.responseText);
+    }
+  });
+  
+  }
+  
+  </script>
 <div id="newemp" class="modal2 container-fluid">
+  <div class="modal1-content  bg-dark">
+    <div class="d-flex justify-content-end">
+      <button type="button" class="close btn  text-grey "
+        onclick="document.getElementById('myMod').style.display='none'" style="background-color: rgb(210, 30, 30);">
+        <span aria-hidden="true">X</span>
+    </div>
+    <div class="modal-body">
+      <style>
+        * {
+
+          font-family: "Gill Sans", sans-serif;
+          color: white;
+        }
+
+        input[type="text"],
+        input[type="date"],
+        input[type="number"],
+        input[type="email"],
+        input[type="file"],
+        .gen-info textarea,
+        .gen-info select,
+        .data select,
+        .data option,
+        .gen-info option {
+          color: rgb(7, 7, 7);
+          border: 1px solid rgb(0, 0, 0);
+        }
+
+        .gen-info .left {
+          padding-right: 2rem;
+        }
+
+
+        .action-button {
+          display: flex;
+          align-items: center;
+          /* justify-content: center; */
+        }
+
+        .action-button button {
+          width: 8vw;
+          font-size: 1.2vw;
+          margin: 0.5rem .3rem;
+        }
+
+        label {
+          font-size: 1.2vw;
+        }
+
+        .containerprof {
+
+          position: relative;
+
+        }
+
+        .input-container {
+          position: relative;
+          margin: 0 auto;
+          text-align: center;
+        }
+      </style>
+      <section>
+        <div class="containerprof p-5">
+          <div class="header pb-5">
+            <h3>CREATE EMPLOYEE</h3>
+            <hr>
+          </div>
+          <form method="POST" action="" enctype="multipart/form-data"  id="newemp2">
+            {% csrf_token %}
+            <div class="row">
+              <div class="data col-6 col-lg-6 col-md-6 col-sm-12">
+                <div class="row pb-3">
+                  <div class="col-6">
+                    <label for="">Title</label>
+                  </div>
+                  <div class=" col-6">
+                    <select class="form-control text-dark" name="title" id="title" required>
+                      <option value=""></option>
+                      <option value="Mr">Mr</option>
+                      <option value="Mrs">Mrs</option>
+                      <option value="Miss">Miss</option>
+                      <option value="Ms">Ms</option>
+                    </select>
+                  </div>
+                </div>
+                <div class="row pb-3">
+                  <div class="col-6">
+                    <label for="">First Name</label>
+                  </div>
+                  <div class="input-container col-6">
+                    <input type="text" class="form-control text-dark" name="fname" id="fname" required>
+                  </div>
+                </div>
+                <div class="row pb-3">
+                  <div class="col-6">
+                    <label for="">Last Name</label>
+                  </div>
+                  <div class="input-container col-6">
+                    <input type="text" class="form-control text-dark" name="lname" id="lname" required>
+                  </div>
+                </div>
+                <div class="row pb-3">
+                  <div class="col-6">
+                    <label for="">Alias</label>
+                  </div>
+                  <div class="input-container col-6"><input type="text" class="form-control text-dark" name="alias"
+                      id="alias">
+                  </div>
+                </div>
+                <div class="row pb-3">
+                  <div class="col-6">
+                    <label for="">Date of joining</label>
+                  </div>
+                  <div class="input-container col-6">
+                    <input type="date" class="form-control text-dark" name="joindate" id="joindate">
+
+                  </div>
+                </div>
+                <div class="row pb-3">
+                  <div class="col-6">
+                    <label for="">Define salary details</label>
+                  </div>
+                  <div class="col-6">
+                    <select class="form-control text-dark" name="saltype" id="sal" onchange="salFunction()">
+                      <option value="">Select</option>
+                      <option value="Fixed">Fixed</option>
+                      <option value="Fixed">Temporary</option>
+                      <option value="Variable">Time Based</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div id="fixed" style="display: none;">
+                  <div class="row pb-3">
+                    <div class="col-6">
+                      <label for="">Salary Amount</label>
+                    </div>
+                    <div class="col-6"><input type="number" class="form-control text-dark" name="fsalary" id="fsalary">
+                    </div>
+                  </div>
+
+                </div>
+                <div id="variable" style="display: none;">
+                  <div class="row pb-3">
+                    <div class="col-6">
+                      <label for="">Amount per Hour</label>
+                    </div>
+                    <div class="col-6"><input type="number" class="form-control text-dark" name="amnt" id="amnt"></div>
+                  </div>
+                  <div class="row pb-3">
+                    <div class="col-6">
+                      <label for="">Total working Hours</label>
+                    </div>
+                    <div class="col-6"><input type="number" class="form-control text-dark" name="hours" id="hours"
+                        onkeyup="calculateAmount()"></div>
+                  </div>
+                  <div class="row pb-3">
+                    <div class="col-6">
+                      <label for="">Salary Amount</label>
+                    </div>
+                    <div class="col-6"><input type="number" class="form-control text-dark" name="vsalary" id="vsalary">
+                    </div>
+                  </div>
+                </div>
+
+
+              </div>
+              <div class="image col-6 col-lg-6 col-md-6 col-sm-12">
+
+                <div class="row">
+                  <div class="col-5 col-lg-5 col-md-10 col-sm-12 text-center">
+                    <label for="">Upload Image</label>
+                  </div>
+                  <div class="col-7 col-lg-7 col-md-10 col-sm-12">
+                    <label for="image-input">
+                      <img class="img-fluid" src="{% static 'images/payrollimg.png' %}" alt="" width="190px"
+                        height="200px" id="img"
+                        style="background-color: rgba(156, 156, 156, 0.267); border-radius: 30px;">
+                    </label>
+                    <input id="image-input" type="file" name="file" class="form-control" accept="image/*"
+                      onchange="loadFile(event)" style="display: none;">
+
+                  </div>
+
+                </div>
+
+
+              </div>
+              <script>
+                var loadFile = function (event) {
+                  var reader = new FileReader();
+                  reader.onload = function () {
+                    var output = document.getElementById('img');
+                    output.src = reader.result;
+                  };
+                  reader.readAsDataURL(event.target.files[0]);
+                };
+
+              </script>
+            </div>
+
+            <div class="gen-info row pt-5">
+              <div class="left col-6 col-lg-6 col-md-6 col-sm-12">
+                <h4 class="text-center py-2">General information</h4>
+                <div class="row pb-3">
+                  <div class="col-6">
+                    <label for="">Employee Number</label>
+                  </div>
+                  <div class="col-6"><input type="text" class="form-control text-dark" name="empnum" id="empnum"
+                      onkeyup="empValidation(document.getElementById('empnum'))" required>
+                  </div>
+                </div>
+                <div class="row pb-3">
+                  <div class="col-6">
+                    <label for="">Designation</label>
+                  </div>
+                  <div class="col-6"><input type="text" class="form-control text-dark" name="designation" id="des" required>
+                  </div>
+                </div>
+                <div class="row pb-3">
+                  <div class="col-6">
+                    <label for="">Location</label>
+                  </div>
+                  <div class="col-6"><input type="text" class="form-control text-dark" name="location" required>
+                  </div>
+                </div>
+                <div class="row pb-3">
+                  <div class="col-6">
+                    <label for="">Gender</label>
+                  </div>
+                  <div class="col-6">
+                    <select class="form-control text-dark" name="gender" id="dropId3" required>
+                      <option value="">Select</option>
+                      <option value="Male">Male</option>
+                      <option value="Female">Female</option>
+                      <option value="Transgender">Transgender</option>
+                    </select>
+                  </div>
+                </div>
+                <div class="row pb-3">
+                  <div class="col-6">
+                    <label for="">Date of Birth</label>
+                  </div>
+                  <div class="col-6"><input type="date" class="form-control text-dark" name="dob" id= required></div>
+                </div>
+                <div class="row pb-3">
+                  <div class="col-6">
+                    <label for="">Blood Group</label>
+                  </div>
+                  <div class="col-6">
+                    <select class="form-control text-dark" id="blood" name="blood" required>
+                      <option value=""></option>
+                      <option value="A+">A+</option>
+                      <option value="A-">A-</option>
+                      <option value="B+">B+</option>
+                      <option value="B-">B-</option>
+                      <option value="O+">O+</option>
+                      <option value="O-">O-</option>
+                      <option value="AB+">AB+</option>
+                      <option value="AB-">AB-</option>
+                    </select>
+                  </div>
+                </div>
+                <div class="row pb-3">
+                  <div class="col-6">
+                    <label for="">Father's Name/Mother's Name</label>
+                  </div>
+                  <div class="col-6"><input type="text" class="form-control text-dark" name="fm_name" required>
+                  </div>
+                </div>
+                <div class="row pb-3">
+                  <div class="col-6">
+                    <label for="">Spouse's Name</label>
+                  </div>
+                  <div class="col-6"><input type="text" class="form-control text-dark" name="s_name"></div>
+                </div>
+                <div class="row pb-3">
+                  <div class="col-6">
+                    <label for="">Permanent Address</label>
+                  </div>
+                  <div class="col-6">
+                    <textarea class="form-control text-dark mb-2 pt-0" name="paddress" id="padrs1" required></textarea>
+                    <textarea class="form-control text-dark pt-0" name="paddress2" id="padrs2"></textarea>
+                  </div>
+                </div>
+                <div class="row pb-4">
+                  <div class="col-6">
+                    <label for="">Temporary Address</label>
+                  </div>
+                  <div class="col-6">
+                    <input class="mx-2" type="checkbox" id="filladdress" name="filladdress"><label
+                      style="font-size: .8rem;">Same as permanent address</label>
+                    <textarea class="form-control text-dark mb-2 pt-0" name="address" id="adrs1" required></textarea>
+                    <textarea class="form-control text-dark pt-0" name="address2" id="adrs2"></textarea>
+                  </div>
+                </div>
+
+                <div class="row pb-3">
+                  <div class="col-6">
+                    <label for="">Contact Number</label>
+                  </div>
+                  <div class="col-6"><input type="number" class="form-control text-dark" name="phone" id="phone"
+                      required
+                      onkeyup="phoneValidate(document.getElementById('phone'),document.getElementById('pherror'))">
+                    <div id="pherror" class="text-danger"></div>
+                  </div>
+                </div>
+                <div class="row pb-3">
+                  <div class="col-6">
+                    <label for="">Emergency Contact Number</label>
+                  </div>
+                  <div class="col-6"><input type="number" class="form-control text-dark" name="ephone" id="ephone"
+                      onkeyup="phoneValidate(document.getElementById('ephone'),document.getElementById('epherror'))">
+                    <div id="epherror" class="text-danger"></div>
+                  </div>
+                </div>
+                <div class="row pb-3">
+                  <div class="col-6">
+                    <label for="">Email</label>
+                  </div>
+                  <div class="col-6"><input type="email" class="form-control text-dark" name="email" id="eemail" required
+                      onkeyup="">
+                    <div id="error" class="text-danger"></div>
+                  </div>
+                </div>
+                <div class="row pb-3">
+                  <div class="col-6">
+                    <label for="">Attachments</label>
+                  </div>
+                  <div class="col-6">
+                    <input class="form-control" id="file-upload" type="file" name="attach"
+                      style="background: transparent;">
+                  </div>
+                </div>
+              </div>
+              <div class="col-6 col-lg-6 col-md-6 col-sm-12 pt-3">
+                <div class="row pb-4">
+                  <div class="col-6">
+                    <label for="">Provide Bank Details</label>
+                  </div>
+                  <div class="col-6"><select class="form-control text-dark" name="bank" id="dropId"
+                      onchange="bankdisplay()" required>
+                      <option value=""></option>
+                      <option value="1">Yes</option>
+                      <option value="0">No</option>
+                    </select>
+                  </div>
+                </div>
+                <div class="bank" id="bank" style="display: none;">
+                  <h4 class="text-center py-2">Bank information</h4>
+                  <div class="row pb-3">
+                    <div class="col-6">
+                      <label for="">Account Number</label>
+                    </div>
+                    <div class="col-6"><input type="number" class="form-control text-dark" name="acc_no" id="acc_no"
+                        pattern="[0-9]{15}"></div>
+                  </div>
+                  <div class="row pb-3">
+                    <div class="col-6">
+                      <label for="">IFSC</label>
+                    </div>
+                    <div class="col-6"><input type="text" class="form-control text-dark" name="ifsc" id="ifsc">
+                    </div>
+                  </div>
+                  <div class="row pb-3">
+                    <div class="col-6">
+                      <label for="">Name of Bank</label>
+                    </div>
+                    <div class="col-6"><input type="text" class="form-control text-dark" name="b_name" id="b_name">
+                    </div>
+                  </div>
+                  <div class="row pb-3">
+                    <div class="col-6">
+                      <label for="">Branch Name</label>
+                    </div>
+                    <div class="col-6"><input type="text" class="form-control text-dark" name="branch" id="branch">
+                    </div>
+                  </div>
+                  <h5 class="text-center py-1">For Banking</h5>
+                  <div class="row pb-3">
+                    <div class="col-6">
+                      <label for="">Transaction Type</label>
+                    </div>
+                    <div class="col-6">
+                      <select class="form-control text-dark" name="ttype" id="ttype">
+                        <option value=""></option>
+                        <option value="ATM">ATM</option>
+                        <option value="Cash">Cash</option>
+                        <option value="Check">Check</option>
+                      </select>
+                    </div>
+                  </div>
+                </div>
+                <div class="row pb-3">
+                  <div class="col-6">
+                    <label for="">TDS Applicable</label>
+                  </div>
+                  <div class="col-6">
+                    <select class="form-control text-dark" name="tds" id="tds" onchange="tdsFunction()" required>
+                      <option value=""></option>
+                      <option value="1">Yes</option>
+                      <option value="0">No</option>
+                    </select>
+                  </div>
+                </div>
+                <div id="tds-div" style="display: none;">
+                  <div class="row pb-3">
+                    <div class="col-6">
+                      <label for="">Percentage/Amount</label>
+                    </div>
+                    <div class="col-6">
+                      <select class="form-control text-dark" name="pora" id="pora" onchange="tdsFunction2()">
+                        <option value=""></option>
+                        <option value="Percentage">Percentage</option>
+                        <option value="Amount">Amount</option>
+                      </select>
+                    </div>
+                  </div>
+                  <div id="p" style="display: none;">
+                    <div class="row pb-3">
+                      <div class="col-6">
+                        <label for="">Percentage</label>
+                      </div>
+                      <div class="col-6"><input type="number" class="form-control text-dark" name="pcnt" id="pcnt">
+                      </div>
+                    </div>
+                  </div>
+                  <div id="a" style="display: none;">
+                    <div class="row pb-3">
+                      <div class="col-6">
+                        <label for="">Amount</label>
+                      </div>
+                      <div class="col-6"><input type="number" class="form-control text-dark" name="amnt" id="amnt">
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <h4 class="text-center py-2">Statutary information</h4>
+                <div class="row pb-3">
+                  <div class="col-6">
+                    <label for="">Income Tax Number</label>
+                  </div>
+                  <div class="col-6"><input type="number" class="form-control text-dark" name="itn"></div>
+                </div>
+                <div class="row pb-3">
+                  <div class="col-6">
+                    <label for="">Aadhar Number</label>
+                  </div>
+                  <div class="col-6"><input type="text" class="form-control text-dark" name="an" id="an" required></div>
+                </div>
+          
+                <div class="row pb-3">
+                  <div class="col-6">
+                    <label for="">Universal Account Number(UAN)</label>
+                  </div>
+                  <div class="col-6"><input type="number" class="form-control text-dark" name="uan"></div>
+                </div>
+                <div class="row pb-3">
+                  <div class="col-6">
+                    <label for="">PF Account Number(PFN)</label>
+                  </div>
+                  <div class="col-6"><input type="number" class="form-control text-dark" name="pfn"></div>
+                </div>
+                <div class="row pb-3">
+                  <div class="col-6">
+                    <label for="">PR Account Number(PRAN)</label>
+                  </div>
+                  <div class="col-6"><input type="text" class="form-control text-dark" name="pran"></div>
+                </div>
+              </div>
+            </div>
+
+            <hr>
+            <div class="action-button">
+              <button class="btn btn-primary" type="submit" id="empsave2">Add</button>
+              <button class="btn btn-danger" type="reset">Cancel</button>
+            </div>
+            <div class="text-center">
+              {% for message in messages %}
+              <div class="alert alert-success alert-dismissible fade show" role="alert" id="alert">
+                <strong>{{message}}</strong>
+                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                  <span aria-hidden="true">&times;</span>
+                </button>
+              </div>
+              {% endfor %}
+            </div>
+          </form>
+
+        </div>
+
+
+
+      </section>
+
+      <script>
+
+        function bankdisplay() {
+          var e = document.getElementById("dropId").value;
+
+          if (e == 0) {
+            document.getElementById("bank").style.display = 'none'
+
+          }
+          else {
+            document.getElementById("bank").style.display = 'block'
+          }
+
+        }
+        function salFunction() {
+          var e = document.getElementById("sal");
+          var sal = e.value;
+          if (sal == 'Fixed') {
+            document.getElementById("fixed").style.display = 'block'
+            document.getElementById("variable").style.display = 'none'
+          }
+          else if (sal == 'Variable') {
+            document.getElementById("variable").style.display = 'block'
+            document.getElementById("fixed").style.display = 'none'
+          }
+
+        }
+        function calculateAmount(val) {
+          var a = document.getElementById("amnt").value;
+          var h = document.getElementById("hours").value;
+          var tot = h * a;
+          document.getElementById('vsalary').value = tot;
+
+        }
+
+        function tdsFunction() {
+          var e = document.getElementById("tds");
+          var sal = e.value;
+          if (sal == '1') {
+            document.getElementById("tds-div").style.display = 'block'
+          }
+          else {
+            document.getElementById("tds-div").style.display = 'none'
+          }
+
+        }
+        function tdsFunction2() {
+          var e = document.getElementById("pora");
+          var sal = e.value;
+          if (sal == 'Percentage') {
+            document.getElementById("p").style.display = 'block';
+            document.getElementById("a").style.display = 'none';
+          }
+          else if (sal == 'Amount') {
+            document.getElementById("a").style.display = 'block';
+            document.getElementById("p").style.display = 'none'
+          }
+        }
+        function emailvalidate() {
+          var email = document.getElementById('email')
+          var error = document.getElementById('error')
+          if (!email.value.match(/^[A-Za-z\._\-0-9]*[@][A-Za-z]*[\.][a-z]{2,4}$/)) {
+            error.style.fontSize = ".8rem"
+            error.innerHTML = "*Please enter a valid email"
+            return false;
+
+          }
+          error.innerHTML = ""
+          return true;
+        }
+        function phoneValidate(phn, pherror) {
+          if (!phn.value.match(/^[6-9]\d{9}$/)) {
+            pherror.style.display = "block"
+            pherror.style.fontSize = ".8rem"
+            pherror.innerHTML = "*Please enter a valid phone number"
+            return false;
+          }
+          pherror.style.display = "none"
+          pherror.innerHTML = ""
+          return true;
+        }
+        function empValidation(emp) {
+          emp.addEventListener("input", function () {
+            emp.value = emp.value.toUpperCase();
+          });
+
+        }
+        inputvalue = document.getElementById('ifsc')
+        inputvalue.addEventListener("input", function () {
+          inputvalue.value = inputvalue.value.toUpperCase();
+        });
+        const inputFields = document.querySelectorAll("input[type='text']");
+
+        inputFields.forEach(function (input) {
+          input.addEventListener("input", function () {
+            const inputValue = input.value;
+            input.value = inputValue.charAt(0).toUpperCase() + inputValue.slice(1);
+          });
+        });
+
+        document.getElementById("an").addEventListener("input", function () {
+          const input = this.value;
+          if (input.length > 14) {
+            this.value = input.slice(0, 14); // Truncate the input to 10 characters
+          }
+        });
+        document.getElementById("acc_no").addEventListener("input", function () {
+          const input = this.value;
+          if (input.length > 15) {
+            this.value = input.slice(0, 15); // Truncate the input to 10 characters
+          }
+        });
+
+        $(document).ready(function () {
+          $("#filladdress").on("click", function () {
+            if (this.checked) {
+              $("#adrs1").val($("#padrs1").val());
+              $("#adrs2").val($("#padrs2").val());
+
+            }
+            else {
+              $("#adrs1").val('');
+              $("#adrs2").val('');
+            }
+          });
+        });
+      </script>
+
+    </div>
+  </div>
+</div>
+<!-- <div id="newemp" class="modal2 container-fluid">
   <div class="modal1-content  bg-dark">
     <div class="d-flex justify-content-end">
       <button type="button" class="close btn  text-grey "
@@ -4047,7 +5271,7 @@
 
     </div>
   </div>
-</div>
+</div> -->
 <script>
   $(document).ready(function () {
     $("#employeeform").on("submit", function (e) {

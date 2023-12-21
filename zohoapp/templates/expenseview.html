@@ -551,7 +551,14 @@
                   <div class="col-5"><label class="text-dark" for="">Tax:</label></div>
                   <div class="col-7">
                     <p class="bold text-dark" style="max-width: 15rem;word-wrap: break-word;">
-                        {{expense.tax}} %</p>
+                      {% if expense.tax != "" %}
+                        {{expense.tax}}%
+                       
+                        {% elif expense.tax2 != "" %}
+                            {{ expense.tax2 }}%
+                        {% endif %}
+                        
+                      </p>
                   </div>
                 </div>
                 <div class="row mt-3">
@@ -576,11 +583,58 @@
                   </div>
                 </div>
                 <div class="row mt-3">
-                  <div class="col-5"><label class="text-dark" for="">>Expense Type:</label></div>
+                  <div class="col-5"><label class="text-dark" for="">Expense Type:</label></div>
                   <div class="col-7">
                     <p class="bold text-dark" style="max-width: 15rem;word-wrap: break-word;">{{ expense.expense_type }}</p>
                   </div>
                 </div>
+                <div class="row mt-3">
+                  <div class="col-5"><label class="text-dark" for="">Expense Number:</label></div>
+                  <div class="col-7">
+                    <p class="bold text-dark" style="max-width: 15rem;word-wrap: break-word;">{{ expense.expense_number }}</p>
+                  </div>
+                </div>
+                <div class="row mt-3">
+                  <div class="col-5"><label class="text-dark" for="">ReferenceNumber:</label></div>
+                  <div class="col-7">
+                    <p class="bold text-dark" style="max-width: 15rem;word-wrap: break-word;">{{ expense.reference_number }}</p>
+                  </div>
+                </div>
+
+                {% if expense.chequeno !=  ""  %}
+                <div class="row mt-3">
+                  <div class="col-5"><label class="text-dark" for="">cheque no:</label></div>
+                  <div class="col-7">
+                    <p class="bold text-dark" style="max-width: 15rem;word-wrap: break-word;">{{ expense.chequeno }}</p>
+                  </div>
+                </div>
+                {% endif %}
+                {% if expense.upiid !=  ""  %}
+                <div class="row mt-3">
+                  <div class="col-5"><label class="text-dark" for="">Upi id:</label></div>
+                  <div class="col-7">
+                    <p class="bold text-dark" style="max-width: 15rem;word-wrap: break-word;">{{ expense.upiid }}</p>
+                  </div>
+                </div>
+                {% endif %}
+
+                <!-- {% if expense.sac !=  ""  %}
+                <div class="row mt-3">
+                  <div class="col-5"><label class="text-dark" for="">SAC:</label></div>
+                  <div class="col-7">
+                    <p class="bold text-dark" style="max-width: 15rem;word-wrap: break-word;">{{ expense.sac }}</p>
+                  </div>
+                </div>
+                {% endif %} -->
+                
+                {% if expense.hsn_code !=  ""  %}
+                <div class="row mt-3">
+                  <div class="col-5"><label class="text-dark" for="">HNC:</label></div>
+                  <div class="col-7">
+                    <p class="bold text-dark" style="max-width: 15rem;word-wrap: break-word;">{{ expense.hsn_code }}</p>
+                  </div>
+                </div>
+                {% endif %}
                 <!-- <div class="row mt-3">
                   <div class="col-5"><label class="text-dark" for="">Amount:</label></div>
                   <div class="col-7">
@@ -652,7 +706,7 @@
                   <div class="row mt-2">
                     <div class="col-5"><label for="">Vendor Name :</label></div>
                     <div class="col-7">
-                      <p class="bold">{{expense.vendor_name}}</p>
+                      <p class="bold">{{expense.vendor.salutation}}&nbsp;{{expense.vendor.first_name}}&nbsp;{{expense.vendor.last_name}}</p>
                     </div>
                   </div>
                   <div class="row mt-2">
@@ -665,7 +719,7 @@
                   <div class="row mt-2">
                     <div class="col-5"><label for=""> Gst Treatment</label></div>
                     <div class="col-7">
-                      <p class="bold">{{expense.gst_treatment} <br>
+                      <p class="bold">{{expense.gst_treatment}} <br>
                         
                     </div>
                   </div>
@@ -885,7 +939,7 @@
         <!-- <th id="th" style="text-align: center;">Quantity</th> -->
         <th id="th" style="text-align: center;">Tax</th>
         <th id="th" style="text-align: center;">Amount</th>
-        <th id="th" style="text-align: center;">GSTIN</th>
+        <!-- <th id="th" style="text-align: center;">GSTIN</th> -->
    
       
       </tr>
@@ -896,9 +950,9 @@
         <td style="text-align: center;"> {{expense.expense_account}}</td>
         <td style="text-align: center;"> {{expense.date}}</td>
         <!-- <td style="text-align: center;">{{i.quantity}}</td> -->
-        <td style="text-align: center;">{{expense.tax}}</td>
+        <td style="text-align: center;">{{expense.tax}}%</td>
         <td style="text-align: center;">{{expense.amount}}</td>
-        <td style="text-align: center;">{{expense.customer_name.GSTIN}} </td>
+        <!-- <td style="text-align: center;">{{expense.customer_name.GSTIN}} </td> -->
      
       </tr>
 
@@ -1130,7 +1184,7 @@
                               <!-- <th id="th" style="text-align: center;">Quantity</th> -->
                               <th id="th" style="text-align: center;">Tax</th>
                               <th id="th" style="text-align: center;">Amount</th>
-                              <th id="th" style="text-align: center;">GSTIN</th>
+                              <!-- <th id="th" style="text-align: center;">GSTIN</th> -->
                          
                             
                             </tr>
@@ -1141,9 +1195,14 @@
                               <td style="text-align: center;"> {{expense.expense_account}}</td>
                               <td style="text-align: center;"> {{expense.date}}</td>
                               <!-- <td style="text-align: center;">{{i.quantity}}</td> -->
-                              <td style="text-align: center;">{{expense.tax}}</td>
+                              <td style="text-align: center;">  {% if expense.tax != "" %}
+                                {{expense.tax}}%
+                               
+                                {% elif expense.tax2 != "" %}
+                                    {{ expense.tax2 }}%
+                                {% endif %}</td>
                               <td style="text-align: center;">{{expense.amount}}</td>
-                              <td style="text-align: center;">{{expense.customer_name.GSTIN}} </td>
+                              <!-- <td style="text-align: center;">{{expense.customer_name.GSTIN}} </td> -->
                            
                             </tr>
         
@@ -1349,7 +1408,7 @@
                               <!-- <th id="th" style="text-align: center;">Quantity</th> -->
                               <th id="th" style="text-align: center;">Tax</th>
                               <th id="th" style="text-align: center;">Amount</th>
-                              <th id="th" style="text-align: center;">GSTIN</th>
+                              <!-- <th id="th" style="text-align: center;">GSTIN</th> -->
                               <!-- <th id="th" style="text-align: center;">GSTTYPE</th> -->
                             
                             </tr>
@@ -1360,9 +1419,14 @@
                               <td style="text-align: center;"> {{expense.expense_account}}</td>
                               <td style="text-align: center;"> {{expense.date}}</td>
                               <!-- <td style="text-align: center;">{{i.quantity}}</td> -->
-                              <td style="text-align: center;">{{expense.tax}}</td>
+                              <td style="text-align: center;">  {% if expense.tax != "" %}
+                                {{expense.tax}}%
+                               
+                                {% elif expense.tax2 != "" %}
+                                    {{ expense.tax2 }}%
+                                {% endif %}</td>
                               <td style="text-align: center;">{{expense.amount}}</td>
-                              <td style="text-align: center;">{{expense.customer_name.GSTIN}} </td>
+                              <!-- <td style="text-align: center;">{{expense.customer_name.GSTIN}} </td> -->
                               <!-- <td style="text-align: center;">{{expense.customer_name.GSTTreatment}} </td> -->
                             </tr>
         
@@ -1594,7 +1658,7 @@
   // Generate PDF using html2pdf
   html2pdf()
     .from(content)
-    .save('{{sale.sales_no}}' + '.pdf');
+    .save('{{expense.expense_account}}' + '.pdf');
 }
 
 function exportToPDF1() {
@@ -1613,7 +1677,7 @@ function exportToPDF1() {
   // Generate PDF using html2pdf
   html2pdf()
     .from(content)
-    .save('{{sale.sales_no}}' + '.pdf');
+    .save('{{expense.expense_account}}' + '.pdf');
 }
 
 function exportToPDF2() {
@@ -1632,7 +1696,7 @@ function exportToPDF2() {
   // Generate PDF using html2pdf
   html2pdf()
     .from(content)
-    .save('{{sale.sales_no}}' + '.pdf');
+    .save('{{expense.expense_account}}' + '.pdf');
 }
 
 function exportToPDF3() {
@@ -1651,7 +1715,7 @@ function exportToPDF3() {
   // Generate PDF using html2pdf
   html2pdf()
     .from(content)
-    .save('{{sale.sales_no}}' + '.pdf');
+    .save('{{expense.expense_account}}' + '.pdf');
 }
 
 function exportToPDF4() {
@@ -1670,7 +1734,7 @@ function exportToPDF4() {
   // Generate PDF using html2pdf
   html2pdf()
     .from(content)
-    .save('{{sale.sales_no}}' + '.pdf');
+    .save('{{expense.expense_account}}' + '.pdf');
 }
 
 

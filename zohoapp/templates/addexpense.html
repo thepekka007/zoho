@@ -586,7 +586,7 @@ document.getElementById("hsn_code").addEventListener("input", function() {
 <div class="row d-none" id="v_supply_field"   >
   <label class="col-md-3">vendor source Of Supply</label>
   <div class="col-md-6 p-3">
-    <select name="source_of_supply5" class="form-control text-dark bg-light form-select" id="source_of_suppl" name="csource_of_supply" onchange="showTaxSelectors();" >
+    <select name="source_of_supply5" class="form-control text-dark bg-light form-select" id="source_of_suppl"  onchange="showTaxSelectors();" >
     
       <option value="Nill"></option>
       <option value="[AN] Andaman and Nicobar Islads">[AN] Andaman and Nicobar Islads</option>
@@ -893,7 +893,7 @@ function validateExpenseNumber() {
   <div class="col-md-6 p-3">
     <select name="source_of_supply6" class="form-control text-dark bg-light form-select" id="cs" name="csource_of_supply" onchange="showTaxSelectors();" >
     
-      <option value="Nill"></option>
+      <!-- <option value="Nill"></option> -->
                   <option value="[AN] Andaman and Nicobar Islads">[AN] Andaman and Nicobar Islads</option>
                   <option value="[AD] Andhra Predhesh">[AD] Andhra Predhesh</option>
                   <option value="[AR] Arunachal Predesh">[AR] Arunachal Predesh</option>
@@ -941,7 +941,7 @@ function validateExpenseNumber() {
 <div class="row">
   <label for="tax" class="col-md-3" id="tax_label">Tax</label>
   <div class="col-md-6 p-3">
-    <select class="form-control text-dark bg-light form-select" id="tax2" name="tax1"  style="display: none;" >
+    <select class="form-control text-dark bg-light form-select" id="tax2" name="tax"  style="display: none;" >
           <option value="">-- Select Tax --</option>
               <option value="0">GST0[0%]</option>
               <option value="3">GST3[3%]</option>
@@ -950,6 +950,15 @@ function validateExpenseNumber() {
               <option value="18">GST18[18%]</option>
               <option value="28">GST28[28%]</option>
       </select>
+      <select class="form-control text-dark bg-light form-select" id="tax3" name="tax2"  style="display: none;" >
+        <option value="">-- Select Tax --</option>
+            <option value="0">IGST0[0%]</option>
+            <option value="3">IGST3[3%]</option>
+            <option value="5">IGST5[5%]</option>
+            <option value="12">IGST12[12%]</option>
+            <option value="18">IGST18[18%]</option>
+            <option value="28">IGST28[28%]</option>
+    </select>
   </div>
 </div>
 <!-- <div class="row">
@@ -966,21 +975,13 @@ function validateExpenseNumber() {
       </select>
   </div>
 </div> -->
-<div class="row">
+<!-- <div class="row">
 <label  class="col-md-3" id="tax_label" style="display: none;" >Tax</label>
 <div class="col-md-6 p-3" style="margin-left: 25%;padding-top: -3px;">
-  <select class="form-control text-dark bg-light form-select" id="tax3" name="tax2"  style="display: none;" >
-        <option value="">-- Select Tax --</option>
-            <option value="0">IGST0[0%]</option>
-            <option value="3">IGST3[3%]</option>
-            <option value="5">IGST5[5%]</option>
-            <option value="12">IGST12[12%]</option>
-            <option value="18">IGST18[18%]</option>
-            <option value="28">IGST28[28%]</option>
-    </select>
-</div>
 
 </div>
+
+</div> -->
 
 <script>
   function showTaxSelectors() {
@@ -2703,7 +2704,7 @@ function validateExpenseNumber() {
                     <option value="{{p.Terms}} {{p.id}}">{{p.Terms}}</option>
                     {% endfor %}
                   </select>                
-                  <a href="#" class="btn btn-outline-secondary py-2 my-1" data-target="#newpayment" data-toggle="modal">+</a>   
+                  <a href="#" class="btn btn-outline-secondary py-2 my-1" data-target="#newpayment" data-toggle="modal">+</a>    
                 </div>
               </div>       
             </div>
@@ -3116,7 +3117,7 @@ function validateExpenseNumber() {
                 <label for="v_gsttype" style="color:rgb(190, 88, 88);">GST Treatment *</label>
               </div>
               <div class="col-md-6 mt-2">
-                <select class="form-control text-dark bg-light" id="v_gsttype2" name="v_gsttype" required>
+                <select class="form-control text-dark bg-light" id="v_gsttype2" name="v_gsttype" required onchange="gstin();">
                   <option selected disabled value="">Choose..</option>
                   <option value="Registered Business - Regular">Registered Business - Regular <span><i>(Business that is registered under gst)</i></span></option>
                   <option value="Registered Business - Composition">Registered Business - Composition (Business that is registered under composition scheme in gst)</option>
@@ -3129,18 +3130,37 @@ function validateExpenseNumber() {
                 </select>
               </div>       
             </div>
+<script>
+ function gstin() {
+      var valu = document.getElementById("v_gsttype2");
+      var tax3 = document.getElementById("gstins");
+      // var pan = document.getElementById("pan2");
 
-            <div class="row gstrow d-none">
+      // Check if the selected values in the first two selectors are the same
+      if (valu.value == "unregistered Business") {
+          // Show the third selector and hide the fourth selector
+          // pan2.style.display = "none";
+          tax3.style.display = "none";
+      } else {
+          // Show the fourth selector and hide the third selector
+          // pan2.style.display = "none";
+          tax3.style.display = "gstrow";
+      }
+  }
+  
+  </script>
+
+            <div class="row gstrow" id="gstins">
               <div class="col-md-3 mt-2">
-                <label id="glbl" style="color:rgb(190, 88, 88);">GSTIN/UIN *</label>
+                <label id="glbl3" style="color:rgb(190, 88, 88);">GSTIN/UIN *</label>
               </div>
-              <div class="col-md-6 mt-2">
-                <input type="text" class="form-control text-dark bg-light" id="v_gstin" name="v_gstin" placeholder="29APPCK7465F1Z1">
+              <div class="col-md-6 mt-2 gstrow" >
+                <input type="text" class="form-control text-dark bg-light"  name="v_gstin" placeholder="29APPCK7465F1Z1" >
                 <label id="gst_label"></label>
               </div>       
             </div>
 
-            <div class="row">
+            <!-- <div class="row" id="pan2">
               <div class="col-md-3 mt-2">
                 <label for="v_pan">PAN Number</label>
               </div>
@@ -3148,7 +3168,7 @@ function validateExpenseNumber() {
                 <input type="text" class="form-control text-dark bg-light" id="v_pan2" name="v_pan" placeholder="APPCK7465F">
                 <label id="pan_label"></label>
               </div>       
-            </div>
+            </div> -->
 
             <div class="row">
               <div class="col-md-3 mt-2">
@@ -3232,16 +3252,12 @@ function validateExpenseNumber() {
                 <div class="d-flex">
                   <select class="form-control text-dark bg-light" id="v_terms" name="v_terms" required>
                     
-                    <option value="30">NET 30</option>
-                    
-                    <option value="60">NET 60</option>
-                   
-                    
-                    <option value="recpt">Due on receipt</option>
-                    {% for p in payments %}
+
+                    {% for p in payment %}
                     <option value="{{p.Terms}} {{p.id}}">{{p.Terms}}</option>
                     {% endfor %}
-                  </select>                
+                  </select>           
+                  <a href="#" class="btn btn-outline-secondary py-2 my-1" data-target="#newpayment" data-toggle="modal">+</a>        
                   <!-- <a href="#" class="btn btn-outline-secondary py-2 my-1" data-target="#newpayment" data-toggle="modal">+</a>    -->
                 </div>
               </div>       
