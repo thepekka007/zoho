@@ -26724,6 +26724,7 @@ def overview(request,id):
     # 
     
     company=company_details.objects.get(user=request.user)
+    pay=Payroll.objects.filter(user=request.user)
     # emp=Payroll.objects.get(id=id)
     project = get_object_or_404(project1, id=id)
     # taskz=task.objects.get(proj=project)
@@ -26735,7 +26736,7 @@ def overview(request,id):
      # Save the project object with the  updated comment
 
 
-    return render(request,'overview.html',{'usern':usern,'proje':proje,'project':project,'company':company,'cmt':cmt,'attach':attach})
+    return render(request,'overview.html',{'usern':usern,'proje':proje,'project':project,'company':company,'cmt':cmt,'attach':attach,'pay':pay})
 
 
 
@@ -26945,6 +26946,8 @@ def addproj(request):
         mapped_users = zip(user_select1, email1)
         mapped_users = list(mapped_users)
         for elez in mapped_users:
+
+            # ca = Payroll.objects.get(id=elez[0])
             usrz, varez = usernamez.objects.get_or_create(
                 usernamez=elez[0], emailz=elez[1], projn=proj, 
             )
@@ -27175,7 +27178,7 @@ def get_vendor_gst_treatment(request):
 
 
 def new_emp(request):
-    # company = company_details.objects.get(user = request.user)
+    company = company_details.objects.get(user = request.user)
 
     if request.method=='POST':
 
@@ -27230,7 +27233,7 @@ def new_emp(request):
 
         u = User.objects.get(id = request.user.id)
         print("helloooooooooooooooooooo")
-        print(lname)
+        # print(lname)
         cust = Payroll(title=title,first_name=fname,last_name=lname,alias=alias,joindate=joindate,salary_type=sal,user=u,email=email)
         cust.save()
 
@@ -27248,7 +27251,9 @@ def emp_dropdownE(request):
     options = {}
     option_objects = Payroll.objects.filter(user=user)
     for option in option_objects:
-        options[option.id] = [option.title, option.first_name, option.last_name, option.id]
+        display_name = option.first_name
+        options[option.id] = [display_name, f"{display_name}"]
+        # options[option.id] = [option.title, option.first_name, option.last_name, option.id]
         
     return JsonResponse(options)
 

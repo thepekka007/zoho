@@ -95,7 +95,7 @@ class History(models.Model):
 class vendor_table(models.Model):
     user=models.ForeignKey(User,on_delete=models.CASCADE,null=True)
     salutation=models.CharField(max_length=25,default='')
-    first_name=models.CharField(max_length=50,default='',null=True)
+    first_name=models.CharField(max_length=50,default='')
     last_name=models.CharField(max_length=50,default='')
     company_name=models.CharField(max_length=150,default='')
     vendor_display_name=models.CharField(max_length=150,default='')
@@ -256,11 +256,12 @@ class Bankcreation(models.Model):
     branch = models.CharField(max_length=220,default='', null=True, blank=True)
     ac_no = models.CharField(max_length=220,default='', null=True, blank=True)
     ifsc = models.CharField(max_length=220,default='', null=True, blank=True)
-    opn_bal =models.FloatField(null=True, blank=True)
+    opn_bal =models.FloatField(null=True, blank=True,default=0.0)
     bal_type=models.CharField(max_length=220,default='', null=True, blank=True)
     date = models.DateField(null=True, blank=True)
     document=models.FileField(upload_to='bank/',null=True,blank=True)
     status= models.TextField(default='Active')
+    balance=models.FloatField(default=0.0,null=True, blank=True)
     
 class invoice(models.Model):
     user = models.ForeignKey(User,on_delete=models.CASCADE,null=True,blank=True)
@@ -534,12 +535,13 @@ class DeliveryChellan(models.Model):
 
 class ChallanItems(models.Model):
     chellan = models.ForeignKey(DeliveryChellan,on_delete=models.CASCADE,null=True,blank=True)
+    hsn = models.TextField(max_length=255,default='')
     item_name = models.CharField(max_length=100,null=True,blank=True)
     quantity = models.IntegerField(null=True,blank=True)
     rate = models.FloatField(null=True,blank=True)
     discount = models.FloatField(null=True,blank=True)
     tax_percentage = models.IntegerField(null=True,blank=True)
-    amount = models.FloatField(null=True,blank=True)
+    amount = models.FloatField(null=True,blank=True)  
     
     
 class Recurring_invoice(models.Model):
@@ -779,9 +781,7 @@ class Chart_of_Account_Upload(models.Model):
     
 class project1(models.Model):
     user=models.ForeignKey(User,on_delete=models.CASCADE,null=True,blank=True)
-    # emp = models.ForeignKey(Payroll,on_delete=models.CASCADE,null=True,blank=True)
     
-    # payroll=models.ForeignKey(Payroll,on_delete=models.CASCADE,default='')
     name=models.CharField(max_length=255,null=True,blank=True)
     desc=models.CharField(max_length=255,null=True,blank=True)
     c_name=models.ForeignKey(customer,on_delete=models.CASCADE,null=True,blank=True)
@@ -816,7 +816,6 @@ class task(models.Model):
 
 class usercreate(models.Model):
     projnn=models.ForeignKey(project1,on_delete=models.CASCADE,null=True,blank=True)
-    
     userss=models.ForeignKey(User,on_delete=models.CASCADE,null=True,blank=True)
     usernamezz=models.CharField(max_length=255, null=True,blank=True)
     emailzz=models.CharField(max_length=255, null=True,blank=True)
@@ -908,7 +907,6 @@ class Payroll(models.Model):
     amountperhr = models.CharField(max_length=100,null=True)
     workhr = models.CharField(max_length=100,null=True)
     proj =models.ForeignKey(project1,on_delete=models.CASCADE,null=True,blank=True)
-    projcode =models.IntegerField(null=True,default=0)
     
     
 class Bankdetails(models.Model):
@@ -1081,7 +1079,6 @@ class Payrollfiles(models.Model):
 class usernamez(models.Model):
     projn=models.ForeignKey(project1,on_delete=models.CASCADE,null=True,blank=True)
     users=models.ForeignKey(User,on_delete=models.CASCADE,null=True,blank=True)
-    emp=models.ForeignKey(Payroll,on_delete=models.CASCADE,null=True,blank=True)
     usernamez=models.CharField(max_length=255, null=True,blank=True)
     emailz=models.CharField(max_length=255, null=True,blank=True)
     
@@ -1318,7 +1315,9 @@ class transactions(models.Model):
     description=models.CharField(max_length=220,default='', null=True, blank=True)
     type=models.CharField(max_length=220,default='', null=True, blank=True)
     adjtype=models.CharField(max_length=220,default='', null=True, blank=True)
-    adjacname=models.CharField(max_length=220,default='', null=True, blank=True)
+    adjacname=models.CharField(max_length=220,default='', null=True, blank=True) 
+    name=models.CharField(max_length=220,default='', null=True, blank=True) 
+    balance=models.FloatField(default=0.0,null=True, blank=True)
     
 class Transportation(models.Model):
     user = models.ForeignKey(User,on_delete=models.CASCADE,null=True,blank=True)
@@ -1509,7 +1508,7 @@ class LoanAttach(models.Model):
 class Journal(models.Model):
     STATUS_CHOICES = (
         ('draft', 'Draft'),
-        ('published', 'Published'),
+        ('save', 'Save'),
     )
     user = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=True)
     date = models.DateField()
@@ -1600,8 +1599,10 @@ class projectcomment(models.Model):
 class Events(models.Model):
     id = models.AutoField(primary_key=True)
     name = models.CharField(max_length=255,null=True,blank=True)
-    start = models.DateTimeField(null=True,blank=True)
-    end = models.DateTimeField(null=True,blank=True)
+    start_date = models.DateTimeField(null=True,blank=True)
+    end_date = models.DateTimeField(null=True,blank=True)
+    company = models.ForeignKey(company_details,on_delete=models.CASCADE,null=True,blank=True)
+    comments=models.CharField(max_length=500,null=True,blank=True)
     
 class projectfiles(models.Model):
     attachment=models.FileField(upload_to='doc/',null=True)
@@ -1920,3 +1921,25 @@ class LoanDuration(models.Model):
         ('Years', 'Years'),
         ('Year', 'Year'),
     ))
+    
+    
+class Events_comments(models.Model):
+    id = models.AutoField(primary_key=True)
+
+    company = models.ForeignKey(company_details,on_delete=models.CASCADE,null=True,blank=True)
+    comments=models.CharField(max_length=500,null=True,blank=True)
+    
+class Attendance(models.Model):
+    reason = models.CharField(max_length=255,null=True,blank=True)
+    start_date = models.DateTimeField(null=True,blank=True)
+    end_date = models.DateTimeField(null=True,blank=True)
+    company = models.ForeignKey(company_details,on_delete=models.CASCADE,null=True,blank=True)
+    leave=models.CharField(max_length=500,null=True,blank=True)
+    payroll = models.ForeignKey(Payroll, on_delete=models.CASCADE)
+    
+    
+class Attendance_comments(models.Model):
+    id = models.AutoField(primary_key=True)
+
+    company = models.ForeignKey(company_details,on_delete=models.CASCADE,null=True,blank=True)
+    comments=models.CharField(max_length=500,null=True,blank=True)

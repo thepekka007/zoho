@@ -192,6 +192,119 @@
 
 
     <script>
+      document.addEventListener("DOMContentLoaded", function() {
+        var name = $("#customer").val();
+    console.log("helooooooooooooooooooo")
+    console.log(name)
+    $.ajax({
+      url: "{% url 'exp_get_customerdet' %}", 
+            data: { 
+                    id : name,
+                    csrfmiddlewaretoken: '{{ csrf_token }}' 
+                },
+
+            type : 'POST',
+            success: function(data) {
+              var gstTreatment = data.gst_treatment;
+                    var gstin = data.gstin;
+                    var s_supply=data.cust_place_supply;
+                    var adrs=data.address;
+                    var city=data.city;
+                    var state=data.cus_state;
+                    var country=data.country;
+                    var pin=data.pincode;
+                    console.log("helloooooooooooooooooooooooooooooooo");
+                    if(adrs !== null && adrs.trim() !== '' )
+                    {
+                      $("#caddress_field").show();
+                      // $("#s_supply_field").show();
+                      $("#cust_address").val(adrs);
+                    }
+                    else 
+                    {
+                        $("#caddress_field").hide();
+                    }
+                    if(email !== null && email.trim() !== '' )
+                    {
+                      $("#cemail_field").show();
+                      // $("#s_supply_field").show();
+                      $("#cemail").val(email);
+                    }
+                    else 
+                    {
+                        $("#cemail_fi eld").hide();
+                    }
+                    if(gstTreatment !== null && gstTreatment.trim() !== '' )
+                    {
+                      $("#cgsttreat_field").show();
+                      // $("#s_supply_field").show();
+                      $("#cgst_treatment").val(gstTreatment);
+                    }
+                    else 
+                    {
+                        $("#cgsttreat_field").hide();
+                    }
+                    
+
+                    // $("#caddress_field").removeClass('d-none');
+                    // $("#caddress_field").addClass('d-flex');
+
+                    // $("#c_supply_field").removeClass('d-none');
+                    // $("#c_supply_field").addClass('d-flex');
+
+                    // $("#cgsttreat_field").removeClass('d-none');
+                    // $("#cgsttreat_field").addClass('d-flex');
+                    // console.log("helloooooooooooooooooooooooooooooooo");
+                   
+
+                   
+                      // $("#caddress_field").show();
+                      // $("#c_supply_field").show();
+                    // document.getElementById('caddress_field').style.display='block';
+                    
+
+                    // $("#cgst_treatment").val(gstTreatment);
+                    $("#place_of_supply").val(s_supply);
+                    $("#place_of_supply2").val(s_supply);
+                    $("#cust_address").val(adrs+"\n"+city+"\n"+state+"\n"+country+"\n"+pin);
+
+                    if (gstin) 
+                    {
+                        $("#cgstin").val(gstin);
+                        $("#cgstin_field").removeClass('d-none');
+                         $("#cgstin_field").addClass('d-flex');
+
+                    } 
+                    else 
+                    {
+                      $("#cgstin_field").removeClass('d-flex');
+                         $("#cgstin_field").addClass('d-none');
+                    }
+
+                    var cust_place=s_supply;
+                    var vend_place=document.getElementById("source_of_supply2").value;
+                    console.log("%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%");
+                    console.log(vend_place);
+                    console.log(cust_place);
+                    console.log("%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%");
+
+                    if(vend_place == cust_place)
+                    {
+                      document.getElementById("tax").style.display="block";
+                      document.getElementById("tax_label").style.display="block";
+                      document.getElementById("tax2").style.display="none";
+                      document.getElementById("tax2_label").style.display="none";
+                    } 
+                    else{
+                      document.getElementById("tax2").style.display="block";
+                      document.getElementById("tax2_label").style.display="block";
+                      document.getElementById("tax").style.display="none";
+                      document.getElementById("tax_label").style.display="none";
+                    }
+            }
+    });
+  });
+
       window.onload=function(){ 
         // document.getElementById('vend_address').value='{{vend_address}}'+'\n'+'{{vend_city}}'+'\n'+'{{vend_state}}'+'\n'+'{{vend_country}}';
         document.getElementById('source_of_supply').value='{{vend_place_supply}}';
@@ -552,7 +665,7 @@ document.getElementById("hsn_code").addEventListener("input", function() {
                                         <option value="Cash">Cash</option>
                                         <option value="Cheque">Cheque</option>
                                         <option value="UPI">UPI</option>
-                                        {% for i in banks%}
+                                        {% for i in banks %}
                                         <option value="{{ i.name }}">{{ i.name }}</option>
                                         {% endfor %}
                                     </select>
@@ -986,14 +1099,19 @@ document.getElementById("hsn_code").addEventListener("input", function() {
         </div>
         </div>
 
-        <div class="row " id="cgsttreat_field" >
+        <div class="row d-none " id="cgsttreat_field" >
           <label class="col-md-3">GST Treatment</label>
           <div class="col-md-6 p-3">
               <input type="text" class="form-control text-dark bg-light" id="cgst_treatment" name="cgst_treatment">
           </div>
         </div>
         
-
+        <div class="row d-none" id="cemail_field" >
+          <label class="col-md-3">Email</label>
+          <div class="col-md-6 p-3">
+              <input type="text" class="form-control text-dark bg-light" id="cemail" name="cgstin">
+          </div>
+        </div>
         <div class="row d-none" id="cgstin_field" >
           <label class="col-md-3">GSTIN</label>
           <div class="col-md-6 p-3">
@@ -3746,7 +3864,7 @@ window.onload = function() {
                     console.log("hiii")
                     if(adrs !== null && adrs.trim() !== '' )
                     {
-                      $("#vaddress_field").show();
+                      $("#caddress_field").show();
                       // $("#s_supply_field").show();
                       $("#vend_address").val(adrs);
                     }
@@ -3842,6 +3960,7 @@ window.onload = function() {
         });
     });
   }
+  
   $(document).ready(function(){
   $('#customer').change(function(){
     var name = $("#customer").val();

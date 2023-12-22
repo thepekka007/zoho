@@ -363,10 +363,10 @@
         </select>
       </div>
     </div>
-    <div id="inputBoxContainer" style="display: none;">
+    <div id="inputBoxContainer" >
       <div class="form-group row">
         <div class="col-sm-12 col-md-3 col-lg-3 col-form-label">
-          <label id="rateLabel">Rate per hour*</label>
+          <label id="rateLabel">Total project cost*</label>
         </div>
         <div class="col-sm-12 col-md-6 col-lg-6">
           <div class="input-group">
@@ -1347,6 +1347,7 @@
       }
   
   </script>
+    
     <table class="table text-black my-2" id="task_table">
       <div class="form-group row mt-4">
         <!-- <label class="col-sm-12 col-md-3 col-lg-3 col-form-label" style="color: white;">Customer Type</label> -->
@@ -3066,7 +3067,7 @@
 
             <hr>
             <div class="action-button">
-              <button class="btn btn-primary" type="submit" id="empsave2">Add</button>
+              <button class="btn btn-primary"  id="empsave2">Add</button>
               <button class="btn btn-danger" type="reset">Cancel</button>
             </div>
             <div class="text-center">
@@ -3223,55 +3224,55 @@
 
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script>
-  $(document).ready(function () {
-    $("#employeeform").on("submit", function (e) {
-      e.preventDefault(); // Prevent the default form submission
+  // $(document).ready(function () {
+  //   $("#employeeform").on("submit", function (e) {
+  //     e.preventDefault(); // Prevent the default form submission
 
-      $.ajax({
-        type: "POST",
-        url: $(this).attr("action"), // Get the URL from the form's action attribute
-        data: $(this).serialize(), // Serialize the form data
+  //     $.ajax({
+  //       type: "POST",
+  //       url: $(this).attr("action"), // Get the URL from the form's action attribute
+  //       data: $(this).serialize(), // Serialize the form data
 
-        success: function (data) {
-          document.getElementById("employeeform").reset();
-          // reloadCustomer();
+  //       success: function (data) {
+  //         document.getElementById("employeeform").reset();
+  //         // reloadCustomer();
 
-          var dropdown = $('#user_select');
-          dropdown.empty();
-          $.each(data, function (key, value) {
-            console.log()
-            dropdown.append($('<option></option>').attr('value', key).text(value[1] + " " + value[2]));
-          });
-          var modal1 = document.getElementById("myMod");
-          modal1.style.display = "none";
+  //         var dropdown = $('#user_select');
+  //         dropdown.empty();
+  //         $.each(data, function (key, value) {
+  //           console.log()
+  //           dropdown.append($('<option></option>').attr('value', key).text(value[1] + " " + value[2]));
+  //         });
+  //         var modal1 = document.getElementById("myMod");
+  //         modal1.style.display = "none";
 
-        },
-        error: function (xhr, textStatus, errorThrown) {
-          console.error("Error:", textStatus, errorThrown);
-        }
-      });
-    });
-  });
+  //       },
+  //       error: function (xhr, textStatus, errorThrown) {
+  //         console.error("Error:", textStatus, errorThrown);
+  //       }
+  //     });
+  //   });
+  // });
 </script>
 
 <script>
-  $(document).on('change', '#user_select', function () {
-    var employee = $('#user_select').val();
-    console.log(employee)
-    $.ajax({
-      type: "GET",
-      url: "{% url 'getemployee' %}",
-      data: {
-        id: employee
-      },
-      success: function (response) {
-        data7 = response.email
-        document.getElementById('email').value = data7
+  // $(document).on('change', '#user_select', function () {
+  //   var employee = $('#user_select').val();
+  //   console.log(employee)
+  //   $.ajax({
+  //     type: "GET",
+  //     url: "{% url 'getemployee' %}",
+  //     data: {
+  //       id: employee
+  //     },
+  //     success: function (response) {
+  //       data7 = response.email
+  //       document.getElementById('email').value = data7
 
-      }
-    });
+  //     }
+  //   });
 
-  });
+  // });
 
 </script>
 
@@ -3364,89 +3365,89 @@
 </script>
 
 <script>
-  $(document).on('click', '#user_select', function () {
-    var select = $('#user_select').val();
-    $.ajax({
-      type: "GET",
-      url: "{% url 'poject_itemz' %}",
-      data: {
-        id: select
-      },
-      success: function (response) {
-        console.log(response);
-        var data = response.email;
-        $('#email').val(data);
-      }
-    });
-  });
+  // $(document).on('click', '#user_select', function () {
+  //   var select = $('#user_select').val();
+  //   $.ajax({
+  //     type: "GET",
+  //     url: "{% url 'poject_itemz' %}",
+  //     data: {
+  //       id: select
+  //     },
+  //     success: function (response) {
+  //       console.log(response);
+  //       var data = response.email;
+  //       $('#email').val(data);
+  //     }
+  //   });
+  // });
 </script>
 <script>
-  $(document).on('click', '#user_select1', function () {
-    var select = $('#user_select1').val();
-    $.ajax({
-      type: "GET",
-      url: "{% url 'poject_itemz' %}",
-      data: {
-        id: select
-      },
-      success: function (response) {
-        console.log(response);
-        var data = response.email;
-        $('#email1').val(data);
-      }
-    });
-  });
+  // $(document).on('click', '#user_select1', function () {
+  //   var select = $('#user_select1').val();
+  //   $.ajax({
+  //     type: "GET",
+  //     url: "{% url 'poject_itemz' %}",
+  //     data: {
+  //       id: select
+  //     },
+  //     success: function (response) {
+  //       console.log(response);
+  //       var data = response.email;
+  //       $('#email1').val(data);
+  //     }
+  //   });
+  // });
 </script>
 <script>
-  $(document).on('click', '#user_select2', function () {
-    var select = $('#user_select2').val();
-    $.ajax({
-      type: "GET",
-      url: "{% url 'poject_itemz' %}",
-      data: {
-        id: select
-      },
-      success: function (response) {
-        console.log(response);
-        var data = response.email;
-        $('#email2').val(data);
-      }
-    });
-  });
+  // $(document).on('click', '#user_select2', function () {
+  //   var select = $('#user_select2').val();
+  //   $.ajax({
+  //     type: "GET",
+  //     url: "{% url 'poject_itemz' %}",
+  //     data: {
+  //       id: select
+  //     },
+  //     success: function (response) {
+  //       console.log(response);
+  //       var data = response.email;
+  //       $('#email2').val(data);
+  //     }
+  //   });
+  // });
 </script>
 <script>
-  $(document).on('click', '#user_select3', function () {
-    var select = $('#user_select3').val();
-    $.ajax({
-      type: "GET",
-      url: "{% url 'poject_itemz' %}",
-      data: {
-        id: select
-      },
-      success: function (response) {
-        console.log(response);
-        var data = response.email;
-        $('#email3').val(data);
-      }
-    });
-  });
+  // $(document).on('click', '#user_select3', function () {
+  //   var select = $('#user_select3').val();
+  //   $.ajax({
+  //     type: "GET",
+  //     url: "{% url 'poject_itemz' %}",
+  //     data: {
+  //       id: select
+  //     },
+  //     success: function (response) {
+  //       console.log(response);
+  //       var data = response.email;
+  //       $('#email3').val(data);
+  //     }
+  //   });
+  // });
 </script>
 <script>
-  $(document).on('click', '#user_select4', function () {
-    var select = $('#user_select4').val();
-    $.ajax({
-      type: "GET",
-      url: "{% url 'poject_itemz' %}",
-      data: {
-        id: select
-      },
-      success: function (response) {
-        console.log(response);
-        var data = response.email;
-        $('#email4').val(data);
-      }
-    });
-  });
+  // $(document).on('click', '#user_select4', function () {
+  //   var select = $('#user_select4').val();
+  //   $.ajax({
+  //     type: "GET",
+  //     url: "{% url 'poject_itemz' %}",
+  //     data: {
+  //       id: select
+  //     },
+  //     success: function (response) {
+  //       console.log(response);
+  //       var data = response.email;
+  //       $('#email4').val(data);
+  //     }
+  //   });
+  // });
 </script>
 <script>
   // var customerSelect = document.getElementById('customer');
@@ -5009,7 +5010,109 @@ $(document).ready(function() {
 // new emp
 
 
+// $(document).on("click","#empsave2",function(){
+
+
+// $.ajax({
+  
+//   type : 'POST',
+//   url:"{% url 'new_emp' %}",
+
+//   data:{
+//       title : $('#title').val(),
+//       fname : $('#fname').val(),
+//       lname : $("#lname").val(),
+      
+//       alias :$("#alias").val(),
+//       joindate :$("#joindate").val(),
+//       sal :$("#sal").val(),
+//       fsalary :$("#fsalary").val(),
+//       amnt :$("#amnt").val(),
+//       hours :$("#hours").val(),
+//       vsalary :$("#vsalary").val(),
+//       // img :$("#img").val(),
+//       empnum :$("#empnum").val(),
+//       des:$("#des").val(),
+//       location :$("#location").val(),
+//       // tax_preference :cust_tax,
+//       dropId3 : $("#dropId3").val(),
+//       // openingbalance : openbal,
+//       dob : $("#dob").val(),
+
+//       blood : $("#blood").val(),
+//       faname : $("#faname").val(),
+//       spname : $("#spname").val(),
+//       padrs1 : $("#padrs1").val(),
+//       padrs2 : $("#padrs2").val(),
+//       adrs1 : $("#adrs1").val(),
+//       adrs2 : $("#adrs2").val(),
+//       phone : $("#phone").val(),
+//       ephone : $("#ephone").val(),
+//       email : $("#eemail").val(),
+//       // file : $("#file").val(),
+//       dropId : $("#dropId").val(),
+//       acc_no : $("#acc_no").val(),
+//       ifsc : $("#ifsc").val(),
+//       b_name: $("#b_name").val(),
+//       branch: $("#branch").val(),
+
+//       ttype : $("#ttype").val(),
+//       tds : $("#tds").val(),
+//       pora : $("#pora").val(),
+//       pcnt: $("#pcnt").val(),
+//       amnt: $("#amnt").val(),
+
+//       itn : $("#itn").val(),
+//       an : $("#an").val(),
+//       uan : $("#uan").val(),
+//       pfn: $("#pfn").val(),
+//       pran: $("#pran").val(),
+//       csrfmiddlewaretoken: '{{ csrf_token }}'
+//     },
+  
+//     success: function(response) {
+//       document.getElementById("newemp2").reset();
+//       reloadVendor();
+//     },
+// });        
+// });
+
+// function reloadVendor() {
+
+// $.ajax({ 
+//   url: "{% url 'emp_dropdownE' %}",
+//   type: "GET",
+//   dataType: "json",
+//   data: $(this).serialize(),
+//   csrfmiddlewaretoken: '{{ csrf_token }}',
+// // Inside the success callback of your AJAX request
+// success: function(response) {
+//     // Assuming the response contains the newly added employee details
+//     var empId = response.id;
+//     var empName = response.first_name;
+
+//     // Add the new option to the select dropdown
+//     $('#empid').append($('<option></option>').attr('value', empid).text(empName).data('email', response.first_name));
+    
+//     // Clear the form or perform any other actions you need
+//     // document.getElementById("newemp2").reset();
+// },
+
+  // success: function(data) {
+  //   var dropdown = $('#selected');
+  // +   dropdown.empty();
+  //   $.each(data, function(key, value) {
+  //       // dropdown.append($('<option></option>').attr('value', key).text(value[1]).val(value[0] + ' ' + value[1]));
+  //       dropdown.append($('<option></option>').attr('value', key).text(value[1]).val(key));
+  //   });
+  // },
+//   error: function(xhr, status, error) {
+//   console.error(xhr.responseText);
+//   }
+// });
+// }
 $(document).on("click","#empsave2",function(){
+  event.preventDefault();
 $.ajax({
   
   type : 'POST',
@@ -5066,9 +5169,10 @@ $.ajax({
       pfn: $("#pfn").val(),
       pran: $("#pran").val(),
       csrfmiddlewaretoken: '{{ csrf_token }}'
+     
     },
   
-    success: function(response) {debugger
+    success: function(response2) {
       document.getElementById("newemp2").reset();
       reloadEmp();
     },
@@ -5083,18 +5187,33 @@ $.ajax({
   type: "GET",
   dataType: "json",
   data: $(this).serialize(),
-  data:enteredCName,
+  // data:enteredCName,
   csrfmiddlewaretoken: '{{ csrf_token }}',
 
-  success: function(data) {debugger
-    // console.log("AJAX Success Data:", data);
+  success: function(options) {
+    console.log(1111111111111111111);
+
     var dropdown = $('#empid');
     dropdown.empty();
-    dropdown.append($('<option></option>').text('Select Employee'));
-    $.each(data, function(key, value) {
-        // dropdown.append($('<option></option>').attr('value', key).text(value[1]).val(value[0]));
-        dropdown.append($('<option></option>').attr('value', key).text(value[0] + ' ' + value[1]+ ' ' + value[2]).val(key));
-   });
+    console.log(11111111111111111211);
+
+    // Add a default option if needed
+    // dropdown.append($('<option></option>').text('Select Employee'));
+
+    // Ensure that options is an object and has properties
+    if (options && Object.keys(options).length > 0) {
+        // Iterate over the properties of the options object
+        $.each(options, function(key, value) {
+            dropdown.append($('<option></option>').attr('value', key).text(value[1]).val(key));
+        });
+    } else {
+        console.error('Options object is empty or not valid.');
+    }
+
+
+
+
+
 
 
     // if (enteredCName) {
